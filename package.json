@@ -1,0 +1,21 @@
+{
+  "name": "llama_playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "download:model":"npm run download:llama-2-7b-arguments",
+    "download:llama-2-7b-arguments": "cd models && npx ipull https://huggingface.co/TheBloke/llama-2-7B-Arguments-GGUF/resolve/main/llama-2-7b-arguments.Q2_K.gguf",
+    "download:codellama-13b-instruct": "cd models && npx ipull https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q4_K_M.gguf",
+    "validate": "npx --no node-llama-cpp chat --model ./models/llama-2-7b-arguments.Q2_K.gguf",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "langchain": "^0.0.166",
+    "node-llama-cpp": "^2.7.2"
+  }
+}
