@@ -5,17 +5,30 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "download:model":"npm run download:llama-2-7b-arguments",
-    "download:llama-2-7b-arguments": "cd models && npx ipull https://huggingface.co/TheBloke/llama-2-7B-Arguments-GGUF/resolve/main/llama-2-7b-arguments.Q2_K.gguf",
-    "download:codellama-13b-instruct": "cd models && npx ipull https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q4_K_M.gguf",
-    "validate": "npx --no node-llama-cpp chat --model ./models/llama-2-7b-arguments.Q2_K.gguf",
+    "run:testbed": "node ./examples/testbed-chat-bot.js",
+    "run:langchain": "node ./examples/langchain-chat-bot.js",
+    "run:raw": "node ./examples/raw-chat-bot.js",
+    "generate:modelpaths": "node ./bin/generate_model_paths.js > ./src/available_model_paths.js",
+    "download:model": "npm run download:llama-2-7b-arguments",
+    "download:llama-2-7b-chat": "cd models && npx ipull https://huggingface.co/TheBloke/Llama-2-7b-Chat-GGUF/resolve/main/llama-2-7b-chat.Q2_K.gguf",
+    "download:mistral-7b-instruct": "cd models && npx ipull https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF/resolve/main/mistral-7b-instruct-v0.1.Q6_K.gguf",
+    "download:codellama-13b-instruct": "cd models && npx ipull https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q3_K_M.gguf",
+    "download:codellama-7b-instruct": "cd models && npx ipull https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q4_K_M.gguf",
+    "validate:llama-2-7b-chat": "npx node-llama-cpp chat --model ./models/llama-2-7b-chat.Q2_K.gguf",
+    "validate:mistral-7b-instruct": "npx node-llama-cpp chat --model ./models/mistral-7b-instruct-v0.1.Q6_K.gguf",
+    "validate:codellama-13b-instruct": "npx node-llama-cpp chat --model ./models/codellama-13b-instruct.Q3_K_M.gguf",
+    "validate:codellama-7b-instruct": "npx node-llama-cpp chat --model ./models/codellama-7b-instruct.Q4_K_M.gguf",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cli-color": "^2.0.3",
+    "json-schema-to-zod": "^1.1.1",
+    "json5": "^2.2.3",
     "langchain": "^0.0.166",
-    "node-llama-cpp": "^2.7.2"
+    "node-llama-cpp": "^2.7.2",
+    "zod-to-json-schema": "^3.21.4"
   }
 }
