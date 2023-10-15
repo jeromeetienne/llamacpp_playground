@@ -8,6 +8,7 @@ export default class AvailableModelPaths {
 	static CODELLAMA_7B_INSTRUCT_Q4_K_M = 'codellama-7b-instruct.Q4_K_M.gguf'
 	static LLAMA_2_7B_CHAT_Q2_K = 'llama-2-7b-chat.Q2_K.gguf'
 	static MISTRAL_7B_INSTRUCT_V0_1_Q6_K = 'mistral-7b-instruct-v0.1.Q6_K.gguf'
+	static ZEPHYR_7B_ALPHA_Q6_K = 'zephyr-7b-alpha.Q6_K.gguf'
 
 }
 

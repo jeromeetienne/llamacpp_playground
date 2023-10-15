@@ -71,8 +71,9 @@ export default class LlamaUtils {
         /**
          * 
          * @param {string} modelPath 
+         * @param {boolean} verbose
          */
-        static async initModelAndContext(modelPath) {
+        static async initModelAndContext(modelPath, verbose = false) {
                 // debugger
                 const hrTimeBefore = process.hrtime();
                 const llamaModel = new LlamaModel({
@@ -82,9 +83,11 @@ export default class LlamaUtils {
                 const hrTimeElapsed = process.hrtime(hrTimeBefore);
                 const timeElapsed = hrTimeElapsed[0] + hrTimeElapsed[1] / 1000000000;
 
-                console.log(`modelPath: ${CliColor.red(Path.basename(modelPath))} loaded in ${CliColor.red(timeElapsed.toFixed(2))}-seconds`);
-                console.log(`Context size: ${CliColor.red(llamaContext.getContextSize())}-bytes`)
-                console.log(`model system info: ${CliColor.red(LlamaModel.systemInfo)}`)
+                if (verbose) {
+                        console.log(`modelPath: ${CliColor.red(Path.basename(modelPath))} loaded in ${CliColor.red(timeElapsed.toFixed(2))}-seconds`);
+                        console.log(`Context size: ${CliColor.red(llamaContext.getContextSize())}-bytes`)
+                        console.log(`model system info: ${CliColor.red(LlamaModel.systemInfo)}`)
+                }
 
                 return { llamaModel, llamaContext }
         }
@@ -120,7 +123,7 @@ export default class LlamaUtils {
          * @param {string} question
          * @param {number} nIterations
          */
-        static async bench(llamaContext, question = 'Where do Llamas come from?', nIterations = 3) {
+        static async bench(llamaContext, question = 'hi', nIterations = 1) {
                 const benchResponse = {
                         timeElapsed: 0,
                         tokensCount: 0,

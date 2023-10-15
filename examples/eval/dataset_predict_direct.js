@@ -25,8 +25,9 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 // const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K)
 // const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K)
 // const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_7B_INSTRUCT_Q4_K_M)
-const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
+// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,5 +93,5 @@ ${datasetItem.question}`;
 	predictionArrayJson.push(predictionItemJson)
 }
 
-console.log(`OUTPUT ${CliColor.red(Path.basename(modelPath))}`)
+console.log(`OUTPUT by ${CliColor.red(Path.basename(modelPath))}`)
 console.log(`${JSON.stringify(predictionArrayJson, null, '\t')}`)
