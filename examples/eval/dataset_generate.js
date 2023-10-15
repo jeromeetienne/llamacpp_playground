@@ -15,6 +15,7 @@ import Json5 from "json5";
 
 // local imports
 import LlamaUtils from "../../src/llama-utils.js";
+import Utils from "../../src/utils.js";
 import AvailableModelPaths from "../../src/available_model_paths.js";
 
 // get __dirname in esm module
@@ -33,7 +34,7 @@ const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODEL
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-const { llamaContext, llamaModel } = await LlamaUtils.loadModelContext(modelPath)
+const { llamaContext } = await LlamaUtils.initModelAndContext(modelPath)
 // await LlamaUtils.warmUpContext(llamaContext);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,23 +50,29 @@ const responseZodSchema = Zod.array(Zod.object({
 
 const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
 const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
-const responseSample = [{ "question": "What is your name?", "answer": "My name is John." }, { "question": "What do you like?", "answer": "I like blue." }]
+const responseSample = [{ "question": "What is your name?", "trueAnswer": "My name is John." }, { "question": "What do you like?", "trueAnswer": "I like blue." }]
+console.assert( responseZodSchema.parse(responseSample) !== undefined, `responseSample should be valid`);
+
 
 console.log(`reponse json-schema ${JSON.stringify(responseJsonSchema, null, 2)}`)
 
-const contextLineLimit = 10
-const contextText = await LlamaUtils.loadText(contextLineLimit)
+const contextText = await Utils.loadText()
 
 // const contextText = `My name is john, i like blue and eat sausages. i speak french and i listen to rock.`
 
-const systemPrompt = `Be sure to Format your response in JSON as an array of objects with the following format:
+const systemPrompt = `Be sure to format your response in JSON with the following format:
 ${JSON.stringify(responseSample)}`;
 
 const nQuestions = 3;
-const question = `Here is a context, you will be asked to generate questions about it:
+const question = `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
+CONTEXT_BEGIN
 ${contextText}
+CONTEXT_END
 
-Please generate ${nQuestions} question/answer tuples about this context, make your questions are clear and simple, the answer MUST be short and come from the context.`;
+Please generate ${nQuestions} question/answer tuples about this context
+- make your questions are clear and simple
+- make your answers short and factual.
+- the answer MUST come from the context`;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

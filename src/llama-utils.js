@@ -25,7 +25,7 @@ export default class LlamaUtils {
          * @param {string} systemPrompt 
          * @param {string} question 
          */
-        static async promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question) {
+        static async promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question, streamEnabled = false) {
                 // console.log(`User : ${CliColor.green(question)}`);
                 // console.log(`Ai : computing...`)
 
@@ -43,10 +43,11 @@ export default class LlamaUtils {
                          * @param {import("node-llama-cpp").Token[]} chunk 
                          */
                         onToken(chunk) {
+                                if (streamEnabled === false) return
                                 // display the tokens as they are generated
                                 process.stdout.write(llamaContext.decode(chunk));
                         },
-                        temperature: 1,
+                        temperature: 0,
                 })
                 const response = await llamaSession.promptWithMeta(question, promptOptions);
                 // console.log(`Ai : ${CliColor.cyan(response.text)}`)
@@ -71,7 +72,7 @@ export default class LlamaUtils {
          * 
          * @param {string} modelPath 
          */
-        static async loadModelContext(modelPath) {
+        static async initModelAndContext(modelPath) {
                 // debugger
                 const hrTimeBefore = process.hrtime();
                 const llamaModel = new LlamaModel({
@@ -88,15 +89,6 @@ export default class LlamaUtils {
                 return { llamaModel, llamaContext }
         }
 
-        static async loadText(contextLineLimit = 10) {
-                const contextFileName = Path.join(__dirname, '../data/state_of_the_union.txt')
-                const contextTextFull = await Fs.promises.readFile(contextFileName, 'utf8')
-                const contextTextLines = contextTextFull.split('\n').map(line => line.trim()).filter(line => line.length > 0)
-                // keep only the 200 first lines
-                contextTextLines.splice(contextLineLimit)
-                const contextText = contextTextLines.join('\n')
-                return contextText
-        }
         ///////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
         //	

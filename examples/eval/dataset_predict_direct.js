@@ -15,6 +15,7 @@ import Json5 from "json5";
 
 // local imports
 import LlamaUtils from "../../src/llama-utils.js";
+import Utils from "../../src/utils.js";
 import AvailableModelPaths from "../../src/available_model_paths.js";
 
 // get __dirname in esm module
@@ -23,9 +24,9 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 
 // const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K)
-const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 // const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_7B_INSTRUCT_Q4_K_M)
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
+const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,7 @@ const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTR
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-const {llamaContext, llamaModel} = await LlamaUtils.loadModelContext(modelPath)
+const { llamaContext } = await LlamaUtils.initModelAndContext(modelPath)
 
 // await LlamaUtils.warmUpContext(llamaContext);
 
@@ -44,29 +45,22 @@ const {llamaContext, llamaModel} = await LlamaUtils.loadModelContext(modelPath)
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-const responseZodSchema = Zod.array(Zod.object({
+const responseZodSchema = Zod.object({
 	answer: Zod.string(),
-}))
+})
 
 const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
 const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
-const responseSample = [{"answer": "My name is John." }, {"answer": "I like blue." }]
+const responseSample = { "answer": "<YOUR ANSWER GOES HERE>" }
+console.assert(responseZodSchema.parse(responseSample) !== undefined, `responseSample should be valid`);
 
-console.log(`reponse json-schema ${JSON.stringify(responseJsonSchema, null, 2)}`)
 
-const contextLineLimit = 10
-const contextText = await LlamaUtils.loadText(contextLineLimit)
+// console.log(`reponse json-schema ${JSON.stringify(responseJsonSchema, null, 2)}`)
 
-// const contextText = `My name is john, i like blue and eat sausages. i speak french and i listen to rock.`
+const contextText = await Utils.loadText()
 
-const systemPrompt = `Be sure to Format your response in JSON as an array of objects with the following format:
+const systemPrompt = `Be sure to Format your response in JSON with the following format:
 ${JSON.stringify(responseSample)}`;
-
-const nQuestions = 3;
-const question = `Here is a context, you will be asked to generate questions about it:
-${contextText}
-
-Please generate ${nQuestions} question/answer tuples about this context, make your questions are clear and simple, the answer MUST be short and come from the context.`;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,10 +68,29 @@ Please generate ${nQuestions} question/answer tuples about this context, make yo
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
-// const llamaGrammar = await LlamaGrammar.getFor("json");
+const datasetPath = Path.join(__dirname, './data', 'data.dataset.json')
+const datasetFileContent = await Fs.promises.readFile(datasetPath, 'utf-8')
+const datasetArray = /** @type {import("./type.d.js").DatasetArrayJson} */(Json5.parse(datasetFileContent))
 
-console.log(`System Prompt : ${CliColor.green(systemPrompt)}`);
-console.log(`Question : ${CliColor.green(question)}`);
-const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
-console.log(`Response : ${CliColor.cyan(JSON.stringify(responseJson, null, '\t'))}`)
+
+const predictionArrayJson = /** @type {import("./type.d.js").PredictionArrayJson} */([])
+
+const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
+for (const datasetItem of datasetArray) {
+	const question = `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
+CONTEXT_BEGIN
+${contextText}
+CONTEXT_END
+
+Based on this context, answer the following question:
+${datasetItem.question}`;
+
+	console.log(`Question : ${CliColor.green(datasetItem.question)}`);
+	const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
+	console.log(`Answer : ${CliColor.cyan(responseJson.answer)}`)
+	const predictionItemJson = { answer: responseJson.answer }
+	predictionArrayJson.push(predictionItemJson)
+}
+
+console.log(`OUTPUT ${CliColor.red(Path.basename(modelPath))}`)
+console.log(`${JSON.stringify(predictionArrayJson, null, '\t')}`)
