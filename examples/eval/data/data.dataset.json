@@ -1,18 +1,18 @@
 [
         {
                 "question": "What is the name of the First Lady of the United States?",
-                "answer": "The First Lady of the United States is Dr. Jill Biden."
+                "trueAnswer": "The First Lady of the United States is Dr. Jill Biden."
         },
         {
                 "question": "Who is the President of Ukraine?",
-                "answer": "The President of Ukraine is Volodymyr Zelenskyy."
+                "trueAnswer": "The President of Ukraine is Volodymyr Zelenskyy."
         },
         {
                 "question": "What was the reason for Russia's invasion of Ukraine?",
-                "answer": "According to the context, Russia's invasion of Ukraine was an attempt to 'shake the foundations of the free world.'"
+                "trueAnswer": "According to the context, Russia's invasion of Ukraine was an attempt to 'shake the foundations of the free world.'"
         },
         {
                 "question": "What was Russia's President Vladimir Putin trying to achieve by invading Ukraine?",
-                "answer": "Vladimir Putin was trying to assert Russian dominance and control over Ukraine, as well as to undermine the sovereignty and territorial integrity of the country."
+                "trueAnswer": "Vladimir Putin was trying to assert Russian dominance and control over Ukraine, as well as to undermine the sovereignty and territorial integrity of the country."
         }
 ]

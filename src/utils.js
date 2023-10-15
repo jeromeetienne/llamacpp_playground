@@ -3,6 +3,7 @@ import Path from "path";
 import Fs from 'fs'
 
 // npm imports
+import Json5 from "json5";
 import CliColor from "cli-color";
 
 // get __dirname in esm module
@@ -18,5 +19,24 @@ export default class Utils {
                 contextTextLines.splice(contextLineLimit)
                 const contextText = contextTextLines.join('\n')
                 return contextText
+        }
+
+	/**
+	 * 
+	 * @param {string} filePath 
+	 */
+        static async loadDatasetJson(filePath){
+		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
+		const datasetJson = /** @type {import("../examples/eval/type.d").DatasetArrayJson} */(Json5.parse(fileContent))
+		return datasetJson
+        }
+	/**
+	 * 
+	 * @param {string} filePath 
+	 */
+        static async loadPredictionJson(filePath){
+		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
+		const predictionJson = /** @type {import("../examples/eval/type.d").PredictionArrayJson} */(Json5.parse(fileContent))
+		return predictionJson
         }
 }
