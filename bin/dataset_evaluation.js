@@ -91,7 +91,7 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
         ///////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
 
-        cmdline.command('predict <evaluationName> <predictionName> modelName]')
+        cmdline.command('predict <evaluationName> <predictionName> [modelName]')
                 .description('predict on the dataset')
                 .option('-l, --langchain', 'generate the dataset using langchain', false)
                 .option('-d, --direct', 'generate the dataset using node-llama-cpp', true)
@@ -170,7 +170,9 @@ async function doDatasetGenerateDirect(evaluationName, modelName = undefined, nQ
         const options = /** @type {import("./dataset_evaluation_helpers/dataset_generate_direct.js").DatasetGenerateDirectOptions} */({})
         if (nQuestions !== undefined) options.nQuestions = nQuestions
         const datasetJson = await DatasetGenerateDirect.generate(evaluationName, modelName, options)
-        console.log({ datasetJson })
+
+        console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+        console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
 }
 
 /**
@@ -185,7 +187,9 @@ async function doDatasetGenerateLangchain(evaluationName, modelName = undefined,
                 // verbose: true,
                 nQuestions: nQuestions,
         })
-        console.log({ datasetJson })
+
+        console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+        console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
 }
 
 /**
@@ -202,7 +206,9 @@ async function doDatasetPredictDirect(evaluationName, predictionName, modelName 
         const predictionJson = await DatasetPredictDirect.predict(evaluationName, predictionName, modelName, {
                 // verbose: true
         })
-        console.log({ predictionJson })
+
+        console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+        console.log(`${JSON.stringify(predictionJson, null, '\t')}`)
 }
 
 /**
@@ -216,7 +222,9 @@ async function doDatasetPredictLangchain(evaluationName, predictionName, modelNa
         const predictionJson = await DatasetPredictLangchain.predict(evaluationName, predictionName, modelName, {
                 // verbose: true
         })
-        console.log({ predictionJson })
+
+        console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+        console.log(`${JSON.stringify(predictionJson, null, '\t')}`)
 }
 
 /**
@@ -229,7 +237,9 @@ async function doDatasetEvaluateLangchain(evaluationName, predictionName) {
         const evaluationJson = await DatasetEvaluateLangchain.evaluate(evaluationName, predictionName, modelName, {
                 // verbose: true
         })
-        console.log({ predictionJson: evaluationJson })
+
+        console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+        console.log(`${JSON.stringify(evaluationJson, null, '\t')}`)
 }
 
 /**
@@ -238,7 +248,7 @@ async function doDatasetEvaluateLangchain(evaluationName, predictionName) {
  * @param {string} predictionName
  */
 async function doDatasetReport(evaluationName, predictionName) {
-        await DatasetReport.build(evaluationName, predictionName,{
+        await DatasetReport.build(evaluationName, predictionName, {
                 // verbose: true
         })
 }

@@ -31,6 +31,7 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 /**
  * @typedef {Object} DatasetPredictLangchainOptions
  * @property {Boolean} verbose
+ * @property {string} prompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
  */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,6 +53,13 @@ export default class DatasetPredictLangchain {
 		// handle default options
 		partialOptions = Object.assign({}, /** @type {DatasetPredictLangchainOptions} */({
 			verbose: false,
+			prompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
+CONTEXT_BEGIN
+{context}
+CONTEXT_END
+
+Based on this context, answer the following question:
+{question}`
 		}), partialOptions)
 		const options = /** @type {DatasetPredictLangchainOptions} */(partialOptions)
 
@@ -79,17 +87,7 @@ export default class DatasetPredictLangchain {
 		///////////////////////////////////////////////////////////////////////////////
 
 		// debugger
-		const promptTemplate = PromptTemplate.fromTemplate(
-			`Here is a context between CONTEXT_BEGIN and CONTEXT_END:
-CONTEXT_BEGIN
-{contextText}
-CONTEXT_END
-
-Based on this context, answer the following question:
-{question}`
-		);
-
-
+		const promptTemplate = PromptTemplate.fromTemplate(options.prompt);
 
 
 		const contextText = await Utils.loadContextText()
@@ -104,7 +102,7 @@ Based on this context, answer the following question:
 		for (const datasetItem of datasetJson) {
 			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
 			const result = await chain.call({
-				contextText: contextText,
+				context: contextText,
 				question: datasetItem.question,
 			});
 			// debugger
