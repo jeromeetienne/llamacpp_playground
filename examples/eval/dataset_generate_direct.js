@@ -25,9 +25,9 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 // const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K)
 // const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
-const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K)
+// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K)
 // const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_7B_INSTRUCT_Q4_K_M)
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
+const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,9 +71,9 @@ ${contextText}
 CONTEXT_END
 
 Please generate ${nQuestions} question/answer tuples about this context
-- make your questions are clear and simple
-- make your answers short and factual.
-- the answer MUST come from the context`;
+- make your questions are short and clear
+- make your answers short and factual
+- make sure the question can be fully answered only by reading the context`;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,5 +86,5 @@ const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
 
 console.log(`System Prompt : ${CliColor.green(systemPrompt)}`);
 console.log(`Question : ${CliColor.green(question)}`);
-const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
+const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question, true);
 console.log(`Response : ${CliColor.cyan(JSON.stringify(responseJson, null, '\t'))}`)

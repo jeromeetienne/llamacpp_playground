@@ -41,7 +41,7 @@ const lgModel = new OpenAI({
 	// modelName: "gpt-3.5-turbo",
 	// modelName: 'gpt-4',
 	temperature: 0 ,
-	verbose: true,
+	// verbose: true,
 });
 const modelName = lgModel.modelName
 
@@ -78,7 +78,7 @@ const outputFixingParser = OutputFixingParser.fromLLM(outputFixingModel, outputP
 
 // debugger
 const promptTemplate = PromptTemplate.fromTemplate(
-	`{formatInstructions}
+	`{outputFormatInstructions}
 
 Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
@@ -87,12 +87,12 @@ CONTEXT_END
 
 Please generate {nQuestions} question/answer tuples about this context
 - make your questions are clear and simple
-- make your answers short and factual.
-- the answer MUST come from the context
+- make your answers short and factual
+- make sure the question can be answered by only reading the context
 `
 );
 
-const nQuestions = 1
+const nQuestions = 5
 const contextText = await Utils.loadText()
 
 // console.log('format instruction', outputParser.getFormatInstructions())
@@ -112,8 +112,8 @@ const chain = new LLMChain({
 
 const result = await chain.call({
 	contextText: contextText,
-	formatInstructions: outputParser.getFormatInstructions(),
-	// formatInstructions: '',
+	outputFormatInstructions: outputParser.getFormatInstructions(),
+	// outputFormatInstructions: '',
 	nQuestions: nQuestions,
 });
 // debugger
@@ -133,3 +133,4 @@ if( result.content ){
 
 console.log(`OUTPUT by ${CliColor.red(modelName)}`)
 console.log(outputText)
+console.log()
