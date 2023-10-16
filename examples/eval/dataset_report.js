@@ -1,16 +1,5 @@
-// node imports
-import Path from "path";
-
-// langchain imports
-import { loadEvaluator } from "langchain/evaluation";
-import { OpenAI } from "langchain/llms/openai";
-
 // local imports
 import Utils from "../../src/utils.js";
-
-// get __dirname in esm module
-import Url from "url";
-const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,8 +8,6 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 ///////////////////////////////////////////////////////////////////////////////
 
 const evaluationName = 'myeval'
-
-const contextText = await Utils.loadText()
 const datasetJson = await Utils.loadDatasetJson(evaluationName)
 const predictionJson = await Utils.loadPredictionJson(evaluationName)
 const evaluationJson = await Utils.loadEvaluationJson(evaluationName)
@@ -49,10 +36,8 @@ for (const datasetItem of datasetJson) {
 	reportArrayJson.push(reportItemJson)
 }
 
-
 console.log(`OUTPUT`)
 console.log(`${JSON.stringify(reportArrayJson, null, '\t')}`)
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,16 +60,16 @@ console.log(`Evaluation score: ${(evaluationScore*100).toFixed(2)}%`)
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-for(const reportItem of reportArrayJson) {
-        const itemIndex = reportArrayJson.indexOf(reportItem)
-        if( reportItem.predictionValid ){
-                continue 
-        }
-        console.log(`items ${itemIndex} INVALID`)
-        console.log(JSON.stringify(reportItem, null, '\t'))
-}
-
 const hasInvalidItems = reportArrayJson.some(reportItem => reportItem.predictionValid === false)
 if( hasInvalidItems === false ) {
         console.log('No invalid items')
+}else{
+        for(const reportItem of reportArrayJson) {
+                const itemIndex = reportArrayJson.indexOf(reportItem)
+                if( reportItem.predictionValid ){
+                        continue 
+                }
+                console.log(`items ${itemIndex} INVALID`)
+                console.log(JSON.stringify(reportItem, null, '\t'))
+        }        
 }
