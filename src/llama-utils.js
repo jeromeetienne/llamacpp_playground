@@ -12,6 +12,7 @@ import Url from "url";
 const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 export default class LlamaUtils {
 
+
         ///////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
         //	
@@ -73,7 +74,7 @@ export default class LlamaUtils {
          * @param {string} modelPath 
          * @param {boolean} verbose
          */
-        static async initModelAndContext(modelPath, verbose = false) {
+        static async initModelAndContext(modelPath, verbose=false) {
                 // debugger
                 const hrTimeBefore = process.hrtime();
                 const llamaModel = new LlamaModel({
@@ -83,10 +84,11 @@ export default class LlamaUtils {
                 const hrTimeElapsed = process.hrtime(hrTimeBefore);
                 const timeElapsed = hrTimeElapsed[0] + hrTimeElapsed[1] / 1000000000;
 
-                if (verbose) {
-                        console.log(`modelPath: ${CliColor.red(Path.basename(modelPath))} loaded in ${CliColor.red(timeElapsed.toFixed(2))}-seconds`);
-                        console.log(`Context size: ${CliColor.red(llamaContext.getContextSize())}-bytes`)
-                        console.log(`model system info: ${CliColor.red(LlamaModel.systemInfo)}`)
+                if( verbose){
+                console.log(`modelPath: ${CliColor.red(Path.basename(modelPath))} loaded in ${CliColor.red(timeElapsed.toFixed(2))}-seconds`);
+                console.log(`Context size: ${CliColor.red(llamaContext.getContextSize())}-bytes`)
+                console.log(`model system info: ${CliColor.red(LlamaModel.systemInfo)}`)
+
                 }
 
                 return { llamaModel, llamaContext }
@@ -123,7 +125,7 @@ export default class LlamaUtils {
          * @param {string} question
          * @param {number} nIterations
          */
-        static async bench(llamaContext, question = 'hi', nIterations = 1) {
+        static async bench(llamaContext, question = 'where do llamas comes from ?', nIterations = 3) {
                 const benchResponse = {
                         timeElapsed: 0,
                         tokensCount: 0,

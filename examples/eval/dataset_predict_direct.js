@@ -89,7 +89,7 @@ ${datasetItem.question}`;
 	console.log(`Question : ${CliColor.green(datasetItem.question)}`);
 	const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
 	console.log(`Answer : ${CliColor.cyan(responseJson.answer)}`)
-	const predictionItemJson = { answer: responseJson.answer }
+	const predictionItemJson = /** @type {import("./type.d.js").PredictionItemJson} */({ predictedAnswer: responseJson.answer })
 	predictionArrayJson.push(predictionItemJson)
 }
 

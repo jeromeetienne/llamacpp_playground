@@ -91,7 +91,9 @@ for (const datasetItem of datasetArray) {
 
 
 	console.log(`Answer : ${CliColor.cyan(outputText)}`)
-	const predictionItemJson = /** @type {import("./type.d.js").PredictionItemJson} */({ answer: outputText })
+	const predictionItemJson = /** @type {import("./type.d.js").PredictionItemJson} */({ 
+		predictedAnswer: outputText 
+	})
 	predictionArrayJson.push(predictionItemJson)
 }
 

@@ -12,13 +12,25 @@ void (0);
 
 /**
  * @typedef {object} PredictionItemJson
- * @property {string} answer
+ * @property {string} predictedAnswer
  */
 void (0);
 
 
 /**
  * @typedef {PredictionItemJson[]} PredictionArrayJson
+ */
+void (0);
+
+/**
+ * @typedef {object} EvaluationItemJson
+ * @property {boolean} predictionValid
+ */
+void (0);
+
+
+/**
+ * @typedef {EvaluationItemJson[]} EvaluationArrayJson
  */
 void (0);
 

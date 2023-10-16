@@ -40,7 +40,7 @@ async function benchOne(modelPath) {
 
 
         console.log(`Benching model... ${modelName}`)
-        const benchResponse = await LlamaUtils.bench(llamaContext, 'hi', 1);
+        const benchResponse = await LlamaUtils.bench(llamaContext);
         // console.log(`benchResponse: ${JSON.stringify(benchResponse)}`)
 
         console.log(`Time elapsed: ${benchResponse.timeElapsed.toFixed(2)}-seconds`)
