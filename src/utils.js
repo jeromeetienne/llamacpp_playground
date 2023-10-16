@@ -17,7 +17,7 @@ export default class Utils {
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	static async loadText(contextLineLimit = 10) {
+	static async loadContextText(contextLineLimit = 10) {
 		const contextFileName = Path.join(__dirname, '../data/state_of_the_union.txt')
 		const contextTextFull = await Fs.promises.readFile(contextFileName, 'utf8')
 		const contextTextLines = contextTextFull.split('\n').map(line => line.trim()).filter(line => line.length > 0)
@@ -62,7 +62,7 @@ export default class Utils {
 		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
 		const filePath = Path.join(evaluationFolder, 'data.prediction.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
-		const predictionJson = /** @type {import("./type.d").PredictionArrayJson} */(Json5.parse(fileContent))
+		const predictionJson = /** @type {import("./type.d").PredictionJson} */(Json5.parse(fileContent))
 		return predictionJson
 	}
 

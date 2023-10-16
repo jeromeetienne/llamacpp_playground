@@ -5,10 +5,6 @@
 // node imports
 import Path from "path";
 
-// npm imports
-import { LlamaModel, LlamaContext, LlamaChatSession, LlamaGrammar, LlamaJsonSchemaGrammar, LlamaChatPromptWrapper } from "node-llama-cpp";
-import CliColor from "cli-color";
-
 // local imports
 import LlamaUtils from "../src/llama-utils.js";
 import AvailableModelPaths from "../src/available_model_paths.js";

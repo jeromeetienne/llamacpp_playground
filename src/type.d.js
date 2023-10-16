@@ -18,7 +18,7 @@ void (0);
 
 
 /**
- * @typedef {PredictionItemJson[]} PredictionArrayJson
+ * @typedef {PredictionItemJson[]} PredictionJson
  */
 void (0);
 

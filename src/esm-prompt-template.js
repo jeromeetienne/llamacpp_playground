@@ -32,10 +32,7 @@ export default EsmPromptTemplate
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-
-import { fileURLToPath } from 'url';
-const runAsMainModule = process.argv[1] === fileURLToPath(import.meta.url)
-if (runAsMainModule) {
+async function mainAsync(){
 	const promptTemplate = EsmPromptTemplate`Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
 ${"contextText"}
@@ -50,4 +47,11 @@ ${"question"}`
 	})
 
 	console.log(renderedTemplate)
+}
+
+import { fileURLToPath } from 'url';
+const runAsMainModule = process.argv[1] === fileURLToPath(import.meta.url)
+if (runAsMainModule) {
+	// call mainAsync()
+	await mainAsync()
 }

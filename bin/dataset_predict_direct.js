@@ -24,22 +24,16 @@ import Url from "url";
 const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 
-// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K)
-const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
-// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K)
-// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.CODELLAMA_7B_INSTRUCT_Q4_K_M)
-// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
-const modelName = Path.basename(modelPath)
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-//	init
+//	
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-const { llamaContext } = await LlamaUtils.initModelAndContext(modelPath)
-
-// await LlamaUtils.warmUpContext(llamaContext);
+/**
+ * @typedef {Object} DatasetPredictDirectOptions
+ * @property {Boolean} verbose
+ */
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,30 +41,67 @@ const { llamaContext } = await LlamaUtils.initModelAndContext(modelPath)
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-const responseZodSchema = Zod.object({
-	answer: Zod.string(),
-})
+export default class DatasetPredictDirect {
 
-const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
-const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
-const responseSample = { "answer": "<YOUR ANSWER GOES HERE>" }
-console.assert(responseZodSchema.parse(responseSample) !== undefined, `responseSample should be valid`);
+	/**
+	 * @param {string} modelName
+	 * @param {string} evaluationName
+	 * @param {Partial<DatasetPredictDirectOptions>} partialOptions
+	 */
+	static async predict(modelName, evaluationName, partialOptions = {}) {
 
+		// handle default options
+		partialOptions = Object.assign({}, /** @type {DatasetPredictDirectOptions} */({
+			verbose: false,
+		}), partialOptions)
+		const options = /** @type {DatasetPredictDirectOptions} */(partialOptions)
 
-// console.log(`reponse json-schema ${JSON.stringify(responseJsonSchema, null, 2)}`)
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	init llamaModel and llamaContext
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
 
-const contextText = await Utils.loadText()
+		const modelPath = Path.join(__dirname, '../models', modelName)
+		const { llamaContext, llamaModel } = await LlamaUtils.initModelAndContext(modelPath)
 
-const systemPrompt = `Be sure to Format your response in JSON with the following format:
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	build llamaGrammar
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const responseZodSchema = Zod.object({
+			answer: Zod.string(),
+		})
+
+		const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
+		const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
+		const responseSample = { "answer": "<YOUR ANSWER GOES HERE>" }
+		console.assert(responseZodSchema.parse(responseSample) !== undefined, `responseSample should be valid`);
+		const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		
+
+		// console.log(`reponse json-schema ${JSON.stringify(responseJsonSchema, null, 2)}`)
+
+		const contextText = await Utils.loadContextText()
+
+		const systemPrompt = `Be sure to Format your response in JSON with the following format:
 ${JSON.stringify(responseSample)}`;
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-//	
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
 
-const promptTemplate = EsmPromptTemplate`Here is a context between CONTEXT_BEGIN and CONTEXT_END:
+		const promptTemplate = EsmPromptTemplate`Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
 ${"contextText"}
 CONTEXT_END
@@ -78,28 +109,61 @@ CONTEXT_END
 Based on this context, answer the following question:
 ${"question"}`
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-//	
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
 
-const evaluationName = 'myeval'
-const datasetArray = await Utils.loadDatasetJson(evaluationName)
+		const datasetArray = await Utils.loadDatasetJson(evaluationName)
+		const predictionArrayJson = /** @type {import("../src/type.d.js").PredictionJson} */([])
 
-const predictionArrayJson = /** @type {import("../src/type.d.js").PredictionArrayJson} */([])
+		for (const datasetItem of datasetArray) {
+			const question = promptTemplate({ 
+				contextText, 
+				question: datasetItem.question 
+			})
 
-const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
-for (const datasetItem of datasetArray) {
-	const question = promptTemplate({ contextText, question: datasetItem.question })
-	// console.log({question})
+			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
+			const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
+			console.log(`Answer : ${CliColor.cyan(responseJson.answer)}`)
+			const predictionItemJson = /** @type {import("../src/type.d.js").PredictionItemJson} */({ predictedAnswer: responseJson.answer })
+			predictionArrayJson.push(predictionItemJson)
+		}
 
-	console.log(`Question : ${CliColor.green(datasetItem.question)}`);
-	const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
-	console.log(`Answer : ${CliColor.cyan(responseJson.answer)}`)
-	const predictionItemJson = /** @type {import("../src/type.d.js").PredictionItemJson} */({ predictedAnswer: responseJson.answer })
-	predictionArrayJson.push(predictionItemJson)
+		if( options.verbose){
+			console.log(`OUTPUT by ${CliColor.red(Path.basename(modelPath))}`)
+			console.log(`${JSON.stringify(predictionArrayJson, null, '\t')}`)
+	
+		}
+
+		// return predictionJson
+		return predictionArrayJson
+	}
 }
 
-console.log(`OUTPUT by ${CliColor.red(Path.basename(modelPath))}`)
-console.log(`${JSON.stringify(predictionArrayJson, null, '\t')}`)
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//	Usage example
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+async function mainAsync() {
+	const modelName = AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K
+	// const modelName = AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K
+	// const modelName = AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M
+	// await LlamaUtils.warmUpContext(llamaContext);
+
+	const evaluationName = 'myeval'
+	await DatasetPredictDirect.predict(modelName, evaluationName, {
+		verbose: true
+	})
+}
+
+// run mainAsync() if this file is run directly from node.js
+import { fileURLToPath } from 'url';
+const runAsMainModule = process.argv[1] === fileURLToPath(import.meta.url)
+if (runAsMainModule) {
+	// call mainAsync()
+	await mainAsync()
+}

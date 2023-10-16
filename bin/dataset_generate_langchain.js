@@ -19,7 +19,7 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { OpenAI } from "langchain/llms/openai";
 import { LlamaCpp } from "langchain/llms/llama_cpp";
 import { LLMChain } from "langchain/chains";
-import { StructuredOutputParser,OutputFixingParser } from "langchain/output_parsers";
+import { StructuredOutputParser, OutputFixingParser } from "langchain/output_parsers";
 
 // local imports
 // import LlamaUtils from "../../src/llama-utils.js";
@@ -37,19 +37,11 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-const lgModel = new OpenAI({ 
-	// modelName: "gpt-3.5-turbo",
-	// modelName: 'gpt-4',
-	temperature: 0 ,
-	// verbose: true,
-});
-const modelName = lgModel.modelName
-
-// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
-// const modelName = Path.basename(modelPath)
-// const lgModel = new LlamaCpp({ modelPath });
-
-// debugger
+/**
+ * @typedef {Object} DatasetGenerateLangchainOptions
+ * @property {number} nQuestions
+ * @property {Boolean} verbose
+ */
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,28 +49,75 @@ const modelName = lgModel.modelName
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-const responseZodSchema = Zod.array(Zod.object({
-	question: Zod.string(),
-	trueAnswer: Zod.string(),
-}))
-const outputParser = StructuredOutputParser.fromZodSchema(responseZodSchema);
-// const outputFixingModel = new LlamaCpp({ 
-// 	modelPath : Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
-// });
-// const outputFixingModel = lgModel
-const outputFixingModel = new OpenAI({ 
-	temperature: 0 ,
-});
-const outputFixingParser = OutputFixingParser.fromLLM(outputFixingModel, outputParser);
+/**
+ * 
+ * @param {LlamaContext} llamaContext 
+ */
+export default class DatasetGenerateDirect {
 
-// const outputFixingModel = 
-// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
-// const modelName = Path.basename(modelPath)
+	/**
+	 * @param {string} modelName
+	 * @param {string} evaluationName
+	 * @param {Partial<DatasetGenerateLangchainOptions>} partialOptions
+	 */
+	static async generate(modelName, evaluationName, partialOptions = {}) {
+
+		// handle default options
+		partialOptions = Object.assign({}, /** @type {DatasetGenerateLangchainOptions} */({
+			nQuestions: 1,
+			verbose: false,
+		}), partialOptions)
+		const options = /** @type {DatasetGenerateLangchainOptions} */(partialOptions)
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const lgModel = new OpenAI({
+			// modelName: "gpt-3.5-turbo",
+			modelName: modelName,
+			// modelName: 'gpt-4',
+			temperature: 0,
+			// verbose: true,
+		});
+		// const modelName = lgModel.modelName
+
+		// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+		// const modelName = Path.basename(modelPath)
+		// const lgModel = new LlamaCpp({ modelPath });
+
+		// debugger
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const responseZodSchema = Zod.array(Zod.object({
+			question: Zod.string(),
+			trueAnswer: Zod.string(),
+		}))
+		const outputParser = StructuredOutputParser.fromZodSchema(responseZodSchema);
+		// const outputFixingModel = new LlamaCpp({ 
+		// 	modelPath : Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+		// });
+		// const outputFixingModel = lgModel
+		const outputFixingModel = new OpenAI({
+			temperature: 0,
+		});
+		const outputFixingParser = OutputFixingParser.fromLLM(outputFixingModel, outputParser);
+
+		// const outputFixingModel = 
+		// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+		// const modelName = Path.basename(modelPath)
 
 
-// debugger
-const promptTemplate = PromptTemplate.fromTemplate(
-	`{outputFormatInstructions}
+		// debugger
+		const promptTemplate = PromptTemplate.fromTemplate(
+			`{outputFormatInstructions}
 
 Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
@@ -90,47 +129,76 @@ Please generate {nQuestions} question/answer tuples about this context
 - make your answers short and factual
 - make sure the question can be answered by only reading the context
 `
-);
-
-const nQuestions = 5
-const contextText = await Utils.loadText()
-
-// console.log('format instruction', outputParser.getFormatInstructions())
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-//	
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+		);
 
 
-const chain = new LLMChain({ 
-	llm: lgModel, 
-	prompt: promptTemplate,
-	// outputParser: outputFixingParser,
-});
+		const contextText = await Utils.loadContextText()
 
-const result = await chain.call({
-	contextText: contextText,
-	outputFormatInstructions: outputParser.getFormatInstructions(),
-	// outputFormatInstructions: '',
-	nQuestions: nQuestions,
-});
-// debugger
-// @ts-ignore
-let outputText = /** @type {string} */(null)
-if( result.content ){
-	outputText = result.content.trim()
-}else if(result.text instanceof Object){
-	outputText = JSON.stringify(result.text, null, '\t')
-}else if(typeof result.text ==='string'){
-	outputText = result.text.trim()
-}else{
-	// @ts-ignore
-	outputText = /** @type {string} */(result)
-	outputText = outputText
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+
+		const chain = new LLMChain({
+			llm: lgModel,
+			prompt: promptTemplate,
+			outputParser: outputFixingParser,
+		});
+
+		const result = await chain.call({
+			contextText: contextText,
+			outputFormatInstructions: outputParser.getFormatInstructions(),
+			// outputFormatInstructions: '',
+			nQuestions: options.nQuestions,
+		});
+
+		// @ts-ignore
+		let outputText = /** @type {string} */(null)
+		if (result.content) {
+			outputText = result.content.trim()
+		} else if (result.text instanceof Object) {
+			outputText = JSON.stringify(result.text, null, '\t')
+		} else if (typeof result.text === 'string') {
+			outputText = result.text.trim()
+		} else {
+			// @ts-ignore
+			outputText = /** @type {string} */(result)
+			outputText = outputText
+		}
+
+		if (options.verbose) {
+			console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+			console.log(outputText)
+			console.log()
+		}
+
+		const responseJson = Json5.parse(outputText)
+		const datasetJson = /** @type {import("../src/type.d.js").DatasetArrayJson} */(responseJson)
+
+		// return datasetJson
+		return datasetJson
+	}
 }
 
-console.log(`OUTPUT by ${CliColor.red(modelName)}`)
-console.log(outputText)
-console.log()
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//	Usage example
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+async function mainAsync() {
+	const modelName = 'gpt-3.5-turbo'
+	await DatasetGenerateDirect.generate(modelName, {
+		verbose: true
+	})
+}
+
+// run mainAsync() if this file is run directly from node.js
+import { fileURLToPath } from 'url';
+const runAsMainModule = process.argv[1] === fileURLToPath(import.meta.url)
+if (runAsMainModule) {
+	// call mainAsync()
+	await mainAsync()
+}

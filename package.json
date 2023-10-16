@@ -27,6 +27,7 @@
   "license": "ISC",
   "dependencies": {
     "cli-color": "^2.0.3",
+    "commander": "^11.1.0",
     "json-schema-to-zod": "^1.1.1",
     "json5": "^2.2.3",
     "langchain": "^0.0.166",
