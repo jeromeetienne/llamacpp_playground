@@ -1,6 +1,7 @@
 // node imports
 import Path from "path";
 import Fs from 'fs'
+import FsExtra from 'fs-extra'
 
 // npm imports
 import Json5 from "json5";
@@ -53,6 +54,12 @@ export default class Utils {
 		return predictionFolder
 	}
 
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * 
 	 * @param {string} evaluationName 
@@ -68,14 +75,41 @@ export default class Utils {
 	/**
 	 * 
 	 * @param {string} evaluationName 
+	 * @param {import("./type.d").DatasetJson} evaluationJson
+	 */
+	static async saveDatasetJson(evaluationName, evaluationJson) {
+		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
+		await FsExtra.ensureDir(evaluationFolder)
+		const filePath = Path.join(evaluationFolder, 'data.dataset.json')
+		const fileContent = JSON.stringify(evaluationJson, null, '\t')
+		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
+	}
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
 	 * @param {string} predictionName
 	 */
 	static async loadPredictionJson(evaluationName, predictionName) {
-		const evaluationFolder = Utils.getPredictionFolder(evaluationName, predictionName)
-		const filePath = Path.join(evaluationFolder, 'data.prediction.json')
+		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
+		const filePath = Path.join(predictionFolder, 'data.prediction.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
-		const predictionJson = /** @type {import("./type.d").PredictionJson} */(Json5.parse(fileContent))
+		const predictionJson = /** @type {import("./type.d").EvaluationJson} */(Json5.parse(fileContent))
 		return predictionJson
+	}
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @param {string} predictionName
+	 * @param {import("./type.d").EvaluationJson} predictionJson
+	 */
+	static async savePredictionJson(evaluationName, predictionName, predictionJson) {
+		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
+		await FsExtra.ensureDir(predictionFolder)
+		const filePath = Path.join(predictionFolder, 'data.prediction.json')
+		const fileContent = JSON.stringify(predictionJson, null, '\t')
+		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
 
 	/**
@@ -84,10 +118,39 @@ export default class Utils {
 	 * @param {string} predictionName
 	 */
 	static async loadEvaluationJson(evaluationName, predictionName) {
-		const evaluationFolder = Utils.getPredictionFolder(evaluationName, predictionName)
-		const filePath = Path.join(evaluationFolder, 'data.evaluation.json')
+		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
+		const filePath = Path.join(predictionFolder, 'data.evaluation.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
 		const predictionJson = /** @type {import("./type.d").EvaluationJson} */(Json5.parse(fileContent))
 		return predictionJson
+	}
+
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @param {string} predictionName
+	 * @param {import("./type.d").EvaluationJson} evaluationJson
+	 */
+	static async saveEvaluationJson(evaluationName, predictionName, evaluationJson) {
+		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
+		await FsExtra.ensureDir(predictionFolder)
+		const filePath = Path.join(predictionFolder, 'data.evaluation.json')
+		const fileContent = JSON.stringify(evaluationJson, null, '\t')
+		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
+	}
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @param {string} predictionName
+	 * @param {import("./type.d").HyperParametersSearchPredictionJson} searchPredictionJson
+	 */
+	static async savePredictionMetadataJson(evaluationName, predictionName, searchPredictionJson) {
+		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
+		await FsExtra.ensureDir(predictionFolder)
+		const filePath = Path.join(predictionFolder, 'metadata.json')
+		const fileContent = JSON.stringify(searchPredictionJson, null, '\t')
+		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
 }

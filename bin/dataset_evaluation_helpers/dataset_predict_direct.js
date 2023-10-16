@@ -117,7 +117,7 @@ ${"question"}`
 		///////////////////////////////////////////////////////////////////////////////
 
 		const datasetArray = await Utils.loadDatasetJson(evaluationName)
-		const predictionArrayJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
+		const predictionArrayJson = /** @type {import("../../src/type.d.js").EvaluationJson} */([])
 
 		for (const datasetItem of datasetArray) {
 			const question = promptTemplate({ 

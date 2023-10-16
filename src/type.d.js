@@ -18,7 +18,7 @@ void (0);
 
 
 /**
- * @typedef {PredictionItemJson[]} PredictionJson
+ * @typedef {PredictionItemJson[]} EvaluationJson
  */
 void (0);
 
@@ -47,6 +47,20 @@ void (0);
 
 /**
  * @typedef {ReportItemJson[]} ReportArrayJson
+ */
+void (0);
+
+/**
+ * @typedef {object} HyperParametersSearchPredictionJson
+ * @property {string=} modelName
+ * @property {string=} prompt
+ */
+void (0);
+
+/**
+ * @typedef {object} HyperParametersSearchJson
+ * @property {string} evaluationName
+ * @property {HyperParametersSearchPredictionJson[]} predictions
  */
 void (0);
 

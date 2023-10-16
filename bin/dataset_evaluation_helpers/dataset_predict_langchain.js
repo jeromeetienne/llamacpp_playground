@@ -98,7 +98,7 @@ Based on this context, answer the following question:
 		const chain = new LLMChain({ llm: lgModel, prompt: promptTemplate });
 
 
-		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
+		const predictionJson = /** @type {import("../../src/type.d.js").EvaluationJson} */([])
 		for (const datasetItem of datasetJson) {
 			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
 			const result = await chain.call({
