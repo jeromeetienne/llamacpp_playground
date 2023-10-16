@@ -43,10 +43,11 @@ export default class DatasetPredictLangchain {
 
 	/**
 	 * @param {string} evaluationName
+	 * @param {string} predictionName
 	 * @param {string} modelName e.g. gpt-4-0613 gpt-3.5-turbo
 	 * @param {Partial<DatasetPredictLangchainOptions>} partialOptions
 	 */
-	static async predict(evaluationName, modelName, partialOptions = {}) {
+	static async predict(evaluationName, predictionName, modelName, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.assign({}, /** @type {DatasetPredictLangchainOptions} */({
@@ -149,7 +150,8 @@ async function mainAsync() {
 	// await LlamaUtils.warmUpContext(llamaContext);
 
 	const evaluationName = 'myeval'
-	await DatasetPredictLangchain.predict(evaluationName, modelName, {
+	const predictionName = 'basic'
+	await DatasetPredictLangchain.predict(evaluationName, predictionName, modelName, {
 		verbose: true
 	})
 }

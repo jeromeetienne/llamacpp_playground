@@ -45,10 +45,11 @@ export default class DatasetPredictDirect {
 
 	/**
 	 * @param {string} evaluationName
+	 * @param {string} predictionName
 	 * @param {string} modelName
 	 * @param {Partial<DatasetPredictDirectOptions>} partialOptions
 	 */
-	static async predict(evaluationName, modelName, partialOptions = {}) {
+	static async predict(evaluationName,predictionName, modelName, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.assign({}, /** @type {DatasetPredictDirectOptions} */({
@@ -155,7 +156,8 @@ async function mainAsync() {
 	// await LlamaUtils.warmUpContext(llamaContext);
 
 	const evaluationName = 'myeval'
-	await DatasetPredictDirect.predict(evaluationName, modelName, {
+	const predictionName = 'basic'
+	await DatasetPredictDirect.predict(evaluationName, predictionName, modelName, {
 		verbose: true
 	})
 }

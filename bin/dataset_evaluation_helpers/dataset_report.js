@@ -24,9 +24,10 @@ export default class DatasetReport {
 
         /**
          * @param {string} evaluationName
+         * @param {string} predictionName
          * @param {Partial<DatasetReportOptions>} partialOptions
          */
-        static async build(evaluationName, partialOptions = {}) {
+        static async build(evaluationName, predictionName, partialOptions = {}) {
 
                 // handle default options
                 partialOptions = Object.assign({}, /** @type {DatasetReportOptions} */({
@@ -42,8 +43,8 @@ export default class DatasetReport {
 
                 // const evaluationName = 'myeval'
                 const datasetJson = await Utils.loadDatasetJson(evaluationName)
-                const predictionJson = await Utils.loadPredictionJson(evaluationName)
-                const evaluationJson = await Utils.loadEvaluationJson(evaluationName)
+                const predictionJson = await Utils.loadPredictionJson(evaluationName, predictionName)
+                const evaluationJson = await Utils.loadEvaluationJson(evaluationName, predictionName)
                 // sanity check
                 console.assert(datasetJson.length === predictionJson.length, `datasetJson.length (${datasetJson.length}) !== predictionJson.length (${predictionJson.length})`)
                 console.assert(datasetJson.length === evaluationJson.length, `datasetJson.length (${datasetJson.length}) !== evaluationJson.length (${predictionJson.length})`)

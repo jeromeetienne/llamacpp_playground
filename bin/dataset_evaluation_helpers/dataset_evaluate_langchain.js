@@ -34,10 +34,11 @@ export default class DatasetEvaluateLangchain {
 
 	/**
 	 * @param {string} evaluationName
+	 * @param {string} predictionName
 	 * @param {string} modelName
 	 * @param {Partial<DatasetEvaluateLangchainOptions>} partialOptions
 	 */
-	static async evaluate(evaluationName, modelName = 'gpt-4', partialOptions = {}) {
+	static async evaluate(evaluationName, predictionName, modelName = 'gpt-4', partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.assign({}, /** @type {DatasetEvaluateLangchainOptions} */({
@@ -56,7 +57,7 @@ export default class DatasetEvaluateLangchain {
 
 		const contextText = await Utils.loadContextText()
 		const datasetJson = await Utils.loadDatasetJson(evaluationName)
-		const predictionJson = await Utils.loadPredictionJson(evaluationName)
+		const predictionJson = await Utils.loadPredictionJson(evaluationName, predictionName)
 		// sanity check
 		console.assert(datasetJson.length === predictionJson.length, `datasetJson.length (${datasetJson.length}) !== predictionJson.length (${predictionJson.length})`)
 		// debugger
@@ -126,8 +127,9 @@ ${datasetItem.question}`
 
 async function mainAsync() {
 	const evaluationName = 'myeval'
+	const predictionName = 'basic'
 	const modelName = 'gpt-3.5-turbo'
-	await DatasetEvaluateLangchain.predict(evaluationName, modelName, {
+	await DatasetEvaluateLangchain.evaluate(evaluationName, predictionName, modelName, {
 		verbose: true
 	})
 }

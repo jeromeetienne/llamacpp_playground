@@ -10,12 +10,12 @@ import CliColor from "cli-color"
 
 // local imports
 import AvailableModelPaths from "../src/available_model_paths.js"
-import DatasetGenerateDirect from "./evaluation_helpers/dataset_generate_direct.js"
-import DatasetGenerateLangchain from "./evaluation_helpers/dataset_generate_langchain.js"
-import DatasetPredictDirect from "./evaluation_helpers/dataset_predict_direct.js"
-import DatasetPredictLangchain from "./evaluation_helpers/dataset_predict_langchain.js"
-import DatasetEvaluateLangchain from "./evaluation_helpers/dataset_evaluate_langchain.js"
-import DatasetReport from "./evaluation_helpers/dataset_report.js"
+import DatasetGenerateDirect from "./dataset_evaluation_helpers/dataset_generate_direct.js"
+import DatasetGenerateLangchain from "./dataset_evaluation_helpers/dataset_generate_langchain.js"
+import DatasetPredictDirect from "./dataset_evaluation_helpers/dataset_predict_direct.js"
+import DatasetPredictLangchain from "./dataset_evaluation_helpers/dataset_predict_langchain.js"
+import DatasetEvaluateLangchain from "./dataset_evaluation_helpers/dataset_evaluate_langchain.js"
+import DatasetReport from "./dataset_evaluation_helpers/dataset_report.js"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,15 +91,15 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
         ///////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
 
-        cmdline.command('predict <evaluationName> [modelName]')
+        cmdline.command('predict <evaluationName> <predictionName> modelName]')
                 .description('predict on the dataset')
                 .option('-l, --langchain', 'generate the dataset using langchain', false)
                 .option('-d, --direct', 'generate the dataset using node-llama-cpp', true)
-                .action(async (evaluationName, modelName, options) => {
+                .action(async (evaluationName, predictionName, modelName, options) => {
                         if (options.langchain) {
-                                await doDatasetPredictLangchain(evaluationName, modelName)
+                                await doDatasetPredictLangchain(evaluationName, predictionName, modelName)
                         } else if (options.direct) {
-                                await doDatasetPredictDirect(evaluationName, modelName)
+                                await doDatasetPredictDirect(evaluationName, predictionName, modelName)
                         } else {
                                 console.error(CliColor.redBright(`ERROR: invalid options`))
                                 cmdline.help()
@@ -113,10 +113,10 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
         ///////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
 
-        cmdline.command('evaluate <evaluationName>')
+        cmdline.command('evaluate <evaluationName> <predictionName>')
                 .description('evaluate the prediction based on the dataset')
-                .action(async (evaluationName, options) => {
-                        await doDatasetEvaluateLangchain(evaluationName)
+                .action(async (evaluationName, predictionName, options) => {
+                        await doDatasetEvaluateLangchain(evaluationName, predictionName)
                 });
 
         ///////////////////////////////////////////////////////////////////////////////
@@ -125,10 +125,10 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
         ///////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
 
-        cmdline.command('report <evaluationName>')
+        cmdline.command('report <evaluationName> <predictionName>')
                 .description('Print a report on the dataset evaluation')
-                .action(async (evaluationName, options) => {
-                        await doDatasetReport(evaluationName)
+                .action(async (evaluationName, predictionName, options) => {
+                        await doDatasetReport(evaluationName, predictionName)
                 });
 
         ///////////////////////////////////////////////////////////////////////////////
@@ -167,7 +167,7 @@ async function doDatasetGenerateDirect(evaluationName, modelName = undefined, nQ
         }
         modelName = modelName ?? AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K
 
-        const options = /** @type {import("./evaluation_helpers/dataset_generate_direct.js").DatasetGenerateDirectOptions} */({})
+        const options = /** @type {import("./dataset_evaluation_helpers/dataset_generate_direct.js").DatasetGenerateDirectOptions} */({})
         if (nQuestions !== undefined) options.nQuestions = nQuestions
         const datasetJson = await DatasetGenerateDirect.generate(evaluationName, modelName, options)
         console.log({ datasetJson })
@@ -191,14 +191,15 @@ async function doDatasetGenerateLangchain(evaluationName, modelName = undefined,
 /**
  * 
  * @param {string} evaluationName 
+ * @param {string} predictionName
  * @param {string=} modelName
  */
-async function doDatasetPredictDirect(evaluationName, modelName = undefined) {
+async function doDatasetPredictDirect(evaluationName, predictionName, modelName = undefined) {
         if (modelName) {
                 modelName = Path.basename(modelName)
         }
         modelName = modelName ?? AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K
-        const predictionJson = await DatasetPredictDirect.predict(evaluationName, modelName, {
+        const predictionJson = await DatasetPredictDirect.predict(evaluationName, predictionName, modelName, {
                 // verbose: true
         })
         console.log({ predictionJson })
@@ -207,11 +208,12 @@ async function doDatasetPredictDirect(evaluationName, modelName = undefined) {
 /**
  * 
  * @param {string} evaluationName 
+ * @param {string} predictionName
  * @param {string=} modelName
  */
-async function doDatasetPredictLangchain(evaluationName, modelName = undefined) {
+async function doDatasetPredictLangchain(evaluationName, predictionName, modelName = undefined) {
         modelName = modelName ?? 'gpt-3.5-turbo'
-        const predictionJson = await DatasetPredictLangchain.predict(evaluationName, modelName, {
+        const predictionJson = await DatasetPredictLangchain.predict(evaluationName, predictionName, modelName, {
                 // verbose: true
         })
         console.log({ predictionJson })
@@ -220,10 +222,11 @@ async function doDatasetPredictLangchain(evaluationName, modelName = undefined) 
 /**
  * 
  * @param {string} evaluationName 
+ * @param {string} predictionName
  */
-async function doDatasetEvaluateLangchain(evaluationName) {
+async function doDatasetEvaluateLangchain(evaluationName, predictionName) {
         const modelName = 'gpt-3.5-turbo'
-        const evaluationJson = await DatasetEvaluateLangchain.evaluate(evaluationName, modelName, {
+        const evaluationJson = await DatasetEvaluateLangchain.evaluate(evaluationName, predictionName, modelName, {
                 // verbose: true
         })
         console.log({ predictionJson: evaluationJson })
@@ -232,9 +235,10 @@ async function doDatasetEvaluateLangchain(evaluationName) {
 /**
  * 
  * @param {string} evaluationName 
+ * @param {string} predictionName
  */
-async function doDatasetReport(evaluationName) {
-        await DatasetReport.build(evaluationName, {
+async function doDatasetReport(evaluationName, predictionName) {
+        await DatasetReport.build(evaluationName, predictionName,{
                 // verbose: true
         })
 }

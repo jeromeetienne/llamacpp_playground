@@ -35,11 +35,22 @@ export default class Utils {
 
 	/**
 	 * 
-	 * @param {string} datasetName 
+	 * @param {string} evaluationName 
 	 */
-	static getEvaluationFolder(datasetName) {
-		const evaluationFolder = Path.join(__dirname, `../data/evaluations/evaluation-${datasetName}`)
+	static getEvaluationFolder(evaluationName) {
+		const evaluationFolder = Path.join(__dirname, `../data/evaluations/evaluation_${evaluationName}`)
 		return evaluationFolder
+	}
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @param {string} predictionName 
+	 */
+	static getPredictionFolder(evaluationName, predictionName) {
+		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
+		const predictionFolder = Path.join(evaluationFolder, `./predictions/prediction_${predictionName}`)
+		return predictionFolder
 	}
 
 	/**
@@ -57,9 +68,10 @@ export default class Utils {
 	/**
 	 * 
 	 * @param {string} evaluationName 
+	 * @param {string} predictionName
 	 */
-	static async loadPredictionJson(evaluationName) {
-		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
+	static async loadPredictionJson(evaluationName, predictionName) {
+		const evaluationFolder = Utils.getPredictionFolder(evaluationName, predictionName)
 		const filePath = Path.join(evaluationFolder, 'data.prediction.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
 		const predictionJson = /** @type {import("./type.d").PredictionJson} */(Json5.parse(fileContent))
@@ -69,9 +81,10 @@ export default class Utils {
 	/**
 	 * 
 	 * @param {string} evaluationName 
+	 * @param {string} predictionName
 	 */
-	static async loadEvaluationJson(evaluationName) {
-		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
+	static async loadEvaluationJson(evaluationName, predictionName) {
+		const evaluationFolder = Utils.getPredictionFolder(evaluationName, predictionName)
 		const filePath = Path.join(evaluationFolder, 'data.evaluation.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
 		const predictionJson = /** @type {import("./type.d").EvaluationJson} */(Json5.parse(fileContent))
