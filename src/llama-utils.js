@@ -74,21 +74,22 @@ export default class LlamaUtils {
          * @param {string} modelPath 
          * @param {boolean} verbose
          */
-        static async initModelAndContext(modelPath, verbose=false) {
+        static async initModelAndContext(modelPath, verbose = false) {
                 // debugger
                 const hrTimeBefore = process.hrtime();
                 const llamaModel = new LlamaModel({
                         modelPath,
                 });
-                const llamaContext = new LlamaContext({ model: llamaModel });
+                const llamaContext = new LlamaContext({
+                        model: llamaModel
+                });
                 const hrTimeElapsed = process.hrtime(hrTimeBefore);
                 const timeElapsed = hrTimeElapsed[0] + hrTimeElapsed[1] / 1000000000;
 
-                if( verbose){
-                console.log(`modelPath: ${CliColor.red(Path.basename(modelPath))} loaded in ${CliColor.red(timeElapsed.toFixed(2))}-seconds`);
-                console.log(`Context size: ${CliColor.red(llamaContext.getContextSize())}-bytes`)
-                console.log(`model system info: ${CliColor.red(LlamaModel.systemInfo)}`)
-
+                if (verbose) {
+                        console.log(`modelPath: ${CliColor.red(Path.basename(modelPath))} loaded in ${CliColor.red(timeElapsed.toFixed(2))}-seconds`);
+                        console.log(`Context size: ${CliColor.red(llamaContext.getContextSize())}-bytes`)
+                        console.log(`model system info: ${CliColor.red(LlamaModel.systemInfo)}`)
                 }
 
                 return { llamaModel, llamaContext }

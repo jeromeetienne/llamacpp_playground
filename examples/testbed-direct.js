@@ -27,18 +27,7 @@ const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.CODELLAM
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// debugger
-const loadModelHrTimeBefore = process.hrtime();
-const llamaModel = new LlamaModel({
-	modelPath,
-});
-const llamaContext = new LlamaContext({ model: llamaModel });
-const loadModelHrTimeElapsed = process.hrtime(loadModelHrTimeBefore);
-const loadModelTimeElapsed = loadModelHrTimeElapsed[0] + loadModelHrTimeElapsed[1] / 1000000000;
-
-console.log(`modelPath: ${CliColor.red(Path.basename(modelPath))} loaded in ${CliColor.red(loadModelTimeElapsed.toFixed(2))}-seconds`);
-console.log(`Context size: ${CliColor.red(llamaContext.getContextSize())}-bytes`)
-console.log(`model system info: ${CliColor.red(LlamaModel.systemInfo)}`)
+const { llamaContext } = await LlamaUtils.initModelAndContext(modelPath)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

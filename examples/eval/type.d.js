@@ -34,6 +34,22 @@ void (0);
  */
 void (0);
 
+
+/**
+ * @typedef {object} ReportItemJson
+ * @property {string} question
+ * @property {string} trueAnswer
+ * @property {string} predictedAnswer
+ * @property {boolean} predictionValid
+ */
+void (0);
+
+
+/**
+ * @typedef {ReportItemJson[]} ReportArrayJson
+ */
+void (0);
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 //	
