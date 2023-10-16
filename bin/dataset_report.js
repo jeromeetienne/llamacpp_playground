@@ -1,5 +1,5 @@
 // local imports
-import Utils from "../../src/utils.js";
+import Utils from "../src/utils.js";
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,13 +21,13 @@ console.assert(datasetJson.length === evaluationJson.length, `datasetJson.length
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-const reportArrayJson = /** @type {import("./type.d.js").ReportArrayJson} */([])
+const reportArrayJson = /** @type {import("../src/type.d.js").ReportArrayJson} */([])
 for (const datasetItem of datasetJson) {
 	const itemIndex = datasetJson.indexOf(datasetItem)
 	const predictionItem = predictionJson[itemIndex]
 	const evaluationItem = evaluationJson[itemIndex]
 
-        const reportItemJson = /** @type {import("./type.d.js").ReportItemJson} */({
+        const reportItemJson = /** @type {import("../src/type.d.js").ReportItemJson} */({
 		question: datasetItem.question,
                 trueAnswer: datasetItem.trueAnswer,
                 predictedAnswer: predictionItem.predictedAnswer,

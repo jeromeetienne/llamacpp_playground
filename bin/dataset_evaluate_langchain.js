@@ -6,7 +6,7 @@ import { loadEvaluator } from "langchain/evaluation";
 import { OpenAI } from "langchain/llms/openai";
 
 // local imports
-import Utils from "../../src/utils.js";
+import Utils from "../src/utils.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -40,7 +40,7 @@ const evaluator = await loadEvaluator("labeled_criteria", {
 });
 
 
-const evaluationArrayJson = /** @type {import("./type.d.js").EvaluationArrayJson} */([])
+const evaluationArrayJson = /** @type {import("../src/type.d.js").EvaluationArrayJson} */([])
 for (const datasetItem of datasetJson) {
 	const indexItem = datasetJson.indexOf(datasetItem)
 	const predictionItem = predictionJson[indexItem]
@@ -69,7 +69,7 @@ ${datasetItem.question}`
 	*/
 	console.log(`Result ${indexItem + 1}th ${JSON.stringify(evalResult, null, '\t')}`);
 
-	const evaluationItemJson = /** @type {import("./type.d.js").EvaluationItemJson} */({
+	const evaluationItemJson = /** @type {import("../src/type.d.js").EvaluationItemJson} */({
 		predictionValid: evalResult.value === 'Y' ? true : false
 	})
 	evaluationArrayJson.push(evaluationItemJson)

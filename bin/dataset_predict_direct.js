@@ -14,21 +14,21 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import Json5 from "json5";
 
 // local imports
-import LlamaUtils from "../../src/llama-utils.js";
-import Utils from "../../src/utils.js";
-import AvailableModelPaths from "../../src/available_model_paths.js";
-import EsmPromptTemplate from "../../src/esm-prompt-template.js";
+import LlamaUtils from "../src/llama-utils.js";
+import Utils from "../src/utils.js";
+import AvailableModelPaths from "../src/available_model_paths.js";
+import EsmPromptTemplate from "../src/esm-prompt-template.js";
 
 // get __dirname in esm module
 import Url from "url";
 const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K)
-const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K)
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_7B_INSTRUCT_Q4_K_M)
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K)
+const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.CODELLAMA_7B_INSTRUCT_Q4_K_M)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
 const modelName = Path.basename(modelPath)
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,7 +87,7 @@ ${"question"}`
 const evaluationName = 'myeval'
 const datasetArray = await Utils.loadDatasetJson(evaluationName)
 
-const predictionArrayJson = /** @type {import("./type.d.js").PredictionArrayJson} */([])
+const predictionArrayJson = /** @type {import("../src/type.d.js").PredictionArrayJson} */([])
 
 const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
 for (const datasetItem of datasetArray) {
@@ -97,7 +97,7 @@ for (const datasetItem of datasetArray) {
 	console.log(`Question : ${CliColor.green(datasetItem.question)}`);
 	const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
 	console.log(`Answer : ${CliColor.cyan(responseJson.answer)}`)
-	const predictionItemJson = /** @type {import("./type.d.js").PredictionItemJson} */({ predictedAnswer: responseJson.answer })
+	const predictionItemJson = /** @type {import("../src/type.d.js").PredictionItemJson} */({ predictedAnswer: responseJson.answer })
 	predictionArrayJson.push(predictionItemJson)
 }
 

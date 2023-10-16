@@ -14,8 +14,8 @@ import { LlamaCpp } from "langchain/llms/llama_cpp";
 import { LLMChain } from "langchain/chains";
 
 // local imports
-import Utils from "../../src/utils.js";
-import AvailableModelPaths from "../../src/available_model_paths.js";
+import Utils from "../src/utils.js";
+import AvailableModelPaths from "../src/available_model_paths.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -33,7 +33,7 @@ const lgModel = new OpenAI({
 });
 const modelName = lgModel.modelName
 
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 // const modelName = Path.basename(modelPath)
 // const lgModel = new LlamaCpp({ modelPath });
 
@@ -59,12 +59,14 @@ Based on this context, answer the following question:
 
 const contextText = await Utils.loadText()
 
-const datasetPath = Path.join(__dirname, './data', 'data.dataset.json')
-const datasetFileContent = await Fs.promises.readFile(datasetPath, 'utf-8')
-const datasetArray = /** @type {import("./type.d.js").DatasetArrayJson} */(Json5.parse(datasetFileContent))
+// const datasetPath = Path.join(__dirname, './data', 'data.dataset.json')
+// const datasetFileContent = await Fs.promises.readFile(datasetPath, 'utf-8')
+// const datasetArray = /** @type {import("../src/type.d.js").DatasetArrayJson} */(Json5.parse(datasetFileContent))
 
+const evaluationName = 'myeval'
+const datasetArray = await Utils.loadDatasetJson(evaluationName)
 
-const predictionArrayJson = /** @type {import("./type.d.js").PredictionArrayJson} */([])
+const predictionArrayJson = /** @type {import("../src/type.d.js").PredictionArrayJson} */([])
 
 // const chain = promptTemplate.pipe(lgModel);
 const chain = new LLMChain({ llm: lgModel, prompt: promptTemplate });
@@ -91,7 +93,7 @@ for (const datasetItem of datasetArray) {
 
 
 	console.log(`Answer : ${CliColor.cyan(outputText)}`)
-	const predictionItemJson = /** @type {import("./type.d.js").PredictionItemJson} */({ 
+	const predictionItemJson = /** @type {import("../src/type.d.js").PredictionItemJson} */({ 
 		predictedAnswer: outputText 
 	})
 	predictionArrayJson.push(predictionItemJson)

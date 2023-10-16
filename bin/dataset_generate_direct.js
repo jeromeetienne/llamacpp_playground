@@ -14,20 +14,20 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import Json5 from "json5";
 
 // local imports
-import LlamaUtils from "../../src/llama-utils.js";
-import Utils from "../../src/utils.js";
-import AvailableModelPaths from "../../src/available_model_paths.js";
+import LlamaUtils from "../src/llama-utils.js";
+import Utils from "../src/utils.js";
+import AvailableModelPaths from "../src/available_model_paths.js";
 
 // get __dirname in esm module
 import Url from "url";
 const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K)
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K)
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_7B_INSTRUCT_Q4_K_M)
-const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.CODELLAMA_7B_INSTRUCT_Q4_K_M)
+const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

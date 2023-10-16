@@ -23,8 +23,8 @@ import { StructuredOutputParser,OutputFixingParser } from "langchain/output_pars
 
 // local imports
 // import LlamaUtils from "../../src/llama-utils.js";
-import Utils from "../../src/utils.js";
-import AvailableModelPaths from "../../src/available_model_paths.js";
+import Utils from "../src/utils.js";
+import AvailableModelPaths from "../src/available_model_paths.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -45,7 +45,7 @@ const lgModel = new OpenAI({
 });
 const modelName = lgModel.modelName
 
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 // const modelName = Path.basename(modelPath)
 // const lgModel = new LlamaCpp({ modelPath });
 
@@ -63,7 +63,7 @@ const responseZodSchema = Zod.array(Zod.object({
 }))
 const outputParser = StructuredOutputParser.fromZodSchema(responseZodSchema);
 // const outputFixingModel = new LlamaCpp({ 
-// 	modelPath : Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+// 	modelPath : Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 // });
 // const outputFixingModel = lgModel
 const outputFixingModel = new OpenAI({ 
@@ -72,7 +72,7 @@ const outputFixingModel = new OpenAI({
 const outputFixingParser = OutputFixingParser.fromLLM(outputFixingModel, outputParser);
 
 // const outputFixingModel = 
-// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 // const modelName = Path.basename(modelPath)
 
 
