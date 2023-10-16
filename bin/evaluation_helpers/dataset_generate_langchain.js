@@ -23,8 +23,8 @@ import { StructuredOutputParser, OutputFixingParser } from "langchain/output_par
 
 // local imports
 // import LlamaUtils from "../../src/llama-utils.js";
-import Utils from "../src/utils.js";
-import AvailableModelPaths from "../src/available_model_paths.js";
+import Utils from "../../src/utils.js";
+import AvailableModelPaths from "../../src/available_model_paths.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -56,11 +56,11 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 export default class DatasetGenerateDirect {
 
 	/**
-	 * @param {string} modelName
 	 * @param {string} evaluationName
+	 * @param {string} modelName
 	 * @param {Partial<DatasetGenerateLangchainOptions>} partialOptions
 	 */
-	static async generate(modelName, evaluationName, partialOptions = {}) {
+	static async generate(evaluationName, modelName, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.assign({}, /** @type {DatasetGenerateLangchainOptions} */({
@@ -84,7 +84,7 @@ export default class DatasetGenerateDirect {
 		});
 		// const modelName = lgModel.modelName
 
-		// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+		// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 		// const modelName = Path.basename(modelPath)
 		// const lgModel = new LlamaCpp({ modelPath });
 
@@ -102,7 +102,7 @@ export default class DatasetGenerateDirect {
 		}))
 		const outputParser = StructuredOutputParser.fromZodSchema(responseZodSchema);
 		// const outputFixingModel = new LlamaCpp({ 
-		// 	modelPath : Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+		// 	modelPath : Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 		// });
 		// const outputFixingModel = lgModel
 		const outputFixingModel = new OpenAI({
@@ -111,7 +111,7 @@ export default class DatasetGenerateDirect {
 		const outputFixingParser = OutputFixingParser.fromLLM(outputFixingModel, outputParser);
 
 		// const outputFixingModel = 
-		// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+		// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 		// const modelName = Path.basename(modelPath)
 
 
@@ -175,7 +175,7 @@ Please generate {nQuestions} question/answer tuples about this context
 		}
 
 		const responseJson = Json5.parse(outputText)
-		const datasetJson = /** @type {import("../src/type.d.js").DatasetArrayJson} */(responseJson)
+		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */(responseJson)
 
 		// return datasetJson
 		return datasetJson
@@ -189,8 +189,9 @@ Please generate {nQuestions} question/answer tuples about this context
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
+	const evaluationName = 'myeval'
 	const modelName = 'gpt-3.5-turbo'
-	await DatasetGenerateDirect.generate(modelName, {
+	await DatasetGenerateDirect.generate(evaluationName, modelName, {
 		verbose: true
 	})
 }

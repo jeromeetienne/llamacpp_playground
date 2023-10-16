@@ -6,7 +6,7 @@
 void (0);
 
 /**
- * @typedef {DatasetItemJson[]} DatasetArrayJson
+ * @typedef {DatasetItemJson[]} DatasetJson
  */
 void (0);
 
@@ -30,7 +30,7 @@ void (0);
 
 
 /**
- * @typedef {EvaluationItemJson[]} EvaluationArrayJson
+ * @typedef {EvaluationItemJson[]} EvaluationJson
  */
 void (0);
 

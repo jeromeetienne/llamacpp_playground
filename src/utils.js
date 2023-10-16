@@ -50,7 +50,7 @@ export default class Utils {
 		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
 		const filePath = Path.join(evaluationFolder, 'data.dataset.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
-		const datasetJson = /** @type {import("./type.d").DatasetArrayJson} */(Json5.parse(fileContent))
+		const datasetJson = /** @type {import("./type.d").DatasetJson} */(Json5.parse(fileContent))
 		return datasetJson
 	}
 
@@ -74,7 +74,7 @@ export default class Utils {
 		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
 		const filePath = Path.join(evaluationFolder, 'data.evaluation.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
-		const predictionJson = /** @type {import("./type.d").EvaluationArrayJson} */(Json5.parse(fileContent))
+		const predictionJson = /** @type {import("./type.d").EvaluationJson} */(Json5.parse(fileContent))
 		return predictionJson
 	}
 }

@@ -14,8 +14,8 @@ import { LlamaCpp } from "langchain/llms/llama_cpp";
 import { LLMChain } from "langchain/chains";
 
 // local imports
-import Utils from "../src/utils.js";
-import AvailableModelPaths from "../src/available_model_paths.js";
+import Utils from "../../src/utils.js";
+import AvailableModelPaths from "../../src/available_model_paths.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -30,7 +30,6 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 /**
  * @typedef {Object} DatasetPredictLangchainOptions
- * @property {number} nQuestions
  * @property {Boolean} verbose
  */
 
@@ -43,15 +42,14 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 export default class DatasetPredictLangchain {
 
 	/**
-	 * @param {string} modelName e.g. gpt-4-0613 gpt-3.5-turbo
 	 * @param {string} evaluationName
+	 * @param {string} modelName e.g. gpt-4-0613 gpt-3.5-turbo
 	 * @param {Partial<DatasetPredictLangchainOptions>} partialOptions
 	 */
-	static async predict(modelName, evaluationName, partialOptions = {}) {
+	static async predict(evaluationName, modelName, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.assign({}, /** @type {DatasetPredictLangchainOptions} */({
-			nQuestions: 1,
 			verbose: false,
 		}), partialOptions)
 		const options = /** @type {DatasetPredictLangchainOptions} */(partialOptions)
@@ -69,7 +67,7 @@ export default class DatasetPredictLangchain {
 		});
 		// const modelName = lgModel.modelName
 
-		// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+		// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 		// const modelName = Path.basename(modelPath)
 		// const lgModel = new LlamaCpp({ modelPath });
 
@@ -101,7 +99,7 @@ Based on this context, answer the following question:
 		const chain = new LLMChain({ llm: lgModel, prompt: promptTemplate });
 
 
-		const predictionJson = /** @type {import("../src/type.d.js").PredictionJson} */([])
+		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
 		for (const datasetItem of datasetJson) {
 			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
 			const result = await chain.call({
@@ -123,7 +121,7 @@ Based on this context, answer the following question:
 
 
 			console.log(`Answer : ${CliColor.cyan(outputText)}`)
-			const predictionItemJson = /** @type {import("../src/type.d.js").PredictionItemJson} */({
+			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({
 				predictedAnswer: outputText
 			})
 			predictionJson.push(predictionItemJson)
@@ -151,7 +149,7 @@ async function mainAsync() {
 	// await LlamaUtils.warmUpContext(llamaContext);
 
 	const evaluationName = 'myeval'
-	await DatasetPredictLangchain.predict(modelName, evaluationName, {
+	await DatasetPredictLangchain.predict(evaluationName, modelName, {
 		verbose: true
 	})
 }
