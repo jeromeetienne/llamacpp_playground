@@ -18,6 +18,7 @@ import LlamaUtils from "../../src/llama-utils.js";
 import Utils from "../../src/utils.js";
 import AvailableModelPaths from "../../src/available_model_paths.js";
 import EsmPromptTemplate from "../../src/esm-prompt-template.js";
+import FstringTemplate from "../../src/fstring-template.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -32,6 +33,8 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 /**
  * @typedef {Object} DatasetPredictDirectOptions
+ * @property {string} modelName valid model basename for node-llama-cpp e.g. codellama-7b-instruct.Q4_K_M.gguf
+ * @property {string} prompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
  * @property {Boolean} verbose
  */
 
@@ -43,18 +46,40 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 export default class DatasetPredictDirect {
 
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	static defaultPredictOptions =  /** @type {DatasetPredictDirectOptions} */({
+		modelName: AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M,
+		prompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
+CONTEXT_BEGIN
+{context}
+CONTEXT_END
+
+Based on this context, answer the following question:
+{question}`,
+		verbose: false,
+	})
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * @param {string} evaluationName
 	 * @param {string} predictionName
-	 * @param {string} modelName
 	 * @param {Partial<DatasetPredictDirectOptions>} partialOptions
 	 */
-	static async predict(evaluationName,predictionName, modelName, partialOptions = {}) {
+	static async predict(evaluationName, predictionName, partialOptions = {}) {
 
 		// handle default options
-		partialOptions = Object.assign({}, /** @type {DatasetPredictDirectOptions} */({
-			verbose: false,
-		}), partialOptions)
+		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
+		partialOptions = Object.assign({}, DatasetPredictDirect.defaultPredictOptions, partialOptions)
 		const options = /** @type {DatasetPredictDirectOptions} */(partialOptions)
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -63,7 +88,7 @@ export default class DatasetPredictDirect {
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		const modelPath = Path.join(__dirname, '../../models', modelName)
+		const modelPath = Path.join(__dirname, '../../models', options.modelName)
 		const { llamaContext, llamaModel } = await LlamaUtils.initModelAndContext(modelPath)
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -87,12 +112,13 @@ export default class DatasetPredictDirect {
 		//	
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-		
+
 
 		// console.log(`reponse json-schema ${JSON.stringify(responseJsonSchema, null, 2)}`)
 
 		const contextText = await Utils.loadContextText()
 
+		// TODO make it tunable
 		const systemPrompt = `Be sure to Format your response in JSON with the following format:
 ${JSON.stringify(responseSample)}`;
 
@@ -102,13 +128,7 @@ ${JSON.stringify(responseSample)}`;
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		const promptTemplate = EsmPromptTemplate`Here is a context between CONTEXT_BEGIN and CONTEXT_END:
-CONTEXT_BEGIN
-${"contextText"}
-CONTEXT_END
-
-Based on this context, answer the following question:
-${"question"}`
+		const promptTemplate = new FstringTemplate(options.prompt);
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -117,29 +137,28 @@ ${"question"}`
 		///////////////////////////////////////////////////////////////////////////////
 
 		const datasetArray = await Utils.loadDatasetJson(evaluationName)
-		const predictionArrayJson = /** @type {import("../../src/type.d.js").EvaluationJson} */([])
+		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
 
 		for (const datasetItem of datasetArray) {
-			const question = promptTemplate({ 
-				contextText, 
-				question: datasetItem.question 
+			const question = promptTemplate.generate({
+				context: contextText,
+				question: datasetItem.question
 			})
 
 			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
 			const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
 			console.log(`Answer : ${CliColor.cyan(responseJson.answer)}`)
 			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({ predictedAnswer: responseJson.answer })
-			predictionArrayJson.push(predictionItemJson)
+			predictionJson.push(predictionItemJson)
 		}
 
-		if( options.verbose){
+		if (options.verbose) {
 			console.log(`OUTPUT by ${CliColor.red(Path.basename(modelPath))}`)
-			console.log(`${JSON.stringify(predictionArrayJson, null, '\t')}`)
-	
+			console.log(`${JSON.stringify(predictionJson, null, '\t')}`)
 		}
 
 		// return predictionJson
-		return predictionArrayJson
+		return predictionJson
 	}
 }
 
@@ -157,7 +176,8 @@ async function mainAsync() {
 
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'
-	await DatasetPredictDirect.predict(evaluationName, predictionName, modelName, {
+	await DatasetPredictDirect.predict(evaluationName, predictionName, {
+		modelName: modelName,
 		verbose: true
 	})
 }

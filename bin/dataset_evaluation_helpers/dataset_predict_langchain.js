@@ -30,8 +30,9 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 /**
  * @typedef {Object} DatasetPredictLangchainOptions
- * @property {Boolean} verbose
+ * @property {string} modelName e.g. gpt-4-0613 gpt-3.5-turbo
  * @property {string} prompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
+ * @property {Boolean} verbose
  */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,25 +43,40 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 export default class DatasetPredictLangchain {
 
-	/**
-	 * @param {string} evaluationName
-	 * @param {string} predictionName
-	 * @param {string} modelName e.g. gpt-4-0613 gpt-3.5-turbo
-	 * @param {Partial<DatasetPredictLangchainOptions>} partialOptions
-	 */
-	static async predict(evaluationName, predictionName, modelName, partialOptions = {}) {
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 
-		// handle default options
-		partialOptions = Object.assign({}, /** @type {DatasetPredictLangchainOptions} */({
-			verbose: false,
-			prompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
+	static defaultPredictOptions =  /** @type {DatasetPredictLangchainOptions} */({
+		modelName: 'gpt-3.5-turbo',
+		prompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
 {context}
 CONTEXT_END
 
 Based on this context, answer the following question:
-{question}`
-		}), partialOptions)
+{question}`,
+		verbose: false,
+	})
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * @param {string} evaluationName
+	 * @param {string} predictionName
+	 * @param {Partial<DatasetPredictLangchainOptions>} partialOptions
+	 */
+	static async predict(evaluationName, predictionName, partialOptions = {}) {
+
+		// handle default options
+		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
+		partialOptions = Object.assign({}, DatasetPredictLangchain.defaultPredictOptions, partialOptions)
 		const options = /** @type {DatasetPredictLangchainOptions} */(partialOptions)
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -70,9 +86,10 @@ Based on this context, answer the following question:
 		///////////////////////////////////////////////////////////////////////////////
 
 		const lgModel = new OpenAI({
-			modelName: modelName,
+			modelName: options.modelName,
 			// modelName: "gpt-3.5-turbo",
-			temperature: 0
+			temperature: 0,
+			verbose: options.verbose,
 		});
 		// const modelName = lgModel.modelName
 
@@ -98,7 +115,7 @@ Based on this context, answer the following question:
 		const chain = new LLMChain({ llm: lgModel, prompt: promptTemplate });
 
 
-		const predictionJson = /** @type {import("../../src/type.d.js").EvaluationJson} */([])
+		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
 		for (const datasetItem of datasetJson) {
 			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
 			const result = await chain.call({
@@ -127,7 +144,7 @@ Based on this context, answer the following question:
 		}
 
 		if (options.verbose) {
-			console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+			console.log(`OUTPUT by ${CliColor.red(options.modelName)}`)
 			console.log(`${JSON.stringify(predictionJson, null, '\t')}`)
 		}
 
@@ -149,7 +166,8 @@ async function mainAsync() {
 
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'
-	await DatasetPredictLangchain.predict(evaluationName, predictionName, modelName, {
+	await DatasetPredictLangchain.predict(evaluationName, predictionName, {
+		modelName: modelName,
 		verbose: true
 	})
 }

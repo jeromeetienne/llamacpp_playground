@@ -53,6 +53,84 @@ export default class Utils {
 		const predictionFolder = Path.join(evaluationFolder, `./predictions/prediction_${predictionName}`)
 		return predictionFolder
 	}
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @returns 
+	 */
+	static async getPredictionNames(evaluationName) {
+		const predictionsFolder = Path.join(Utils.getEvaluationFolder(evaluationName), `./predictions/`)
+		const predictionsAllBasenames = await Fs.promises.readdir(predictionsFolder)
+		const predictionNames = /** @type {string[]} */([])
+		// filter out non-directories
+		for (const basename of predictionsAllBasenames) {
+			const path = Path.join(predictionsFolder, basename)
+			const stats = await Fs.promises.stat(path)
+			if (stats.isDirectory() === false) continue
+			// filter out non-prediction directories
+			if (basename.startsWith('prediction_') === false) continue
+
+			const predictionName = basename.replace(/^prediction_/, '')
+			predictionNames.push(predictionName)
+		}
+		return predictionNames
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @param {string} predictionName
+	 */
+	static async buildReportJson(evaluationName, predictionName) {
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const datasetJson = await Utils.loadDatasetJson(evaluationName)
+		const predictionJson = await Utils.loadPredictionJson(evaluationName, predictionName)
+		const evaluationJson = await Utils.loadEvaluationJson(evaluationName, predictionName)
+		// sanity check
+		console.assert(datasetJson.length === predictionJson.length, `datasetJson.length (${datasetJson.length}) !== predictionJson.length (${predictionJson.length})`)
+		console.assert(datasetJson.length === evaluationJson.length, `datasetJson.length (${datasetJson.length}) !== evaluationJson.length (${predictionJson.length})`)
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//      build report json
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const reportJson = /** @type {import("./type.d.js").ReportJson} */([])
+		for (const datasetItem of datasetJson) {
+			const itemIndex = datasetJson.indexOf(datasetItem)
+			const predictionItem = predictionJson[itemIndex]
+			const evaluationItem = evaluationJson[itemIndex]
+
+			const reportItemJson = /** @type {import("./type.d.js").ReportItemJson} */({
+				question: datasetItem.question,
+				trueAnswer: datasetItem.trueAnswer,
+				predictedAnswer: predictionItem.predictedAnswer,
+				predictionValid: evaluationItem.predictionValid,
+			})
+			reportJson.push(reportItemJson)
+		}
+
+		return reportJson
+	}
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -75,13 +153,13 @@ export default class Utils {
 	/**
 	 * 
 	 * @param {string} evaluationName 
-	 * @param {import("./type.d").DatasetJson} evaluationJson
+	 * @param {import("./type.d").DatasetJson} datasetJson
 	 */
-	static async saveDatasetJson(evaluationName, evaluationJson) {
+	static async saveDatasetJson(evaluationName, datasetJson) {
 		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
 		await FsExtra.ensureDir(evaluationFolder)
 		const filePath = Path.join(evaluationFolder, 'data.dataset.json')
-		const fileContent = JSON.stringify(evaluationJson, null, '\t')
+		const fileContent = JSON.stringify(datasetJson, null, '\t')
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
 
@@ -94,7 +172,7 @@ export default class Utils {
 		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
 		const filePath = Path.join(predictionFolder, 'data.prediction.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
-		const predictionJson = /** @type {import("./type.d").EvaluationJson} */(Json5.parse(fileContent))
+		const predictionJson = /** @type {import("./type.d").PredictionJson} */(Json5.parse(fileContent))
 		return predictionJson
 	}
 
@@ -102,7 +180,7 @@ export default class Utils {
 	 * 
 	 * @param {string} evaluationName 
 	 * @param {string} predictionName
-	 * @param {import("./type.d").EvaluationJson} predictionJson
+	 * @param {import("./type.d").PredictionJson} predictionJson
 	 */
 	static async savePredictionJson(evaluationName, predictionName, predictionJson) {
 		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
@@ -144,13 +222,13 @@ export default class Utils {
 	 * 
 	 * @param {string} evaluationName 
 	 * @param {string} predictionName
-	 * @param {import("./type.d").HyperParametersSearchPredictionJson} searchPredictionJson
+	 * @param {import("./type.d").PredictionMetadataJson} predictionMetadataJson
 	 */
-	static async savePredictionMetadataJson(evaluationName, predictionName, searchPredictionJson) {
+	static async savePredictionMetadataJson(evaluationName, predictionName, predictionMetadataJson) {
 		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
 		await FsExtra.ensureDir(predictionFolder)
-		const filePath = Path.join(predictionFolder, 'metadata.json')
-		const fileContent = JSON.stringify(searchPredictionJson, null, '\t')
+		const filePath = Path.join(predictionFolder, 'data.prediction-metadata.json')
+		const fileContent = JSON.stringify(predictionMetadataJson, null, '\t')
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
 }

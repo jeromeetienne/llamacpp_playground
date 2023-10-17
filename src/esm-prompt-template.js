@@ -47,8 +47,19 @@ ${"question"}`
 	})
 
 	console.log(renderedTemplate)
+
+
+	const pTemplate = EsmPromptTemplate['sdfs${"contextText"}df']
+	debugger
+	const renderedTemplate2 = pTemplate({
+		contextText: "my name is john.",
+		question: 'What is your name?'
+	})
+	console.log({renderedTemplate2})
+
 }
 
+// run mainAsync() if this file is run directly from node.js
 import { fileURLToPath } from 'url';
 const runAsMainModule = process.argv[1] === fileURLToPath(import.meta.url)
 if (runAsMainModule) {

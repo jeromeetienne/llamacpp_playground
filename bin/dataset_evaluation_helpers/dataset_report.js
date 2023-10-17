@@ -1,3 +1,7 @@
+// node imports
+import Path from 'path'
+import Fs from 'fs'
+
 // local imports
 import Utils from "../../src/utils.js";
 
@@ -22,111 +26,76 @@ import Utils from "../../src/utils.js";
 
 export default class DatasetReport {
 
-        /**
-         * @param {string} evaluationName
-         * @param {string} predictionName
-         * @param {Partial<DatasetReportOptions>} partialOptions
-         */
-        static async build(evaluationName, predictionName, partialOptions = {}) {
+	/**
+	 * @param {string} evaluationName
+	 * @param {Partial<DatasetReportOptions>} partialOptions
+	 */
+	static async display(evaluationName, partialOptions = {}) {
 
-                // handle default options
-                partialOptions = Object.assign({}, /** @type {DatasetReportOptions} */({
-                        verbose: false,
-                }), partialOptions)
-                const options = /** @type {DatasetReportOptions} */(partialOptions)
+		// handle default options
+		partialOptions = Object.assign({}, /** @type {DatasetReportOptions} */({
+			verbose: false,
+		}), partialOptions)
+		const options = /** @type {DatasetReportOptions} */(partialOptions)
 
-                ///////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////
-                //	
-                ///////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	get prediction names
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
 
-                // const evaluationName = 'myeval'
-                const datasetJson = await Utils.loadDatasetJson(evaluationName)
-                const predictionJson = await Utils.loadPredictionJson(evaluationName, predictionName)
-                const evaluationJson = await Utils.loadEvaluationJson(evaluationName, predictionName)
-                // sanity check
-                console.assert(datasetJson.length === predictionJson.length, `datasetJson.length (${datasetJson.length}) !== predictionJson.length (${predictionJson.length})`)
-                console.assert(datasetJson.length === evaluationJson.length, `datasetJson.length (${datasetJson.length}) !== evaluationJson.length (${predictionJson.length})`)
+		// TODO put that into Utils
+		const predictionNames = await Utils.getPredictionNames(evaluationName)
+		const datasetJson = await Utils.loadDatasetJson(evaluationName)
 
-                ///////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////
-                //      build report array
-                ///////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//      build report array
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
 
-                const reportArrayJson = /** @type {import("../../src/type.d.js").ReportArrayJson} */([])
-                for (const datasetItem of datasetJson) {
-                        const itemIndex = datasetJson.indexOf(datasetItem)
-                        const predictionItem = predictionJson[itemIndex]
-                        const evaluationItem = evaluationJson[itemIndex]
+		for (const predictionName of predictionNames) {
+			const reportJson = await Utils.buildReportJson(evaluationName, predictionName)
+			console.log(`OUTPUT REPORT FOR ${predictionName}`)
+			if (options.verbose) {
+				console.log(`${JSON.stringify(reportJson, null, '\t')}`)
+			}
 
-                        const reportItemJson = /** @type {import("../../src/type.d.js").ReportItemJson} */({
-                                question: datasetItem.question,
-                                trueAnswer: datasetItem.trueAnswer,
-                                predictedAnswer: predictionItem.predictedAnswer,
-                                predictionValid: evaluationItem.predictionValid,
-                        })
-                        reportArrayJson.push(reportItemJson)
-                }
+			///////////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////////
+			//	display statistics
+			///////////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////////
 
-                console.log(`OUTPUT`)
-                console.log(`${JSON.stringify(reportArrayJson, null, '\t')}`)
+			let validCount = 0
+			for (const reportItem of reportJson) {
+				if (reportItem.predictionValid) validCount += 1
+			}
+			const evaluationScore = validCount / reportJson.length
+			console.log(`\tDataset count: ${reportJson.length} items (${validCount} valid/${reportJson.length-validCount} invalid)`)
+			console.log(`\tEvaluation score: ${(evaluationScore * 100).toFixed(2)}%`)
 
-                ///////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////
-                //	display statistics
-                ///////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////////
+			//	if verbose, display invalid items
+			///////////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////////
 
-                let validCount = 0
-                for (const reportItem of reportArrayJson) {
-                        if (reportItem.predictionValid) validCount += 1
-                }
-                const evaluationScore = validCount / reportArrayJson.length
-                console.log(`dataset: ${reportArrayJson.length} items`)
-                console.log(`validCount: ${validCount}`)
-                console.log(`Evaluation score: ${(evaluationScore * 100).toFixed(2)}%`)
-
-                ///////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////
-                //	display invalid items
-                ///////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////
-
-                const hasInvalidItems = reportArrayJson.some(reportItem => reportItem.predictionValid === false)
-                if (hasInvalidItems === false) {
-                        console.log('No invalid items')
-                } else {
-                        for (const reportItem of reportArrayJson) {
-                                const itemIndex = reportArrayJson.indexOf(reportItem)
-                                if (reportItem.predictionValid) {
-                                        continue
-                                }
-                                console.log(`items ${itemIndex} INVALID`)
-                                console.log(JSON.stringify(reportItem, null, '\t'))
-                        }
-                }
-        }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-//	Usage example
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-async function mainAsync() {
-        const evaluationName = 'myeval'
-        await DatasetReport.build(evaluationName, {
-                verbose: true,
-        })
-}
-
-// run mainAsync() if this file is run directly from node.js
-import { fileURLToPath } from 'url';
-const runAsMainModule = process.argv[1] === fileURLToPath(import.meta.url)
-if (runAsMainModule) {
-        // call mainAsync()
-        await mainAsync()
+			if( options.verbose === true ){
+				const hasInvalidItems = reportJson.some(reportItem => reportItem.predictionValid === false)
+				if (hasInvalidItems === false) {
+					console.log('No invalid items')
+				} else {
+					for (const reportItem of reportJson) {
+						const itemIndex = reportJson.indexOf(reportItem)
+						if (reportItem.predictionValid) {
+							continue
+						}
+						console.log(`items ${itemIndex} INVALID`)
+						console.log(JSON.stringify(reportItem, null, '\t'))
+					}
+				}	
+			}
+		}
+	}
 }

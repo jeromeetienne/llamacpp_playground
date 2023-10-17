@@ -72,9 +72,23 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 
 	cmdline.command('generate <evaluationName> [modelName]')
 		.description('generate the dataset')
+		.option('-l, --langchain', 'use langchain technology instead of direct')
+		.option('-d, --direct', 'use direct technology instead of langchain')
 		.option('-n, --nquestions <number>', 'number of questions to generate', parseFloat)
 		.action(async (evaluationName, modelName, options) => {
-			const shouldUseDirect = modelName?.endsWith('.gguf') ?? true
+			// debugger
+			// compute shouldUseDirect
+			let shouldUseDirect = null
+			if (options.direct) {
+				shouldUseDirect = true
+			} else if (options.langchain) {
+				shouldUseDirect = false
+			} else if (modelName !== undefined) {
+				shouldUseDirect = modelName.endsWith('.gguf')
+			} else {
+				shouldUseDirect = true
+			}
+
 			if (shouldUseDirect) {
 				await doDatasetGenerateDirect(evaluationName, modelName, options.nquestions)
 			} else {
@@ -90,8 +104,21 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 
 	cmdline.command('predict <evaluationName> <predictionName> [modelName]')
 		.description('predict on the dataset')
+		.option('-l, --langchain', 'use langchain technology instead of direct')
+		.option('-d, --direct', 'use direct technology instead of langchain')
 		.action(async (evaluationName, predictionName, modelName, options) => {
-			const shouldUseDirect = modelName?.endsWith('.gguf') ?? true
+			// compute shouldUseDirect
+			let shouldUseDirect = true
+			if (options.direct) {
+				shouldUseDirect = true
+			} else if (options.langchain) {
+				shouldUseDirect = false
+			} else if (modelName !== undefined) {
+				shouldUseDirect = modelName.endsWith('.gguf')
+			} else {
+				shouldUseDirect = true
+			}
+
 			if (shouldUseDirect) {
 				await doDatasetPredictDirect(evaluationName, predictionName, modelName)
 			} else {
@@ -117,10 +144,10 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('report <evaluationName> <predictionName>')
+	cmdline.command('report <evaluationName>')
 		.description('Print a report on the dataset evaluation')
-		.action(async (evaluationName, predictionName, options) => {
-			await doDatasetReport(evaluationName, predictionName)
+		.action(async (evaluationName, options) => {
+			await doDatasetReport(evaluationName)
 		});
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -129,10 +156,10 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('hyperparameters <evaluationName> <hyperparametersPath>')
-		.description('Print a report on the dataset evaluation')
-		.action(async (evaluationName, hyperparametersPath, options) => {
-			await doHyperparametersOptimisation(evaluationName, hyperparametersPath)
+	cmdline.command('hp-tuning <evaluationName> <hpTuningPath>')
+		.description('Do hyperparameters tuning for a given .hptuning.json file')
+		.action(async (evaluationName, hpTuningPath, options) => {
+			await doDatasetHpTuning(evaluationName, hpTuningPath)
 		});
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -175,7 +202,10 @@ async function doDatasetGenerateDirect(evaluationName, modelName = undefined, nQ
 	if (nQuestions !== undefined) options.nQuestions = nQuestions
 	const datasetJson = await DatasetGenerateDirect.generate(evaluationName, modelName, options)
 
-	console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+	// save a prediction.json file
+	await Utils.saveDatasetJson(evaluationName, datasetJson);
+
+	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
 	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
 }
 
@@ -192,7 +222,10 @@ async function doDatasetGenerateLangchain(evaluationName, modelName = undefined,
 		nQuestions: nQuestions,
 	})
 
-	console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+	// save a prediction.json file
+	await Utils.saveDatasetJson(evaluationName, datasetJson);
+
+	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
 	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
 }
 
@@ -201,26 +234,46 @@ async function doDatasetGenerateLangchain(evaluationName, modelName = undefined,
  * @param {string} evaluationName 
  * @param {string} predictionName
  * @param {string=} modelName
+ * @param {string=} prompt
  */
-async function doDatasetPredictDirect(evaluationName, predictionName, modelName = undefined) {
+async function doDatasetPredictDirect(evaluationName, predictionName, modelName = undefined, prompt = undefined) {
+	// build a metadata.json file
+	const metadataJson = /** @type {import("../src/type.d.js").PredictionMetadataJson} */({
+		defaultPredictOptions: {
+			modelName: DatasetPredictDirect.defaultPredictOptions.modelName,
+			prompt: DatasetPredictDirect.defaultPredictOptions.prompt,
+		},
+		modifiedPredictOptions: {
+		}
+	})
+	if (prompt !== undefined) metadataJson.modifiedPredictOptions.prompt = prompt
+	if (modelName !== undefined) metadataJson.modifiedPredictOptions.modelName = modelName
+	// save a metadata.json file
+	await Utils.savePredictionMetadataJson(evaluationName, predictionName, metadataJson)
+
+
+	// trick to have modelName be a path up to this point, now we take the basename
+	// - this helps the command line writing thanks bash autocompletion and using ./models/ folder
 	if (modelName) {
 		modelName = Path.basename(modelName)
 	}
-	modelName = modelName ?? AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K
-	const predictionJson = await DatasetPredictDirect.predict(evaluationName, predictionName, modelName, {
+	// assigned modelName if not defined
+	if (modelName === undefined) {
+		modelName = DatasetPredictDirect.defaultPredictOptions.modelName
+	}
+
+	// do the actual prediction
+	const predictionJson = await DatasetPredictDirect.predict(evaluationName, predictionName, {
+		modelName: modelName,
+		prompt: prompt,
 		// verbose: true
 	})
 
 	// save a prediction.json file
 	await Utils.savePredictionJson(evaluationName, predictionName, predictionJson);
 
-	// save a metadata.json file
-	const metadataJson = /** @type {import("../src/type.d.js").HyperParametersSearchPredictionJson} */({
-		modelName: modelName,
-	})
-	await Utils.savePredictionMetadataJson(evaluationName, predictionName, metadataJson)
 
-	console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+	console.log(`Prediction OUTPUT by ${CliColor.red(modelName)}`)
 	console.log(`${JSON.stringify(predictionJson, null, '\t')}`)
 }
 
@@ -229,23 +282,38 @@ async function doDatasetPredictDirect(evaluationName, predictionName, modelName 
  * @param {string} evaluationName 
  * @param {string} predictionName
  * @param {string=} modelName
+ * @param {string=} prompt
  */
-async function doDatasetPredictLangchain(evaluationName, predictionName, modelName = undefined) {
+async function doDatasetPredictLangchain(evaluationName, predictionName, modelName = undefined, prompt = undefined) {
+	// build a metadata.json file
+	const metadataJson = /** @type {import("../src/type.d.js").PredictionMetadataJson} */({
+		defaultPredictOptions: {
+			modelName: DatasetPredictLangchain.defaultPredictOptions.modelName,
+			prompt: DatasetPredictLangchain.defaultPredictOptions.prompt,
+		},
+		modifiedPredictOptions: {
+		}
+	})
+	if (prompt !== undefined) metadataJson.modifiedPredictOptions.prompt = prompt
+	if (modelName !== undefined) metadataJson.modifiedPredictOptions.modelName = modelName
+	// save a metadata.json file
+	await Utils.savePredictionMetadataJson(evaluationName, predictionName, metadataJson)
+
+	// assigned modelName if not defined
 	modelName = modelName ?? 'gpt-3.5-turbo'
-	const predictionJson = await DatasetPredictLangchain.predict(evaluationName, predictionName, modelName, {
+
+	// do the actual prediction
+	const predictionJson = await DatasetPredictLangchain.predict(evaluationName, predictionName, {
+		modelName: modelName,
+		prompt: prompt,
 		// verbose: true
 	})
 
 	// save a prediction.json file
 	await Utils.savePredictionJson(evaluationName, predictionName, predictionJson);
 
-	// save a metadata.json file
-	const metadataJson = /** @type {import("../src/type.d.js").HyperParametersSearchPredictionJson} */({
-		modelName: modelName,
-	})
-	await Utils.savePredictionMetadataJson(evaluationName, predictionName, metadataJson)
 
-	console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+	console.log(`Prediction OUTPUT by ${CliColor.red(modelName)}`)
 	console.log(`${JSON.stringify(predictionJson, null, '\t')}`)
 }
 
@@ -262,17 +330,16 @@ async function doDatasetEvaluateLangchain(evaluationName, predictionName) {
 
 	await Utils.saveEvaluationJson(evaluationName, predictionName, evaluationJson)
 
-	console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+	console.log(`Evaluate OUTPUT by ${CliColor.red(modelName)}`)
 	console.log(`${JSON.stringify(evaluationJson, null, '\t')}`)
 }
 
 /**
  * 
  * @param {string} evaluationName 
- * @param {string} predictionName
  */
-async function doDatasetReport(evaluationName, predictionName) {
-	await DatasetReport.build(evaluationName, predictionName, {
+async function doDatasetReport(evaluationName) {
+	await DatasetReport.display(evaluationName, {
 		// verbose: true
 	})
 }
@@ -281,22 +348,23 @@ async function doDatasetReport(evaluationName, predictionName) {
 /**
  * 
  * @param {string} evaluationName 
- * @param {string} hyperparametersPath 
+ * @param {string} hpTuningPath 
  */
-async function doHyperparametersOptimisation(evaluationName, hyperparametersPath) {
+async function doDatasetHpTuning(evaluationName, hpTuningPath) {
 
-	const fileContent = await Fs.promises.readFile(hyperparametersPath, 'utf8')
-	const hyperparametersJson = /** @type {import("../src/type.d.js").HyperParametersSearchJson} */(Json5.parse(fileContent))
+	const fileContent = await Fs.promises.readFile(hpTuningPath, 'utf8')
+	const hpTuningJson = /** @type {import("../src/type.d.js").HpTuningJson} */(Json5.parse(fileContent))
 	// debugger
 
-	for (const searchPrediction of hyperparametersJson.predictions) {
-		const itemIndex = hyperparametersJson.predictions.indexOf(searchPrediction)
-		const predictionName = `hp_${itemIndex}`
+	for (const searchPrediction of hpTuningJson.predictions) {
+		const itemIndex = hpTuningJson.predictions.indexOf(searchPrediction)
+		const predictionName = `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
 		const shouldUseDirect = searchPrediction.modelName?.endsWith('.gguf') || searchPrediction.modelName === undefined
 		if (shouldUseDirect) {
-			await doDatasetPredictDirect(evaluationName, predictionName, searchPrediction.modelName)
+			await doDatasetPredictDirect(evaluationName, predictionName, searchPrediction.modelName, searchPrediction.prompt)
 		} else {
-			await doDatasetPredictLangchain(evaluationName, predictionName, searchPrediction.modelName)
+			// debugger
+			await doDatasetPredictLangchain(evaluationName, predictionName, searchPrediction.modelName, searchPrediction.prompt)
 		}
 
 		await doDatasetEvaluateLangchain(evaluationName, predictionName)

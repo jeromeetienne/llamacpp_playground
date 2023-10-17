@@ -18,7 +18,20 @@ void (0);
 
 
 /**
- * @typedef {PredictionItemJson[]} EvaluationJson
+ * @typedef {PredictionItemJson[]} PredictionJson}
+ */
+void (0);
+
+/**
+ * @typedef {object} PredictionMetadataOptionsJson
+ * @property {string=} modelName
+ * @property {string=} prompt
+ */
+void (0);
+/**
+ * @typedef {object} PredictionMetadataJson
+ * @property {PredictionMetadataOptionsJson} defaultPredictOptions
+ * @property {PredictionMetadataOptionsJson} modifiedPredictOptions
  */
 void (0);
 
@@ -46,21 +59,22 @@ void (0);
 
 
 /**
- * @typedef {ReportItemJson[]} ReportArrayJson
+ * @typedef {ReportItemJson[]} ReportJson
  */
 void (0);
 
 /**
- * @typedef {object} HyperParametersSearchPredictionJson
+ * @typedef {object} HpTuningPredictionJson
+ * @property {string=} hpTuningName
  * @property {string=} modelName
  * @property {string=} prompt
  */
 void (0);
 
 /**
- * @typedef {object} HyperParametersSearchJson
- * @property {string} evaluationName
- * @property {HyperParametersSearchPredictionJson[]} predictions
+ * @typedef {object} HpTuningJson
+ * @property {string} hpTuningName
+ * @property {HpTuningPredictionJson[]} predictions
  */
 void (0);
 
