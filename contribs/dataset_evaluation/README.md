@@ -2,14 +2,15 @@
 
 ## Goals
 - [ ] Compare the performance of llamacpp models
+  - thus people can choose the best model for their use case
 - [ ] do it with 2 technologies: natively node-llama-cpp and langchain.js
-  - langchain.js support for llamacpp is not perfect
+  - langchain.js support for llamacpp is not perfect, but it is so rich
 - [ ] What are the limits of langchain.js's support for llamacpp
 
 ## Langchain.js support status
 - langchain's LLamaCpp doesn't support grammar
   - the json grammar is a **KEY** feature of llamacpp, improving quality of structured output
-  - **NOTE** Q. could we improve langchain support
+  - **NOTE** Q. could we improve langchain support ? it got the concept in [DynamicStructuredTool](https://js.langchain.com/docs/modules/agents/agent_types/structured_chat)
 - langchain's LLamaCpp doesn't support chat-model
 
 ## Evaluation Steps

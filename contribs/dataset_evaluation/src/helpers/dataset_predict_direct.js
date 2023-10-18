@@ -53,7 +53,7 @@ export default class DatasetPredictDirect {
 	///////////////////////////////////////////////////////////////////////////////
 
 	static defaultPredictOptions =  /** @type {DatasetPredictDirectOptions} */({
-		modelName: AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M,
+		modelName: AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
 		prompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
 {context}

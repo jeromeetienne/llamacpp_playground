@@ -1,5 +1,11 @@
 - [ ] add npm scripts
 - [ ] add documentation on the steps
+- [ ] support predictionName in .hptuning.json5
 - [ ] support systemPrompt
 - [ ] rename prompt into userPrompt
+- [ ] download zephyr, llama-7b, codellama-7b, codellama-13b
 - [ ] update all the jsdoc, in prediction and hptuning
+- [ ] can i make a seperate git for that ?
+  - how to import the llamacpp_playground ?
+  - it is required for source and to download models
+  - git submodule ?

@@ -13,6 +13,7 @@
     "predict":"node ./bin/dataset_evaluation.js predict myEval myPredict",
     "evaluate":"node ./bin/dataset_evaluation.js evaluate myEval myPredict",
     "report":"node ./bin/dataset_evaluation.js report myEval myPredict",
+    "hptuning":"node ./bin/dataset_evaluation.js hptuning myEval ./data/evaluations/hptunings/superHpTuning.hptuning.json5",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

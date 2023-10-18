@@ -120,7 +120,7 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 			}
 
 			if (shouldUseDirect) {
-				await doDatasetPredictDirect(evaluationName, predictionName, modelName)
+				await doDatasetPredictDirect(evaluationName, predictionName, { modelName })
 			} else {
 				await doDatasetPredictLangchain(evaluationName, predictionName, modelName)
 			}
@@ -198,7 +198,7 @@ async function doDatasetGenerateDirect(evaluationName, modelName = undefined, nQ
 	}
 	modelName = modelName ?? AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K
 
-	const options = /** @type {import("./dataset_evaluation_helpers/dataset_generate_direct.js").DatasetGenerateDirectOptions} */({})
+	const options = /** @type {import("../src/helpers/dataset_generate_direct.js").DatasetGenerateDirectOptions} */({})
 	if (nQuestions !== undefined) options.nQuestions = nQuestions
 	const datasetJson = await DatasetGenerateDirect.generate(evaluationName, modelName, options)
 
@@ -233,10 +233,11 @@ async function doDatasetGenerateLangchain(evaluationName, modelName = undefined,
  * 
  * @param {string} evaluationName 
  * @param {string} predictionName
- * @param {string=} modelName
- * @param {string=} prompt
+ * @param {object} options
+ * @param {string=} options.modelName
+ * @param {string=} options.prompt
  */
-async function doDatasetPredictDirect(evaluationName, predictionName, modelName = undefined, prompt = undefined) {
+async function doDatasetPredictDirect(evaluationName, predictionName, options = {}) {
 	// build a metadata.json file
 	const metadataJson = /** @type {import("../src/type.d.js").PredictionMetadataJson} */({
 		defaultOptions: {
@@ -246,14 +247,15 @@ async function doDatasetPredictDirect(evaluationName, predictionName, modelName 
 		explicitOptions: {
 		}
 	})
-	if (prompt !== undefined) metadataJson.explicitOptions.prompt = prompt
-	if (modelName !== undefined) metadataJson.explicitOptions.modelName = modelName
+	if (options.modelName !== undefined) metadataJson.explicitOptions.modelName = options.modelName
+	if (options.prompt !== undefined) metadataJson.explicitOptions.prompt = options.prompt
 	// save a metadata.json file
 	await Utils.savePredictionMetadataJson(evaluationName, predictionName, metadataJson)
 
 
 	// trick to have modelName be a path up to this point, now we take the basename
 	// - this helps the command line writing thanks bash autocompletion and using ./models/ folder
+	let modelName = options.modelName
 	if (modelName) {
 		modelName = Path.basename(modelName)
 	}
@@ -265,7 +267,7 @@ async function doDatasetPredictDirect(evaluationName, predictionName, modelName 
 	// do the actual prediction
 	const predictionJson = await DatasetPredictDirect.predict(evaluationName, predictionName, {
 		modelName: modelName,
-		prompt: prompt,
+		prompt: options.prompt,
 		// verbose: true
 	})
 
@@ -361,7 +363,10 @@ async function doDatasetHpTuning(evaluationName, hpTuningPath) {
 		const predictionName = hpTuningPrediction.predictionName ?? `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
 		const shouldUseDirect = hpTuningPrediction.modelName?.endsWith('.gguf') || hpTuningPrediction.modelName === undefined
 		if (shouldUseDirect) {
-			await doDatasetPredictDirect(evaluationName, predictionName, hpTuningPrediction.modelName, hpTuningPrediction.prompt)
+			await doDatasetPredictDirect(evaluationName, predictionName, {
+				modelName: hpTuningPrediction.modelName,
+				prompt: hpTuningPrediction.prompt
+			})
 		} else {
 			// debugger
 			await doDatasetPredictLangchain(evaluationName, predictionName, hpTuningPrediction.modelName, hpTuningPrediction.prompt)
