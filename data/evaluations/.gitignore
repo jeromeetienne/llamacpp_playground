@@ -1,5 +1,5 @@
-# ignore all
-*
+# ignore all evaluation_
+evaluation_*/
 
 # except .gitignore
 !.gitignore

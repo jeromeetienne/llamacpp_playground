@@ -30,8 +30,8 @@ void (0);
 void (0);
 /**
  * @typedef {object} PredictionMetadataJson
- * @property {PredictionMetadataOptionsJson} defaultPredictOptions
- * @property {PredictionMetadataOptionsJson} modifiedPredictOptions
+ * @property {PredictionMetadataOptionsJson} defaultOptions
+ * @property {PredictionMetadataOptionsJson} explicitOptions
  */
 void (0);
 
@@ -65,7 +65,7 @@ void (0);
 
 /**
  * @typedef {object} HpTuningPredictionJson
- * @property {string=} hpTuningName
+ * @property {string=} predictionName
  * @property {string=} modelName
  * @property {string=} prompt
  */

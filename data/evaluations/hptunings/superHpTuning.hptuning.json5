@@ -1,0 +1,24 @@
+{
+        "hpTuningName": "superHpTuning",
+        "predictions": [
+                {
+                        predictionName: "defaultOption",
+                },
+                {
+                        "modelName": "gpt-3.5-turbo",
+                        "prompt": "Here is a context between CONTEXT_BEGIN and CONTEXT_END:\
+\
+Based on this context, answer the following question:\
+{question}",
+                },
+                {
+                        "predictionName": "onlyBlas",
+                        "modelName": "codellama-7b-instruct.Q4_K_M.gguf",
+                        "prompt": "Just always answer bla"
+                },
+                {
+                        "predictionName": "mistal7b",
+                        "modelName": "mistral-7b-instruct-v0.1.Q6_K.gguf"
+                },
+        ]
+}

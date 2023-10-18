@@ -156,7 +156,7 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('hp-tuning <evaluationName> <hpTuningPath>')
+	cmdline.command('hptuning <evaluationName> <hpTuningPath>')
 		.description('Do hyperparameters tuning for a given .hptuning.json file')
 		.action(async (evaluationName, hpTuningPath, options) => {
 			await doDatasetHpTuning(evaluationName, hpTuningPath)
@@ -239,15 +239,15 @@ async function doDatasetGenerateLangchain(evaluationName, modelName = undefined,
 async function doDatasetPredictDirect(evaluationName, predictionName, modelName = undefined, prompt = undefined) {
 	// build a metadata.json file
 	const metadataJson = /** @type {import("../src/type.d.js").PredictionMetadataJson} */({
-		defaultPredictOptions: {
+		defaultOptions: {
 			modelName: DatasetPredictDirect.defaultPredictOptions.modelName,
 			prompt: DatasetPredictDirect.defaultPredictOptions.prompt,
 		},
-		modifiedPredictOptions: {
+		explicitOptions: {
 		}
 	})
-	if (prompt !== undefined) metadataJson.modifiedPredictOptions.prompt = prompt
-	if (modelName !== undefined) metadataJson.modifiedPredictOptions.modelName = modelName
+	if (prompt !== undefined) metadataJson.explicitOptions.prompt = prompt
+	if (modelName !== undefined) metadataJson.explicitOptions.modelName = modelName
 	// save a metadata.json file
 	await Utils.savePredictionMetadataJson(evaluationName, predictionName, metadataJson)
 
@@ -287,15 +287,15 @@ async function doDatasetPredictDirect(evaluationName, predictionName, modelName 
 async function doDatasetPredictLangchain(evaluationName, predictionName, modelName = undefined, prompt = undefined) {
 	// build a metadata.json file
 	const metadataJson = /** @type {import("../src/type.d.js").PredictionMetadataJson} */({
-		defaultPredictOptions: {
+		defaultOptions: {
 			modelName: DatasetPredictLangchain.defaultPredictOptions.modelName,
 			prompt: DatasetPredictLangchain.defaultPredictOptions.prompt,
 		},
-		modifiedPredictOptions: {
+		explicitOptions: {
 		}
 	})
-	if (prompt !== undefined) metadataJson.modifiedPredictOptions.prompt = prompt
-	if (modelName !== undefined) metadataJson.modifiedPredictOptions.modelName = modelName
+	if (prompt !== undefined) metadataJson.explicitOptions.prompt = prompt
+	if (modelName !== undefined) metadataJson.explicitOptions.modelName = modelName
 	// save a metadata.json file
 	await Utils.savePredictionMetadataJson(evaluationName, predictionName, metadataJson)
 
@@ -356,15 +356,15 @@ async function doDatasetHpTuning(evaluationName, hpTuningPath) {
 	const hpTuningJson = /** @type {import("../src/type.d.js").HpTuningJson} */(Json5.parse(fileContent))
 	// debugger
 
-	for (const searchPrediction of hpTuningJson.predictions) {
-		const itemIndex = hpTuningJson.predictions.indexOf(searchPrediction)
-		const predictionName = `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
-		const shouldUseDirect = searchPrediction.modelName?.endsWith('.gguf') || searchPrediction.modelName === undefined
+	for (const hpTuningPrediction of hpTuningJson.predictions) {
+		const itemIndex = hpTuningJson.predictions.indexOf(hpTuningPrediction)
+		const predictionName = hpTuningPrediction.predictionName ?? `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
+		const shouldUseDirect = hpTuningPrediction.modelName?.endsWith('.gguf') || hpTuningPrediction.modelName === undefined
 		if (shouldUseDirect) {
-			await doDatasetPredictDirect(evaluationName, predictionName, searchPrediction.modelName, searchPrediction.prompt)
+			await doDatasetPredictDirect(evaluationName, predictionName, hpTuningPrediction.modelName, hpTuningPrediction.prompt)
 		} else {
 			// debugger
-			await doDatasetPredictLangchain(evaluationName, predictionName, searchPrediction.modelName, searchPrediction.prompt)
+			await doDatasetPredictLangchain(evaluationName, predictionName, hpTuningPrediction.modelName, hpTuningPrediction.prompt)
 		}
 
 		await doDatasetEvaluateLangchain(evaluationName, predictionName)
