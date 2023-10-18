@@ -146,14 +146,14 @@ export default class Utils {
 		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
 		const filePath = Path.join(evaluationFolder, 'data.dataset.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
-		const datasetJson = /** @type {import("./type.d").DatasetJson} */(Json5.parse(fileContent))
+		const datasetJson = /** @type {import("./type.d.js").DatasetJson} */(Json5.parse(fileContent))
 		return datasetJson
 	}
 
 	/**
 	 * 
 	 * @param {string} evaluationName 
-	 * @param {import("./type.d").DatasetJson} datasetJson
+	 * @param {import("./type.d.js").DatasetJson} datasetJson
 	 */
 	static async saveDatasetJson(evaluationName, datasetJson) {
 		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
@@ -172,7 +172,7 @@ export default class Utils {
 		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
 		const filePath = Path.join(predictionFolder, 'data.prediction.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
-		const predictionJson = /** @type {import("./type.d").PredictionJson} */(Json5.parse(fileContent))
+		const predictionJson = /** @type {import("./type.d.js").PredictionJson} */(Json5.parse(fileContent))
 		return predictionJson
 	}
 
@@ -180,7 +180,7 @@ export default class Utils {
 	 * 
 	 * @param {string} evaluationName 
 	 * @param {string} predictionName
-	 * @param {import("./type.d").PredictionJson} predictionJson
+	 * @param {import("./type.d.js").PredictionJson} predictionJson
 	 */
 	static async savePredictionJson(evaluationName, predictionName, predictionJson) {
 		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
@@ -199,7 +199,7 @@ export default class Utils {
 		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
 		const filePath = Path.join(predictionFolder, 'data.evaluation.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
-		const predictionJson = /** @type {import("./type.d").EvaluationJson} */(Json5.parse(fileContent))
+		const predictionJson = /** @type {import("./type.d.js").EvaluationJson} */(Json5.parse(fileContent))
 		return predictionJson
 	}
 
@@ -208,7 +208,7 @@ export default class Utils {
 	 * 
 	 * @param {string} evaluationName 
 	 * @param {string} predictionName
-	 * @param {import("./type.d").EvaluationJson} evaluationJson
+	 * @param {import("./type.d.js").EvaluationJson} evaluationJson
 	 */
 	static async saveEvaluationJson(evaluationName, predictionName, evaluationJson) {
 		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
@@ -222,7 +222,7 @@ export default class Utils {
 	 * 
 	 * @param {string} evaluationName 
 	 * @param {string} predictionName
-	 * @param {import("./type.d").PredictionMetadataJson} predictionMetadataJson
+	 * @param {import("./type.d.js").PredictionMetadataJson} predictionMetadataJson
 	 */
 	static async savePredictionMetadataJson(evaluationName, predictionName, predictionMetadataJson) {
 		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)

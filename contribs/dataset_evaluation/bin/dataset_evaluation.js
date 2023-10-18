@@ -10,7 +10,7 @@ import CliColor from "cli-color"
 import Json5 from "json5"
 
 // local imports
-import AvailableModelPaths from "../src/available_model_paths.js"
+import AvailableModelPaths from "../../../src/available_model_paths.js"
 import DatasetGenerateDirect from "./dataset_evaluation_helpers/dataset_generate_direct.js"
 import DatasetGenerateLangchain from "./dataset_evaluation_helpers/dataset_generate_langchain.js"
 import DatasetPredictDirect from "./dataset_evaluation_helpers/dataset_predict_direct.js"

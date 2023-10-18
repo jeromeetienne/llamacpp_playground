@@ -41,12 +41,10 @@ void (0);
  */
 void (0);
 
-
 /**
  * @typedef {EvaluationItemJson[]} EvaluationJson
  */
 void (0);
-
 
 /**
  * @typedef {object} ReportItemJson
@@ -56,7 +54,6 @@ void (0);
  * @property {boolean} predictionValid
  */
 void (0);
-
 
 /**
  * @typedef {ReportItemJson[]} ReportJson

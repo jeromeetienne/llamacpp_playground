@@ -5,6 +5,6 @@
 import { pipeline } from '@xenova/transformers';
 
 let extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-let output = await extractor('This is a simple test.');
+let output = await extractor("Hello world");
 
 console.log({output})

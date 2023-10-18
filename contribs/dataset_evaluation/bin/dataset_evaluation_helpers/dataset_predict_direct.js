@@ -1,21 +1,24 @@
+/**
+ * - from https://js.langchain.com/docs/modules/model_io/models/llms/integrations/llama_cpp
+ */
+
 // node imports
 import Path from "path";
 import Fs from 'fs'
 
 // npm imports
-import Json5 from "json5";
+import { LlamaModel, LlamaContext, LlamaChatSession, LlamaGrammar, LlamaJsonSchemaGrammar, LlamaChatPromptWrapper } from "node-llama-cpp";
 import CliColor from "cli-color";
-
-// langchain imports
-import { PromptTemplate } from "langchain/prompts";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { OpenAI } from "langchain/llms/openai";
-import { LlamaCpp } from "langchain/llms/llama_cpp";
-import { LLMChain } from "langchain/chains";
+import Zod from "zod";
+import { zodToJsonSchema } from "zod-to-json-schema";
+import Json5 from "json5";
 
 // local imports
+import LlamaUtils from "../../../../src/llama-utils.js";
 import Utils from "../../src/utils.js";
-import AvailableModelPaths from "../../src/available_model_paths.js";
+import AvailableModelPaths from "../../../../src/available_model_paths.js";
+import EsmPromptTemplate from "../../src/esm-prompt-template.js";
+import FstringTemplate from "../../src/fstring-template.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -29,8 +32,8 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * @typedef {Object} DatasetPredictLangchainOptions
- * @property {string} modelName e.g. gpt-4-0613 gpt-3.5-turbo
+ * @typedef {Object} DatasetPredictDirectOptions
+ * @property {string} modelName valid model basename for node-llama-cpp e.g. codellama-7b-instruct.Q4_K_M.gguf
  * @property {string} prompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
  * @property {Boolean} verbose
  */
@@ -41,7 +44,7 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-export default class DatasetPredictLangchain {
+export default class DatasetPredictDirect {
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -49,8 +52,8 @@ export default class DatasetPredictLangchain {
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	static defaultPredictOptions =  /** @type {DatasetPredictLangchainOptions} */({
-		modelName: 'gpt-3.5-turbo',
+	static defaultPredictOptions =  /** @type {DatasetPredictDirectOptions} */({
+		modelName: AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M,
 		prompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
 {context}
@@ -70,14 +73,39 @@ Based on this context, answer the following question:
 	/**
 	 * @param {string} evaluationName
 	 * @param {string} predictionName
-	 * @param {Partial<DatasetPredictLangchainOptions>} partialOptions
+	 * @param {Partial<DatasetPredictDirectOptions>} partialOptions
 	 */
 	static async predict(evaluationName, predictionName, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
-		partialOptions = Object.assign({}, DatasetPredictLangchain.defaultPredictOptions, partialOptions)
-		const options = /** @type {DatasetPredictLangchainOptions} */(partialOptions)
+		partialOptions = Object.assign({}, DatasetPredictDirect.defaultPredictOptions, partialOptions)
+		const options = /** @type {DatasetPredictDirectOptions} */(partialOptions)
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	init llamaModel and llamaContext
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const modelPath = Path.join(__dirname, '../../../../models', options.modelName)
+		const { llamaContext, llamaModel } = await LlamaUtils.initModelAndContext(modelPath)
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	build llamaGrammar
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const responseZodSchema = Zod.object({
+			answer: Zod.string(),
+		})
+
+		const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
+		const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
+		const responseSample = { "answer": "<YOUR ANSWER GOES HERE>" }
+		console.assert(responseZodSchema.parse(responseSample) !== undefined, `responseSample should be valid`);
+		const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -85,69 +113,51 @@ Based on this context, answer the following question:
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		const lgModel = new OpenAI({
-			modelName: options.modelName,
-			// modelName: "gpt-3.5-turbo",
-			temperature: 0,
-			verbose: options.verbose,
-		});
-		// const modelName = lgModel.modelName
 
-		// const modelPath = Path.join(__dirname, '../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
-		// const modelName = Path.basename(modelPath)
-		// const lgModel = new LlamaCpp({ modelPath });
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		//	
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-
-		// debugger
-		const promptTemplate = PromptTemplate.fromTemplate(options.prompt);
-
+		// console.log(`reponse json-schema ${JSON.stringify(responseJsonSchema, null, 2)}`)
 
 		const contextText = await Utils.loadContextText()
-		const datasetJson = await Utils.loadDatasetJson(evaluationName)
 
+		// TODO make it tunable
+		const systemPrompt = `Be sure to Format your response in JSON with the following format:
+${JSON.stringify(responseSample)}`;
 
-		// const chain = promptTemplate.pipe(lgModel);
-		const chain = new LLMChain({ llm: lgModel, prompt: promptTemplate });
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
 
+		const promptTemplate = new FstringTemplate(options.prompt);
 
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const datasetArray = await Utils.loadDatasetJson(evaluationName)
 		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
-		for (const datasetItem of datasetJson) {
-			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
-			const result = await chain.call({
+
+		for (const datasetItem of datasetArray) {
+			const question = promptTemplate.generate({
 				context: contextText,
-				question: datasetItem.question,
-			});
-			// debugger
-			// @ts-ignore
-			let outputText = /** @type {string} */(null)
-			if (result.content) {
-				outputText = result.content.trim()
-			} else if (result.text) {
-				outputText = result.text.trim()
-			} else {
-				// @ts-ignore
-				outputText = /** @type {string} */(result)
-				outputText = outputText.trim()
-			}
-
-
-			console.log(`Answer : ${CliColor.cyan(outputText)}`)
-			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({
-				predictedAnswer: outputText
+				question: datasetItem.question
 			})
+
+			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
+			const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
+			console.log(`Answer : ${CliColor.cyan(responseJson.answer)}`)
+			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({ predictedAnswer: responseJson.answer })
 			predictionJson.push(predictionItemJson)
 		}
 
 		if (options.verbose) {
-			console.log(`OUTPUT by ${CliColor.red(options.modelName)}`)
+			console.log(`OUTPUT by ${CliColor.red(Path.basename(modelPath))}`)
 			console.log(`${JSON.stringify(predictionJson, null, '\t')}`)
 		}
 
+		// return predictionJson
 		return predictionJson
 	}
 }
@@ -166,7 +176,7 @@ async function mainAsync() {
 
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'
-	await DatasetPredictLangchain.predict(evaluationName, predictionName, {
+	await DatasetPredictDirect.predict(evaluationName, predictionName, {
 		modelName: modelName,
 		verbose: true
 	})
