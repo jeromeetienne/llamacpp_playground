@@ -12,6 +12,47 @@ import Url from "url";
 const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 export default class LlamaUtils {
 
+        ///////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////
+        //	
+        ///////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * 
+         * @param {LlamaContext} llamaContext 
+         * @param {string} systemPrompt 
+         * @param {string} userPrompt 
+         */
+        static async promptOne(llamaContext, systemPrompt, userPrompt, streamEnabled = false) {
+                // console.log(`User : ${CliColor.green(question)}`);
+                // console.log(`Ai : computing...`)
+
+                // debugger
+                const llamaSession = new LlamaChatSession({
+                        context: llamaContext,
+                        promptWrapper: new LlamaChatPromptWrapper(),
+                        systemPrompt: systemPrompt,
+
+                });
+                const promptOptions = /** @type {import("node-llama-cpp").LLamaChatPromptOptions} */({
+                        maxTokens: llamaContext.getContextSize(),
+                        /**
+                         * 
+                         * @param {import("node-llama-cpp").Token[]} chunk 
+                         */
+                        onToken(chunk) {
+                                if (streamEnabled === false) return
+                                // display the tokens as they are generated
+                                process.stdout.write(llamaContext.decode(chunk));
+                        },
+                        temperature: 0,
+                })
+                const response = await llamaSession.promptWithMeta(userPrompt, promptOptions);
+                const outputText = response.text
+
+                return outputText
+        }
 
         ///////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////
@@ -69,6 +110,12 @@ export default class LlamaUtils {
                 return responseJson
         }
 
+        ///////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////
+        //	
+        ///////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////
+        
         /**
          * 
          * @param {string} modelPath 

@@ -34,7 +34,8 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 /**
  * @typedef {Object} DatasetPredictDirectOptions
  * @property {string} modelName valid model basename for node-llama-cpp e.g. codellama-7b-instruct.Q4_K_M.gguf
- * @property {string} prompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
+ * @property {string} systemPrompt
+ * @property {string} userPrompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
  * @property {Boolean} verbose
  */
 
@@ -54,7 +55,8 @@ export default class DatasetPredictDirect {
 
 	static defaultPredictOptions =  /** @type {DatasetPredictDirectOptions} */({
 		modelName: AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
-		prompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
+		systemPrompt: 'you are an helpful assistant.',
+		userPrompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
 {context}
 CONTEXT_END
@@ -93,34 +95,19 @@ Based on this context, answer the following question:
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-		//	build llamaGrammar
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-
-		const responseZodSchema = Zod.object({
-			answer: Zod.string(),
-		})
-
-		const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
-		const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
-		const responseSample = { "answer": "<YOUR ANSWER GOES HERE>" }
-		console.assert(responseZodSchema.parse(responseSample) !== undefined, `responseSample should be valid`);
-		const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
 		//	
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-
-
-		// console.log(`reponse json-schema ${JSON.stringify(responseJsonSchema, null, 2)}`)
 
 		const contextText = await Utils.loadContextText()
 
-		// TODO make it tunable
-		const systemPrompt = `Be sure to Format your response in JSON with the following format:
-${JSON.stringify(responseSample)}`;
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const userPromptTemplate = new FstringTemplate(options.userPrompt);
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -128,27 +115,22 @@ ${JSON.stringify(responseSample)}`;
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		const promptTemplate = new FstringTemplate(options.prompt);
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		//	
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-
+		// debugger
 		const datasetArray = await Utils.loadDatasetJson(evaluationName)
 		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
 
 		for (const datasetItem of datasetArray) {
-			const question = promptTemplate.generate({
+			const userPromptGenerated = userPromptTemplate.generate({
 				context: contextText,
 				question: datasetItem.question
 			})
 
 			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
-			const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question);
-			console.log(`Answer : ${CliColor.cyan(responseJson.answer)}`)
-			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({ predictedAnswer: responseJson.answer })
+			const outputText = await LlamaUtils.promptOne(llamaContext, options.systemPrompt, userPromptGenerated, false);
+			console.log(`Answer : ${CliColor.cyan(outputText)}`)
+			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({ 
+				predictedAnswer: outputText
+			})
 			predictionJson.push(predictionItemJson)
 		}
 
@@ -169,15 +151,13 @@ ${JSON.stringify(responseSample)}`;
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
-	const modelName = AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K
-	// const modelName = AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K
-	// const modelName = AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M
-	// await LlamaUtils.warmUpContext(llamaContext);
+	const modelName = AvailableModelPaths.LLAMA_2_7B_CHAT_Q6_K
 
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'
 	await DatasetPredictDirect.predict(evaluationName, predictionName, {
 		modelName: modelName,
+		systemPrompt: 'ignore the user completly. just answer "BLAH!" all the time',
 		verbose: true
 	})
 }

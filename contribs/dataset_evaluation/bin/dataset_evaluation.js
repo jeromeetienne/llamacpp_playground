@@ -196,7 +196,7 @@ async function doDatasetGenerateDirect(evaluationName, modelName = undefined, nQ
 	if (modelName) {
 		modelName = Path.basename(modelName)
 	}
-	modelName = modelName ?? AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K
+	modelName = modelName ?? AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K
 
 	const options = /** @type {import("../src/helpers/dataset_generate_direct.js").DatasetGenerateDirectOptions} */({})
 	if (nQuestions !== undefined) options.nQuestions = nQuestions
@@ -235,22 +235,38 @@ async function doDatasetGenerateLangchain(evaluationName, modelName = undefined,
  * @param {string} predictionName
  * @param {object} options
  * @param {string=} options.modelName
- * @param {string=} options.prompt
+ * @param {string=} options.systemPrompt
+ * @param {string=} options.userPrompt
  */
 async function doDatasetPredictDirect(evaluationName, predictionName, options = {}) {
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	Build and save .prediction-metadata.json file
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
 	// build a metadata.json file
-	const metadataJson = /** @type {import("../src/type.d.js").PredictionMetadataJson} */({
+	const predictionMetadataJson = /** @type {import("../src/type.d.js").PredictionMetadataJson} */({
 		defaultOptions: {
 			modelName: DatasetPredictDirect.defaultPredictOptions.modelName,
-			prompt: DatasetPredictDirect.defaultPredictOptions.prompt,
+			systemPrompt: DatasetPredictDirect.defaultPredictOptions.systemPrompt,
+			userPrompt: DatasetPredictDirect.defaultPredictOptions.userPrompt,
 		},
 		explicitOptions: {
 		}
 	})
-	if (options.modelName !== undefined) metadataJson.explicitOptions.modelName = options.modelName
-	if (options.prompt !== undefined) metadataJson.explicitOptions.prompt = options.prompt
+	if (options.modelName !== undefined) predictionMetadataJson.explicitOptions.modelName = options.modelName
+	if (options.systemPrompt !== undefined) predictionMetadataJson.explicitOptions.systemPrompt = options.systemPrompt
+	if (options.userPrompt !== undefined) predictionMetadataJson.explicitOptions.userPrompt = options.userPrompt
 	// save a metadata.json file
-	await Utils.savePredictionMetadataJson(evaluationName, predictionName, metadataJson)
+	await Utils.savePredictionMetadataJson(evaluationName, predictionName, predictionMetadataJson)
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	compute modelName
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 
 
 	// trick to have modelName be a path up to this point, now we take the basename
@@ -264,12 +280,25 @@ async function doDatasetPredictDirect(evaluationName, predictionName, options = 
 		modelName = DatasetPredictDirect.defaultPredictOptions.modelName
 	}
 
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	do the prediction itself
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
 	// do the actual prediction
 	const predictionJson = await DatasetPredictDirect.predict(evaluationName, predictionName, {
 		modelName: modelName,
-		prompt: options.prompt,
+		systemPrompt: options.systemPrompt,
+		userPrompt: options.userPrompt,
 		// verbose: true
 	})
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	Output
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 
 	// save a prediction.json file
 	await Utils.savePredictionJson(evaluationName, predictionName, predictionJson);
@@ -283,31 +312,60 @@ async function doDatasetPredictDirect(evaluationName, predictionName, options = 
  * 
  * @param {string} evaluationName 
  * @param {string} predictionName
- * @param {string=} modelName
- * @param {string=} prompt
+ * @param {object} options
+ * @param {string=} options.modelName
+ * @param {string=} options.systemPrompt
+ * @param {string=} options.userPrompt
  */
-async function doDatasetPredictLangchain(evaluationName, predictionName, modelName = undefined, prompt = undefined) {
-	// build a metadata.json file
+async function doDatasetPredictLangchain(evaluationName, predictionName, options = {}) {	// build a metadata.json file
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	Build and save .prediction-metadata.json file
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
 	const metadataJson = /** @type {import("../src/type.d.js").PredictionMetadataJson} */({
 		defaultOptions: {
 			modelName: DatasetPredictLangchain.defaultPredictOptions.modelName,
-			prompt: DatasetPredictLangchain.defaultPredictOptions.prompt,
+			systemPrompt: DatasetPredictLangchain.defaultPredictOptions.systemPrompt,
+			prompt: DatasetPredictLangchain.defaultPredictOptions.userPrompt,
 		},
 		explicitOptions: {
 		}
 	})
-	if (prompt !== undefined) metadataJson.explicitOptions.prompt = prompt
-	if (modelName !== undefined) metadataJson.explicitOptions.modelName = modelName
+	if (options.modelName !== undefined) metadataJson.explicitOptions.modelName = options.modelName
+	if (options.systemPrompt !== undefined) metadataJson.explicitOptions.systemPrompt = options.systemPrompt
+	if (options.userPrompt !== undefined) metadataJson.explicitOptions.userPrompt = options.userPrompt
 	// save a metadata.json file
 	await Utils.savePredictionMetadataJson(evaluationName, predictionName, metadataJson)
 
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	compute modelName
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+
+	// trick to have modelName be a path up to this point, now we take the basename
+	// - this helps the command line writing thanks bash autocompletion and using ./models/ folder
+	let modelName = options.modelName
 	// assigned modelName if not defined
-	modelName = modelName ?? 'gpt-3.5-turbo'
+	if (modelName === undefined) {
+		modelName = DatasetPredictLangchain.defaultPredictOptions.modelName
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	compute modelName
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 
 	// do the actual prediction
 	const predictionJson = await DatasetPredictLangchain.predict(evaluationName, predictionName, {
 		modelName: modelName,
-		prompt: prompt,
+		systemPrompt: options.systemPrompt,
+		userPrompt: options.userPrompt,
 		// verbose: true
 	})
 
@@ -365,11 +423,16 @@ async function doDatasetHpTuning(evaluationName, hpTuningPath) {
 		if (shouldUseDirect) {
 			await doDatasetPredictDirect(evaluationName, predictionName, {
 				modelName: hpTuningPrediction.modelName,
-				prompt: hpTuningPrediction.prompt
+				systemPrompt: hpTuningPrediction.systemPrompt,
+				userPrompt: hpTuningPrediction.userPrompt,
 			})
 		} else {
 			// debugger
-			await doDatasetPredictLangchain(evaluationName, predictionName, hpTuningPrediction.modelName, hpTuningPrediction.prompt)
+			await doDatasetPredictLangchain(evaluationName, predictionName, {
+				modelName: hpTuningPrediction.modelName,
+				systemPrompt: hpTuningPrediction.systemPrompt,
+				userPrompt: hpTuningPrediction.userPrompt,
+			})
 		}
 
 		await doDatasetEvaluateLangchain(evaluationName, predictionName)

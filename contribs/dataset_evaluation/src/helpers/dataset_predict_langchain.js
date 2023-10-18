@@ -31,7 +31,8 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 /**
  * @typedef {Object} DatasetPredictLangchainOptions
  * @property {string} modelName e.g. gpt-4-0613 gpt-3.5-turbo
- * @property {string} prompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
+ * @property {string} systemPrompt 
+ * @property {string} userPrompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
  * @property {Boolean} verbose
  */
 
@@ -51,7 +52,8 @@ export default class DatasetPredictLangchain {
 
 	static defaultPredictOptions =  /** @type {DatasetPredictLangchainOptions} */({
 		modelName: 'gpt-3.5-turbo',
-		prompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
+		systemPrompt: 'you are an helpful assistant.',
+		userPrompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
 {context}
 CONTEXT_END
@@ -91,7 +93,6 @@ Based on this context, answer the following question:
 			temperature: 0,
 			verbose: options.verbose,
 		});
-		// const modelName = lgModel.modelName
 
 		// const modelPath = Path.join(__dirname, '../../../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 		// const modelName = Path.basename(modelPath)
@@ -103,8 +104,13 @@ Based on this context, answer the following question:
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
+		const fullPrompt = `Instructions:
+${options.systemPrompt}
+
+User:
+${options.userPrompt}`
 		// debugger
-		const promptTemplate = PromptTemplate.fromTemplate(options.prompt);
+		const promptTemplate = PromptTemplate.fromTemplate(fullPrompt);
 
 
 		const contextText = await Utils.loadContextText()
@@ -112,7 +118,10 @@ Based on this context, answer the following question:
 
 
 		// const chain = promptTemplate.pipe(lgModel);
-		const chain = new LLMChain({ llm: lgModel, prompt: promptTemplate });
+		const chain = new LLMChain({ 
+			llm: lgModel, 
+			prompt: promptTemplate 
+		});
 
 
 		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
@@ -158,15 +167,12 @@ Based on this context, answer the following question:
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
-	const modelName = AvailableModelPaths.LLAMA_2_7B_CHAT_Q2_K
-	// const modelName = AvailableModelPaths.ZEPHYR_7B_ALPHA_Q6_K
-	// const modelName = AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M
-	// await LlamaUtils.warmUpContext(llamaContext);
+	// const modelName = AvailableModelPaths.LLAMA_2_7B_CHAT_Q6_K
 
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'
 	await DatasetPredictLangchain.predict(evaluationName, predictionName, {
-		modelName: modelName,
+		// modelName: modelName,
 		verbose: true
 	})
 }

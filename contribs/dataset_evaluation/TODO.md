@@ -1,11 +1,15 @@
-- [ ] add npm scripts
-- [ ] add documentation on the steps
-- [ ] support predictionName in .hptuning.json5
-- [ ] support systemPrompt
-- [ ] rename prompt into userPrompt
-- [ ] download zephyr, llama-7b, codellama-7b, codellama-13b
-- [ ] update all the jsdoc, in prediction and hptuning
-- [ ] can i make a seperate git for that ?
-  - how to import the llamacpp_playground ?
+- [x] add npm scripts
+- [x] add documentation on the steps
+- [x] support predictionName in .hptuning.json5
+- [ ] support systemPrompt in _direct and in _langchain
+  - **BUG** showhow it doesnt seems to react well
+- [x] rename prompt into userPrompt
+- [ ] download zephyr, codellama-7b, codellama-13b
+  - DONE llama-7b
+- [x] DONE update all the jsdoc, in prediction and hptuning
+- [ ] how to import the llamacpp_playground ?
+  - can i make a seperate git for that ?
   - it is required for source and to download models
   - git submodule ?
+- [ ] perform one prompt optimisation for a given model
+- [ ] perform one pick the best model for a prompt
