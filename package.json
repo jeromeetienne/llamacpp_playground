@@ -9,7 +9,7 @@
     "run:langchain": "node ./examples/basic-chat-langchain.js",
     "run:direct": "node ./examples/basoc-chat-direct.js",
     "run:benchmark": "node ./examples/benchmark-direct.js  2>/dev/null",
-    "generate:modelpaths": "node ./bin/generate_model_paths.js > ./src/available_model_paths.js",
+    "generate:modelpaths": "node ./bin/generate_model_paths.js > ./src/model_path_constants.js",
     "download:llama-2-7b-chat": "cd models && npx ipull https://huggingface.co/TheBloke/Llama-2-7b-Chat-GGUF/resolve/main/llama-2-7b-chat.Q6_K.gguf",
     "download:mistral-7b-instruct": "cd models && npx ipull https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF/resolve/main/mistral-7b-instruct-v0.1.Q6_K.gguf",
     "download:zephyr-7b-alpha": "cd models && npx ipull https://huggingface.co/TheBloke/zephyr-7B-alpha-GGUF/resolve/main/zephyr-7b-alpha.Q6_K.gguf",

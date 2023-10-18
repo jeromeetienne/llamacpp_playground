@@ -11,15 +11,15 @@ import CliColor from "cli-color";
 
 // local imports
 import LlamaUtils from "../src/llama-utils.js";
-import AvailableModelPaths from "../src/available_model_paths.js";
+import ModelPathContants from "../src/model_path_constants.js";
 
 // get __dirname in esm module
 import Url from "url";
 const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 
-// const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
-const modelPath = Path.join(__dirname, '../models', AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M)
+// const modelPath = Path.join(__dirname, '../models', ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+const modelPath = Path.join(__dirname, '../models', ModelPathContants.CODELLAMA_13B_INSTRUCT_Q3_K_M)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

@@ -16,7 +16,7 @@ import Json5 from "json5";
 // local imports
 import LlamaUtils from "../../../../src/llama-utils.js";
 import Utils from "../../src/utils.js";
-import AvailableModelPaths from "../../../../src/available_model_paths.js";
+import ModelPathContants from "../../../../src/model_path_constants.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -155,7 +155,7 @@ export default class DatasetGenerateDirect {
 
 async function mainAsync() {
 	const evaluationName = 'myeval'
-	const modelName = AvailableModelPaths.CODELLAMA_13B_INSTRUCT_Q3_K_M
+	const modelName = ModelPathContants.CODELLAMA_13B_INSTRUCT_Q3_K_M
 	await DatasetGenerateDirect.generate(evaluationName, modelName, {
 		nQuestions: 3,
 		verbose: true,

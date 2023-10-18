@@ -1,16 +1,21 @@
-- [x] add npm scripts
-- [x] add documentation on the steps
-- [x] support predictionName in .hptuning.json5
 - [ ] support systemPrompt in _direct and in _langchain
   - **BUG** showhow it doesnt seems to react well
-- [x] rename prompt into userPrompt
 - [ ] download zephyr, codellama-7b, codellama-13b
   - DONE llama-7b
   - DONE codellama-13b
-- [x] DONE update all the jsdoc, in prediction and hptuning
-- [ ] how to import the llamacpp_playground ?
-  - can i make a seperate git for that ?
+- [ ] put dataset_evaluation in its own git, 
+  - how to import the llamacpp_playground ? can i make a seperate git for that ?
   - it is required for source and to download models
-  - git submodule ?
+  - git submodule ? no crazy... well documented ?
+    - not crazy because it is done only once on a not that important directory
+    - doc here https://gist.github.com/gitaarik/8735255
 - [ ] perform one prompt optimisation for a given model
 - [ ] perform one pick the best model for a prompt
+
+## Done
+- [x] in available_models, sort by model size
+- [x] DONE update all the jsdoc, in prediction and hptuning
+- [x] add npm scripts
+- [x] add documentation on the steps
+- [x] support predictionName in .hptuning.json5
+- [x] rename prompt into userPrompt

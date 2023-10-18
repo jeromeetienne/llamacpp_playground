@@ -13,6 +13,25 @@
   - **NOTE** Q. could we improve langchain support ? it got the concept in [DynamicStructuredTool](https://js.langchain.com/docs/modules/agents/agent_types/structured_chat)
 - langchain's LLamaCpp doesn't support chat-model
 
+## How to get started
+
+Install the dependencies
+```
+npm install
+```
+
+**TODO** explain how to download the models for node-llama-cpp
+
+Generate the dataset
+```
+npm run generate
+```
+
+Perform a hyperparameters tuning on this dataset
+```
+npm run hptuning
+```
+
 ## Evaluation Steps
 
 When doing a evaluation, multiples steps are needed

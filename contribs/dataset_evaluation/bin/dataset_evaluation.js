@@ -10,7 +10,7 @@ import CliColor from "cli-color"
 import Json5 from "json5"
 
 // local imports
-import AvailableModelPaths from "../../../src/available_model_paths.js"
+import ModelPathContants from "../../../src/model_path_constants.js"
 import DatasetGenerateDirect from "../src/helpers/dataset_generate_direct.js"
 import DatasetGenerateLangchain from "../src/helpers/dataset_generate_langchain.js"
 import DatasetPredictDirect from "../src/helpers/dataset_predict_direct.js"
@@ -196,7 +196,7 @@ async function doDatasetGenerateDirect(evaluationName, modelName = undefined, nQ
 	if (modelName) {
 		modelName = Path.basename(modelName)
 	}
-	modelName = modelName ?? AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K
+	modelName = modelName ?? ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K
 
 	const options = /** @type {import("../src/helpers/dataset_generate_direct.js").DatasetGenerateDirectOptions} */({})
 	if (nQuestions !== undefined) options.nQuestions = nQuestions

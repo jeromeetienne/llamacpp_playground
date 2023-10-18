@@ -15,7 +15,7 @@ import { LLMChain } from "langchain/chains";
 
 // local imports
 import Utils from "../../src/utils.js";
-import AvailableModelPaths from "../../../../src/available_model_paths.js";
+import ModelPathContants from "../../../../src/model_path_constants.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -94,7 +94,7 @@ Based on this context, answer the following question:
 			verbose: options.verbose,
 		});
 
-		// const modelPath = Path.join(__dirname, '../../../../models', AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
+		// const modelPath = Path.join(__dirname, '../../../../models', ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 		// const modelName = Path.basename(modelPath)
 		// const lgModel = new LlamaCpp({ modelPath });
 
@@ -167,7 +167,7 @@ ${options.userPrompt}`
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
-	// const modelName = AvailableModelPaths.LLAMA_2_7B_CHAT_Q6_K
+	// const modelName = ModelPathContants.LLAMA_2_7B_CHAT_Q6_K
 
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'

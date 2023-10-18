@@ -16,7 +16,7 @@ import Json5 from "json5";
 // local imports
 import LlamaUtils from "../../../../src/llama-utils.js";
 import Utils from "../../src/utils.js";
-import AvailableModelPaths from "../../../../src/available_model_paths.js";
+import ModelPathContants from "../../../../src/model_path_constants.js";
 import EsmPromptTemplate from "../../src/esm-prompt-template.js";
 import FstringTemplate from "../../src/fstring-template.js";
 
@@ -54,7 +54,7 @@ export default class DatasetPredictDirect {
 	///////////////////////////////////////////////////////////////////////////////
 
 	static defaultPredictOptions =  /** @type {DatasetPredictDirectOptions} */({
-		modelName: AvailableModelPaths.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
+		modelName: ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
 		systemPrompt: 'you are an helpful assistant.',
 		userPrompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
 CONTEXT_BEGIN
@@ -151,7 +151,7 @@ Based on this context, answer the following question:
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
-	const modelName = AvailableModelPaths.LLAMA_2_7B_CHAT_Q6_K
+	const modelName = ModelPathContants.LLAMA_2_7B_CHAT_Q6_K
 
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'
