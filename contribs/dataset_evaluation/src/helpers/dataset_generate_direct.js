@@ -62,7 +62,7 @@ export default class DatasetGenerateDirect {
 		//	
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-
+debugger
 		const modelPath = Path.join(__dirname, '../../../../models', modelName)
 		const { llamaContext } = await LlamaUtils.initModelAndContext(modelPath)
 	

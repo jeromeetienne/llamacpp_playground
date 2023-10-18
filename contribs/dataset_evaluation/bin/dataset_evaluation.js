@@ -11,12 +11,12 @@ import Json5 from "json5"
 
 // local imports
 import AvailableModelPaths from "../../../src/available_model_paths.js"
-import DatasetGenerateDirect from "./dataset_evaluation_helpers/dataset_generate_direct.js"
-import DatasetGenerateLangchain from "./dataset_evaluation_helpers/dataset_generate_langchain.js"
-import DatasetPredictDirect from "./dataset_evaluation_helpers/dataset_predict_direct.js"
-import DatasetPredictLangchain from "./dataset_evaluation_helpers/dataset_predict_langchain.js"
-import DatasetEvaluateLangchain from "./dataset_evaluation_helpers/dataset_evaluate_langchain.js"
-import DatasetReport from "./dataset_evaluation_helpers/dataset_report.js"
+import DatasetGenerateDirect from "../src/helpers/dataset_generate_direct.js"
+import DatasetGenerateLangchain from "../src/helpers/dataset_generate_langchain.js"
+import DatasetPredictDirect from "../src/helpers/dataset_predict_direct.js"
+import DatasetPredictLangchain from "../src/helpers/dataset_predict_langchain.js"
+import DatasetEvaluateLangchain from "../src/helpers/dataset_evaluate_langchain.js"
+import DatasetReport from "../src/helpers/dataset_report.js"
 import Utils from "../src/utils.js"
 
 ///////////////////////////////////////////////////////////////////////////////

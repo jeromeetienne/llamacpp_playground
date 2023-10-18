@@ -8,6 +8,11 @@
     "dataset_evaluation": "bin/dataset_evaluation.js"
   },
   "scripts": {
+    "evaluation": "node ./bin/dataset_evaluation.js",
+    "generate":"node ./bin/dataset_evaluation.js generate myEval",
+    "predict":"node ./bin/dataset_evaluation.js predict myEval myPredict",
+    "evaluate":"node ./bin/dataset_evaluation.js evaluate myEval myPredict",
+    "report":"node ./bin/dataset_evaluation.js report myEval myPredict",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

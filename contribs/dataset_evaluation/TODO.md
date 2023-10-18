@@ -1,0 +1,5 @@
+- [ ] add npm scripts
+- [ ] add documentation on the steps
+- [ ] support systemPrompt
+- [ ] rename prompt into userPrompt
+- [ ] update all the jsdoc, in prediction and hptuning
