@@ -31,7 +31,7 @@ export default class LlamaUtils {
                 // debugger
                 const llamaSession = new LlamaChatSession({
                         context: llamaContext,
-                        promptWrapper: new LlamaChatPromptWrapper(),
+                        // promptWrapper: new LlamaChatPromptWrapper(),
                         systemPrompt: systemPrompt,
 
                 });

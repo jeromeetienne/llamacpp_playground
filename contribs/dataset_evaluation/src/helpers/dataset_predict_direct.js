@@ -126,7 +126,9 @@ Based on this context, answer the following question:
 			})
 
 			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
-			const outputText = await LlamaUtils.promptOne(llamaContext, options.systemPrompt, userPromptGenerated, false);
+			// debugger
+			const streamEnabled = true
+			const outputText = await LlamaUtils.promptOne(llamaContext, options.systemPrompt, userPromptGenerated, streamEnabled);
 			console.log(`Answer : ${CliColor.cyan(outputText)}`)
 			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({ 
 				predictedAnswer: outputText
@@ -151,13 +153,14 @@ Based on this context, answer the following question:
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
-	const modelName = ModelPathContants.LLAMA_2_7B_CHAT_Q6_K
+	const modelName = ModelPathContants.ZEPHYR_7B_ALPHA_Q6_K
+	
 
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'
 	await DatasetPredictDirect.predict(evaluationName, predictionName, {
 		modelName: modelName,
-		systemPrompt: 'ignore the user completly. just answer "BLAH!" all the time',
+		// systemPrompt: 'ignore the user completly. just answer "BLAH!" and stop.',
 		verbose: true
 	})
 }

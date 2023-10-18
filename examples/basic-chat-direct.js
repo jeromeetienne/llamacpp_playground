@@ -22,6 +22,8 @@ const llamaSession = new LlamaChatSession({ context: llamaContext });
 
 console.log('modelPath', Path.basename(modelPath));
 
+// Start the conversation
+
 const question1 = "Hi there, how are you?";
 console.log("User: " + question1);
 

@@ -3,10 +3,12 @@
         "predictions": [
                 // {
                 //         predictionName: "defaultOption",
+                //         "modelName": "gpt-3.5-turbo",
                 // },
-//                 {
-//                         "modelName": "gpt-4",
-//                 },
+                {
+                        "modelName": "gpt-4",
+                        systemPrompt: "just answer BLAH all the time"
+                },
 //                 {
 //                         "modelName": "gpt-3.5-turbo",
 //                         "userPrompt": "Here is a context between CONTEXT_BEGIN and CONTEXT_END:\
@@ -17,7 +19,7 @@
                 {
                         "predictionName": "onlyBlas",
                         "modelName": "mistral-7b-instruct-v0.1.Q6_K.gguf",
-                        "systemPrompt": "Just always answer bla"
+                        "systemPrompt": "Just always answer BLAHgguf"
                 },
                 // {
                 //         "predictionName": "mistal7b",

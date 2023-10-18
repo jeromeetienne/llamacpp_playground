@@ -1,8 +1,8 @@
 - [ ] support systemPrompt in _direct and in _langchain
   - **BUG** showhow it doesnt seems to react well
-- [ ] download zephyr, codellama-7b, codellama-13b
-  - DONE llama-7b
-  - DONE codellama-13b
+  - is that a bug, or me being crazy or a bug in the model ?
+- [ ] currenlty the context is hardcoded in the framework
+  - fix that
 - [ ] put dataset_evaluation in its own git, 
   - how to import the llamacpp_playground ? can i make a seperate git for that ?
   - it is required for source and to download models
@@ -13,6 +13,8 @@
 - [ ] perform one pick the best model for a prompt
 
 ## Done
+- [x] download zephyr, llama-13b
+  - DONE codellama-7b, llama-7b, codellama-7b, codellama-13b
 - [x] in available_models, sort by model size
 - [x] DONE update all the jsdoc, in prediction and hptuning
 - [x] add npm scripts

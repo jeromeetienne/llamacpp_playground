@@ -12,6 +12,7 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { OpenAI } from "langchain/llms/openai";
 import { LlamaCpp } from "langchain/llms/llama_cpp";
 import { LLMChain } from "langchain/chains";
+import { HumanMessage, SystemMessage } from "langchain/schema";
 
 // local imports
 import Utils from "../../src/utils.js";
@@ -87,16 +88,15 @@ Based on this context, answer the following question:
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		const lgModel = new OpenAI({
+		const lgModel = new ChatOpenAI({
 			modelName: options.modelName,
-			// modelName: "gpt-3.5-turbo",
 			temperature: 0,
 			verbose: options.verbose,
 		});
-
 		// const modelPath = Path.join(__dirname, '../../../../models', ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K)
 		// const modelName = Path.basename(modelPath)
 		// const lgModel = new LlamaCpp({ modelPath });
+
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -104,33 +104,39 @@ Based on this context, answer the following question:
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		const fullPrompt = `Instructions:
-${options.systemPrompt}
-
-User:
-${options.userPrompt}`
-		// debugger
-		const promptTemplate = PromptTemplate.fromTemplate(fullPrompt);
+		const promptTemplate = PromptTemplate.fromTemplate(options.userPrompt);
 
 
 		const contextText = await Utils.loadContextText()
 		const datasetJson = await Utils.loadDatasetJson(evaluationName)
 
 
+
 		// const chain = promptTemplate.pipe(lgModel);
-		const chain = new LLMChain({ 
-			llm: lgModel, 
-			prompt: promptTemplate 
+		const chain = new LLMChain({
+			llm: lgModel,
+			prompt: promptTemplate
 		});
 
 
 		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
 		for (const datasetItem of datasetJson) {
+
+			// debugger
 			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
-			const result = await chain.call({
+
+			// build final userPrompt
+			const promptTemplate = PromptTemplate.fromTemplate(options.userPrompt);
+			const finalUserPrompt = await promptTemplate.format({
 				context: contextText,
 				question: datasetItem.question,
-			});
+			})
+
+			// call the model
+			const result = await lgModel.call([
+				new SystemMessage(options.systemPrompt),
+				new HumanMessage(finalUserPrompt)
+			])
 
 			// @ts-ignore
 			let outputText = /** @type {string} */(null)
@@ -172,6 +178,7 @@ async function mainAsync() {
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'
 	await DatasetPredictLangchain.predict(evaluationName, predictionName, {
+		// systemPrompt: 'just answer BLAH all the time.',
 		// modelName: modelName,
 		verbose: true
 	})
