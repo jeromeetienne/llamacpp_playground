@@ -39,15 +39,11 @@ node ./bin/dataset-evaluation.js predict myEval myPredict
 - ```-l``` or ```--langchain``` to use langchain.js
 - ```-d``` or ```--direct``` to use node-llama-cpp
 
-TODO
-- specify the model, systemPrompt, userPrompt
-
 ### 3. evaluate this prediction
 
 ```sh
 node ./bin/dataset-evaluation.js evaluate myEval myPredict
 ```
-
 
 ### 4. display a report comparing all predictions
 
@@ -58,6 +54,12 @@ node ./bin/dataset-evaluation.js report myEval
 ## How to do hyper parameter tuning
 
 All the evaluation steps can be a drag to do manually. So we can use the hyper parameter tuning feature to do it for us.
+It will perform a grid search on the hyper parameters and do the evaluation for us.
+
+One can tune the 
+- modelName : the model to use (it can be a langchain.js model or a node-llama-cpp model)
+- systemPrompt : the instruction to the model
+- userPrompt : the question to the model
 
 ```sh
 node ./bin/dataset-evaluation.js hptuning myEval ./data/evaluations/hptunings/superHpTuning.hptuning.json5

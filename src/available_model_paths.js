@@ -2,8 +2,7 @@
 
 export default class AvailableModelPaths {
 	static CODELLAMA_13B_INSTRUCT_Q3_K_M = 'codellama-13b-instruct.Q3_K_M.gguf'
+	static CODELLAMA_7B_INSTRUCT_Q4_K_M = 'codellama-7b-instruct.Q4_K_M.gguf'
 	static LLAMA_2_7B_CHAT_Q6_K = 'llama-2-7b-chat.Q6_K.gguf'
 	static MISTRAL_7B_INSTRUCT_V0_1_Q6_K = 'mistral-7b-instruct-v0.1.Q6_K.gguf'
-
 }
-

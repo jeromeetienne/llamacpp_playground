@@ -6,6 +6,7 @@
 - [x] rename prompt into userPrompt
 - [ ] download zephyr, codellama-7b, codellama-13b
   - DONE llama-7b
+  - DONE codellama-13b
 - [x] DONE update all the jsdoc, in prediction and hptuning
 - [ ] how to import the llamacpp_playground ?
   - can i make a seperate git for that ?
