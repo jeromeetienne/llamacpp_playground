@@ -1,19 +1,19 @@
 {
-  "name": "dataset_evaluation",
+  "name": "llama_cpp_evaluation",
   "version": "1.0.0",
   "description": "## Goals - [ ] Compare the performance of llamacpp models - [ ] do it with 2 technologies: natively node-llama-cpp and langchain.js   - langchain.js support for llamacpp is not perfect - [ ] What are the limits of langchain.js's support for llamacpp",
   "main": "index.js",
   "type": "module",
   "bin": {
-    "dataset_evaluation": "bin/dataset_evaluation.js"
+    "llama_cpp_evaluation": "bin/llama_cpp_evaluation.js"
   },
   "scripts": {
-    "evaluation": "node ./bin/dataset_evaluation.js",
-    "generate":"node ./bin/dataset_evaluation.js generate myEval",
-    "predict":"node ./bin/dataset_evaluation.js predict myEval myPredict",
-    "evaluate":"node ./bin/dataset_evaluation.js evaluate myEval myPredict",
-    "report":"node ./bin/dataset_evaluation.js report myEval",
-    "hptuning":"node ./bin/dataset_evaluation.js hptuning myEval ./data/evaluations/hptunings/superHpTuning.hptuning.json5",
+    "evaluation": "node ./bin/llama_cpp_evaluation.js",
+    "generate":"node ./bin/llama_cpp_evaluation.js generate myEval",
+    "predict":"node ./bin/llama_cpp_evaluation.js predict myEval myPredict",
+    "evaluate":"node ./bin/llama_cpp_evaluation.js evaluate myEval myPredict",
+    "report":"node ./bin/llama_cpp_evaluation.js report myEval",
+    "hptuning":"node ./bin/llama_cpp_evaluation.js hptuning myEval ./data/evaluations/hptunings/superHpTuning.hptuning.json5",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

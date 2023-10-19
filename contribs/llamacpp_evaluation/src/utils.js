@@ -34,11 +34,16 @@ export default class Utils {
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
+	static getEvaluationsFolder() {
+		const evaluationFolder = Path.join(__dirname, `../data/evaluations/`)
+		return evaluationFolder
+	}
 	/**
 	 * 
 	 * @param {string} evaluationName 
 	 */
 	static getEvaluationFolder(evaluationName) {
+		const evaluationsFolder = Utils.getEvaluationsFolder()
 		const evaluationFolder = Path.join(__dirname, `../data/evaluations/evaluation_${evaluationName}`)
 		return evaluationFolder
 	}
@@ -53,6 +58,7 @@ export default class Utils {
 		const predictionFolder = Path.join(evaluationFolder, `./predictions/prediction_${predictionName}`)
 		return predictionFolder
 	}
+
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	//	
@@ -230,5 +236,45 @@ export default class Utils {
 		const filePath = Path.join(predictionFolder, 'data.prediction-metadata.json')
 		const fileContent = JSON.stringify(predictionMetadataJson, null, '\t')
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
+	}
+
+	/**
+	 * 
+	 * @param {string} hpTuningName 
+	 */
+	static async loadHpTuningJson(hpTuningName) {
+		const evaluationsFolder = Utils.getEvaluationsFolder()
+		const filePath = Path.join(evaluationsFolder, `./hptunings/${hpTuningName}.hptuning.json5`)
+		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
+		const hpTuningJson = /** @type {import("./type.d.js").HpTuningJson} */(Json5.parse(fileContent))
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	sanity check
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		
+		// - check the models names are valid
+		//   - whitelist of valid models for openai
+		//   - if .gguf basename, check the file exists in ./models/
+		// - else check is "gpt*"
+		for(let tuningPredictionJson of hpTuningJson.predictions){
+			if( tuningPredictionJson.modelName === undefined ) continue
+			// if it is openai models
+			const isOpenaiModel = tuningPredictionJson.modelName.startsWith('gpt')
+			if( isOpenaiModel ) continue
+
+			const isLlamaCppModel = tuningPredictionJson.modelName.endsWith('.gguf')
+			if( isLlamaCppModel ){
+				const filePath = Path.join(__dirname, `../../../models/${tuningPredictionJson.modelName}`)
+				const fileExists = await FsExtra.pathExists(filePath)
+				if( fileExists === true ) continue
+			}
+
+			throw new Error(`invalid model name "${tuningPredictionJson.modelName}"`)
+		}
+
+
+		return hpTuningJson
 	}
 }

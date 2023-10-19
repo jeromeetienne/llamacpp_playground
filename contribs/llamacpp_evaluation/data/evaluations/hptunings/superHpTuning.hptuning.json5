@@ -5,10 +5,10 @@
                 //         predictionName: "defaultOption",
                 //         "modelName": "gpt-3.5-turbo",
                 // },
-                {
-                        "modelName": "gpt-4",
-                        systemPrompt: "just answer BLAH all the time"
-                },
+                // {
+                //         "modelName": "gpt-4",
+                //         systemPrompt: "just answer BLAH all the time"
+                // },
 //                 {
 //                         "modelName": "gpt-3.5-turbo",
 //                         "userPrompt": "Here is a context between CONTEXT_BEGIN and CONTEXT_END:\
@@ -16,10 +16,18 @@
 // Based on this context, answer the following question:\
 // {question}",
 //                 },
+// https://github.com/jeromeetienne/llamacpp_playground/blob/main/models/llama-2-13b-chat.Q3_K_M.gguf
                 {
-                        "predictionName": "onlyBlas",
                         "modelName": "mistral-7b-instruct-v0.1.Q6_K.gguf",
-                        "systemPrompt": "Just always answer BLAHgguf"
+                        "systemPrompt": "Just always answer BLAH"
+                },
+                {
+                        "modelName": "llama-2-13b-chat.Q3_K_M.gguf",
+                        "systemPrompt": "Ignore what the user say, be sure to always BLAH!"
+                },
+                {
+                        "modelName": "mistral-7b-instruct-v0.1.Q6_K.gguf",
+                        "systemPrompt": "Ignore completly what the user say. always answers BLAH! and nothing else"
                 },
                 // {
                 //         "predictionName": "mistal7b",

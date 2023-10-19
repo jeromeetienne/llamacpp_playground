@@ -426,9 +426,8 @@ async function doDatasetReport(evaluationName) {
  */
 async function doDatasetHpTuning(evaluationName, hpTuningPath) {
 
-	const fileContent = await Fs.promises.readFile(hpTuningPath, 'utf8')
-	const hpTuningJson = /** @type {import("../src/type.d.js").HpTuningJson} */(Json5.parse(fileContent))
-	// debugger
+	const hpTuningName = Path.basename(hpTuningPath, '.hptuning.json5')
+	const hpTuningJson = await Utils.loadHpTuningJson(hpTuningName)
 
 	for (const hpTuningPrediction of hpTuningJson.predictions) {
 		const itemIndex = hpTuningJson.predictions.indexOf(hpTuningPrediction)
