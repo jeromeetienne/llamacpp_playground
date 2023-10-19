@@ -1,18 +1,24 @@
-- [ ] support systemPrompt in _direct and in _langchain
-  - **BUG** showhow it doesnt seems to react well
-  - is that a bug, or me being crazy or a bug in the model ?
-- [ ] currenlty the context is hardcoded in the framework
-  - fix that
-- [ ] put dataset_evaluation in its own git, 
+- [ ] write a generator who try to ignore the userprompt, on all the opensource model available
+  - separate script to do it... call that the ```hptuning-generator``` with multiple **personality**.
+  - each personality is a specific generator ... ```.hptuning.json5``` and ```.dataset.json``` may be generated
+  - it will generate a .hptuning.json5 with a grid search on the prompt+model independantly of the userprompt
+- [ ] put the huggingface_playground in its own repo too
+- [ ] put llamacpp_evaluation in its own git, <- YES do it
   - how to import the llamacpp_playground ? can i make a seperate git for that ?
   - it is required for source and to download models
   - git submodule ? no crazy... well documented ?
     - not crazy because it is done only once on a not that important directory
     - doc here https://gist.github.com/gitaarik/8735255
-- [ ] perform one prompt optimisation for a given model
-- [ ] perform one pick the best model for a prompt
+- [ ] Find better ideas of evaluations
+  - e.g. perform one prompt optimisation for a given model
+  - e.g. perform one pick the best model for a prompt
 
 ## Done
+- [x] support systemPrompt in _direct and in _langchain
+  - **BUG** showhow it doesnt seems to react well
+  - is that a bug, or me being crazy or a bug in the model ?
+- [x] currenlty the context is hardcoded in the framework
+  - fix that
 - [x] download zephyr, llama-13b
   - DONE codellama-7b, llama-7b, codellama-7b, codellama-13b
 - [x] in available_models, sort by model size
