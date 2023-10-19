@@ -343,7 +343,7 @@ async function doDatasetPredictLangchain(evaluationName, predictionName, options
 		defaultOptions: {
 			modelName: DatasetPredictLangchain.defaultPredictOptions.modelName,
 			systemPrompt: DatasetPredictLangchain.defaultPredictOptions.systemPrompt,
-			prompt: DatasetPredictLangchain.defaultPredictOptions.userPrompt,
+			userPrompt: DatasetPredictLangchain.defaultPredictOptions.userPrompt,
 		},
 		explicitOptions: {
 		}

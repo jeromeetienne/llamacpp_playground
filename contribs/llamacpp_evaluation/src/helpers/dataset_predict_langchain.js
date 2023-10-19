@@ -15,7 +15,7 @@ import { LLMChain } from "langchain/chains";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 
 // local imports
-import Utils from "../../src/utils.js";
+import Utils from "../utils.js";
 import ModelPathContants from "../../../../src/model_path_constants.js";
 
 // get __dirname in esm module
@@ -119,7 +119,7 @@ Based on this context, answer the following question:
 		});
 
 
-		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
+		const predictionJson = /** @type {import("../type.d.js").PredictionJson} */([])
 		for (const datasetItem of datasetJson) {
 
 			// debugger
@@ -151,7 +151,7 @@ Based on this context, answer the following question:
 			}
 
 			console.log(`Answer : ${CliColor.cyan(outputText)}`)
-			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({
+			const predictionItemJson = /** @type {import("../type.d.js").PredictionItemJson} */({
 				predictedAnswer: outputText
 			})
 			predictionJson.push(predictionItemJson)
