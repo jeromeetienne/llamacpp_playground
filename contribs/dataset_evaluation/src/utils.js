@@ -121,8 +121,8 @@ export default class Utils {
 			const evaluationItem = evaluationJson[itemIndex]
 
 			const reportItemJson = /** @type {import("./type.d.js").ReportItemJson} */({
-				question: datasetItem.question,
-				trueAnswer: datasetItem.trueAnswer,
+				question: datasetItem.userInput,
+				expectedResponse: datasetItem.expectedResponse,
 				predictedAnswer: predictionItem.predictedAnswer,
 				predictionValid: evaluationItem.predictionValid,
 			})

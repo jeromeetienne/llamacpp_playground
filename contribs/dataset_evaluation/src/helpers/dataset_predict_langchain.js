@@ -33,7 +33,7 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
  * @typedef {Object} DatasetPredictLangchainOptions
  * @property {string} modelName e.g. gpt-4-0613 gpt-3.5-turbo
  * @property {string} systemPrompt 
- * @property {string} userPrompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
+ * @property {string} userPrompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {userInput}"
  * @property {Boolean} verbose
  */
 
@@ -60,7 +60,7 @@ CONTEXT_BEGIN
 CONTEXT_END
 
 Based on this context, answer the following question:
-{question}`,
+{userInput}`,
 		verbose: false,
 	})
 
@@ -107,7 +107,7 @@ Based on this context, answer the following question:
 		const promptTemplate = PromptTemplate.fromTemplate(options.userPrompt);
 
 
-		const contextText = await Utils.loadContextText()
+		const context = await Utils.loadContextText()
 		const datasetJson = await Utils.loadDatasetJson(evaluationName)
 
 
@@ -123,13 +123,13 @@ Based on this context, answer the following question:
 		for (const datasetItem of datasetJson) {
 
 			// debugger
-			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
+			console.log(`Question : ${CliColor.green(datasetItem.userInput)}`);
 
 			// build final userPrompt
 			const promptTemplate = PromptTemplate.fromTemplate(options.userPrompt);
 			const finalUserPrompt = await promptTemplate.format({
-				context: contextText,
-				question: datasetItem.question,
+				context: context,
+				userInput: datasetItem.userInput,
 			})
 
 			// call the model

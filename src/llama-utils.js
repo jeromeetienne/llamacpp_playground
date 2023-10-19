@@ -65,9 +65,9 @@ export default class LlamaUtils {
          * @param {LlamaContext} llamaContext 
          * @param {LlamaGrammar} llamaGrammar 
          * @param {string} systemPrompt 
-         * @param {string} question 
+         * @param {string} userPrompt 
          */
-        static async promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question, streamEnabled = false) {
+        static async promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, userPrompt, streamEnabled = false) {
                 // console.log(`User : ${CliColor.green(question)}`);
                 // console.log(`Ai : computing...`)
 
@@ -91,7 +91,7 @@ export default class LlamaUtils {
                         },
                         temperature: 0,
                 })
-                const response = await llamaSession.promptWithMeta(question, promptOptions);
+                const response = await llamaSession.promptWithMeta(userPrompt, promptOptions);
                 // console.log(`Ai : ${CliColor.cyan(response.text)}`)
 
                 // console.log(`End computing...`)

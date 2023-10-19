@@ -74,7 +74,7 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 		.description('generate the dataset')
 		.option('-l, --langchain', 'use langchain technology instead of direct')
 		.option('-d, --direct', 'use direct technology instead of langchain')
-		.option('-n, --nquestions <number>', 'number of questions to generate', parseFloat)
+		.option('-n, --nQuestions <number>', 'number of questions to generate', parseFloat)
 		.action(async (evaluationName, modelName, options) => {
 			// debugger
 			// compute shouldUseDirect
@@ -90,9 +90,15 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 			}
 
 			if (shouldUseDirect) {
-				await doDatasetGenerateDirect(evaluationName, modelName, options.nquestions)
+				await doDatasetGenerateDirect(evaluationName, {
+					modelName: modelName, 
+					nQuestions: options.nQuestions
+				})
 			} else {
-				await doDatasetGenerateLangchain(evaluationName, modelName, options.nquestions)
+				await doDatasetGenerateLangchain(evaluationName, {
+					modelName: modelName, 
+					nQuestions: options.nQuestions
+				})
 			}
 		});
 
@@ -189,22 +195,28 @@ void mainAsync()
 /**
  * 
  * @param {string} evaluationName 
- * @param {string=} modelName
- * @param {number=} nQuestions
+ * @param {object} options
+ * @param {string=} options.modelName
+ * @param {number=} options.nQuestions
  */
-async function doDatasetGenerateDirect(evaluationName, modelName = undefined, nQuestions = undefined) {
-	if (modelName) {
-		modelName = Path.basename(modelName)
-	}
-	modelName = modelName ?? ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K
+async function doDatasetGenerateDirect(evaluationName, options = {}) {
 
-	const options = /** @type {import("../src/helpers/dataset_generate_direct.js").DatasetGenerateDirectOptions} */({})
-	if (nQuestions !== undefined) options.nQuestions = nQuestions
-	const datasetJson = await DatasetGenerateDirect.generate(evaluationName, modelName, options)
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	do the generate itself
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	// debugger
+	const datasetJson = await DatasetGenerateDirect.generate(evaluationName, {
+		modelName: options.modelName,
+		nQuestions: options.nQuestions,
+		verbose: true
+	})
 
 	// save a prediction.json file
 	await Utils.saveDatasetJson(evaluationName, datasetJson);
 
+	const modelName = options.modelName ?? DatasetGenerateDirect.defaultGenerateOptions.modelName
 	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
 	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
 }
@@ -212,19 +224,21 @@ async function doDatasetGenerateDirect(evaluationName, modelName = undefined, nQ
 /**
  * 
  * @param {string} evaluationName 
- * @param {string=} modelName
- * @param {number=} nQuestions
+ * @param {object}	options
+ * @param {string=} options.modelName
+ * @param {number=} options.nQuestions
  */
-async function doDatasetGenerateLangchain(evaluationName, modelName = undefined, nQuestions = undefined) {
-	modelName = modelName ?? 'gpt-3.5-turbo'
-	const datasetJson = await DatasetGenerateLangchain.generate(evaluationName, modelName, {
-		// verbose: true,
-		nQuestions: nQuestions,
+async function doDatasetGenerateLangchain(evaluationName, options = {}) {
+	const datasetJson = await DatasetGenerateLangchain.generate(evaluationName, {
+		modelName : options.modelName,
+		nQuestions: options.nQuestions,
+		verbose: true,
 	})
 
 	// save a prediction.json file
 	await Utils.saveDatasetJson(evaluationName, datasetJson);
 
+	const modelName = options.modelName ?? DatasetGenerateLangchain.defaultGenerateOptions.modelName
 	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
 	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
 }

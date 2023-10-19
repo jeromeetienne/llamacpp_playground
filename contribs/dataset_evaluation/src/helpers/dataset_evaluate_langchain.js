@@ -83,12 +83,13 @@ export default class DatasetEvaluateLangchain {
 			const input = `${contextText}
 
 Based on this context, answer the following question:
-${datasetItem.question}`
+${datasetItem.userInput}`
 
+			// debugger
 			const evaluatorArgs = /** @type {import("langchain/dist/evaluation/base.js").StringEvaluatorArgs} */({
 				input: input,
 				prediction: predictionItem.predictedAnswer,
-				reference: datasetItem.trueAnswer
+				reference: datasetItem.expectedResponse
 			})
 			console.log({ evaluatorArgs })
 

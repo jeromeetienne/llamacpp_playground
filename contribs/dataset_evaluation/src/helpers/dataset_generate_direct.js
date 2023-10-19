@@ -30,6 +30,7 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 /**
  * @typedef {Object} DatasetGenerateDirectOptions
+ * @property {string} modelName
  * @property {number} nQuestions
  * @property {Boolean} verbose
  */
@@ -42,19 +43,27 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 export default class DatasetGenerateDirect {
 
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	static defaultGenerateOptions =  /** @type {DatasetGenerateDirectOptions} */({
+		modelName: ModelPathContants.CODELLAMA_13B_INSTRUCT_Q3_K_M,
+		nQuestions: 1,
+		verbose: false,
+	})
 	/**
 	 * 
 	 * @param {string} evaluationName
-	 * @param {string} modelName 
 	 * @param {Partial<DatasetGenerateDirectOptions>} partialOptions
 	 */
-	static async generate(evaluationName, modelName, partialOptions = {}) {
+	static async generate(evaluationName, partialOptions = {}) {
 
 		// handle default options
-		partialOptions = Object.assign({}, /** @type {DatasetGenerateDirectOptions} */({
-			nQuestions: 1,
-			verbose: false,
-		}), partialOptions)
+		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
+		partialOptions = Object.assign({}, DatasetGenerateDirect.defaultGenerateOptions, partialOptions)
 		const options = /** @type {DatasetGenerateDirectOptions} */(partialOptions)
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -63,9 +72,9 @@ export default class DatasetGenerateDirect {
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		const modelPath = Path.join(__dirname, '../../../../models', modelName)
+		const modelPath = Path.join(__dirname, '../../../../models', options.modelName)
 		const { llamaContext } = await LlamaUtils.initModelAndContext(modelPath)
-	
+
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 		//	build llama grammar
@@ -75,21 +84,19 @@ export default class DatasetGenerateDirect {
 		/**
 		 * @typedef {object} ResponseItemJson
 		 * @property {string} question
-		 * @property {string} trueAnswer
+		 * @property {string} answer
 		 */
 		/**
-		 * @typedef {object} ResponseJson
-		 * @property {ResponseItemJson[]} items
+		 * @typedef {ResponseItemJson[]} ResponseJson
 		 */
 
 		const responseZodSchema = Zod.array(Zod.object({
 			question: Zod.string(),
-			trueAnswer: Zod.string(),
+			answer: Zod.string(),
 		}))
-
 		const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
 		const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
-		const responseSample = [{ "question": "What is your name?", "trueAnswer": "My name is John." }, { "question": "What do you like?", "trueAnswer": "I like blue." }]
+		const responseSample = [{ "question": "What is your name?", "answer": "My name is John." }, { "question": "What do you like?", "answer": "I like blue." }]
 		console.assert(responseZodSchema.parse(responseSample) !== undefined, `responseSample should be valid`);
 		const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
 		// const llamaGrammar = await LlamaGrammar.getFor("json");
@@ -107,22 +114,22 @@ export default class DatasetGenerateDirect {
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-		//	build systemPrompt and question
+		//	build systemPrompt and userPrompt
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
 		const systemPrompt = `Be sure to format your response in JSON with the following format:
-	${JSON.stringify(responseSample)}`;
+${JSON.stringify(responseSample)}`;
 
-		const question = `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
-	CONTEXT_BEGIN
-	${contextText}
-	CONTEXT_END
-	
-	Please generate ${options.nQuestions} question/answer tuples about this context
-	- make your questions are short and clear
-	- make your answers short and factual
-	- make sure the question can be fully answered only by reading the context`;
+		const userPrompt = `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
+CONTEXT_BEGIN
+${contextText}
+CONTEXT_END
+
+Please generate ${options.nQuestions} question/answer tuples about this context
+- make your questions are short and clear
+- make your answers short and factual
+- make sure the question can be fully answered only by reading the context`;
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -132,11 +139,21 @@ export default class DatasetGenerateDirect {
 
 		if (options.verbose) {
 			console.log(`System Prompt : ${CliColor.green(systemPrompt)}`);
-			console.log(`Question : ${CliColor.green(question)}`);
+			console.log(`User Prompt : ${CliColor.green(userPrompt)}`);
 		}
 
-		const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, question, true);
-		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */(responseJson)
+		const responseJson = /** @type {ResponseJson} */(await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, userPrompt, true))
+
+		// build datasetJson
+		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */([])
+		for (const responseItem of responseJson) {
+			const datasetItemJson = /** @type {import("../../src/type.d.js").DatasetItemJson} */({
+				userInput: responseItem.question,
+				expectedResponse: responseItem.answer,
+				context: contextText,
+			})
+			datasetJson.push(datasetItemJson)
+		}
 
 		if (options.verbose) {
 			console.log(`Response : ${CliColor.cyan(JSON.stringify(responseJson, null, '\t'))}`)
@@ -155,9 +172,9 @@ export default class DatasetGenerateDirect {
 
 async function mainAsync() {
 	const evaluationName = 'myeval'
-	const modelName = ModelPathContants.CODELLAMA_13B_INSTRUCT_Q3_K_M
-	await DatasetGenerateDirect.generate(evaluationName, modelName, {
-		nQuestions: 3,
+	await DatasetGenerateDirect.generate(evaluationName, {
+		// modelName: ModelPathContants.LLAMA_2_7B_CHAT_Q6_K,
+		nQuestions: 1,
 		verbose: true,
 	})
 }

@@ -16,7 +16,23 @@ npm install
 
 To download a model from huggingface
 ```
-npm run download:model
+npm run download:mistral-7b-instruct
+```
+
+it will be downloaded in [./models/ folder](./models/).
+
+
+### Some Predefined Models For Convenience
+Check the [./packages.json](./package.json) scripts and look at ```downdload:*``` or ```validate:*```.
+
+To download a specific model
+```sh
+npm run download:mistral-7b-instruct
+```
+
+To check the download was successful
+```sh
+npm run validate:mistral-7b-instruct
 ```
 
 ## Useful Links

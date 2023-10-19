@@ -6,8 +6,9 @@
 
 /**
  * @typedef {object} DatasetItemJson
- * @property {string} question
- * @property {string} trueAnswer
+ * @property {string} userInput 
+ * @property {string} expectedResponse
+ * @property {string} context context related to the question, for retrieval-augmented-generations
  */
 void (0);
 
@@ -80,7 +81,7 @@ void (0);
 /**
  * @typedef {object} ReportItemJson
  * @property {string} question
- * @property {string} trueAnswer
+ * @property {string} expectedResponse
  * @property {string} predictedAnswer
  * @property {boolean} predictionValid
  */

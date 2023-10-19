@@ -35,7 +35,7 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
  * @typedef {Object} DatasetPredictDirectOptions
  * @property {string} modelName valid model basename for node-llama-cpp e.g. codellama-7b-instruct.Q4_K_M.gguf
  * @property {string} systemPrompt
- * @property {string} userPrompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {question}"
+ * @property {string} userPrompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {userInput}"
  * @property {Boolean} verbose
  */
 
@@ -62,7 +62,7 @@ CONTEXT_BEGIN
 CONTEXT_END
 
 Based on this context, answer the following question:
-{question}`,
+{userInput}`,
 		verbose: false,
 	})
 
@@ -116,16 +116,16 @@ Based on this context, answer the following question:
 		///////////////////////////////////////////////////////////////////////////////
 
 		// debugger
-		const datasetArray = await Utils.loadDatasetJson(evaluationName)
+		const datasetJson = await Utils.loadDatasetJson(evaluationName)
 		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
 
-		for (const datasetItem of datasetArray) {
+		for (const datasetItem of datasetJson) {
 			const userPromptGenerated = userPromptTemplate.generate({
 				context: contextText,
-				question: datasetItem.question
+				userInput: datasetItem.userInput
 			})
 
-			console.log(`Question : ${CliColor.green(datasetItem.question)}`);
+			console.log(`Question : ${CliColor.green(datasetItem.userInput)}`);
 			// debugger
 			const streamEnabled = true
 			const outputText = await LlamaUtils.promptOne(llamaContext, options.systemPrompt, userPromptGenerated, streamEnabled);

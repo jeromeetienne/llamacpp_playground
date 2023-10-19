@@ -39,6 +39,7 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 /**
  * @typedef {Object} DatasetGenerateLangchainOptions
+ * @property {string} modelName
  * @property {number} nQuestions
  * @property {Boolean} verbose
  */
@@ -55,18 +56,34 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
  */
 export default class DatasetGenerateDirect {
 
+		///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	static defaultGenerateOptions =  /** @type {DatasetGenerateLangchainOptions} */({
+		modelName: 'gpt-3.5-turbo',
+		nQuestions: 1,
+		verbose: false,
+	})
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	
 	/**
 	 * @param {string} evaluationName
-	 * @param {string} modelName
 	 * @param {Partial<DatasetGenerateLangchainOptions>} partialOptions
 	 */
-	static async generate(evaluationName, modelName, partialOptions = {}) {
+	static async generate(evaluationName, partialOptions = {}) {
+
 
 		// handle default options
-		partialOptions = Object.assign({}, /** @type {DatasetGenerateLangchainOptions} */({
-			nQuestions: 1,
-			verbose: false,
-		}), partialOptions)
+		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
+		partialOptions = Object.assign({}, DatasetGenerateDirect.defaultGenerateOptions, partialOptions)
 		const options = /** @type {DatasetGenerateLangchainOptions} */(partialOptions)
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +94,7 @@ export default class DatasetGenerateDirect {
 
 		const lgModel = new OpenAI({
 			// modelName: "gpt-3.5-turbo",
-			modelName: modelName,
+			modelName: options.modelName,
 			// modelName: 'gpt-4',
 			temperature: 0,
 			// verbose: true,
@@ -96,9 +113,18 @@ export default class DatasetGenerateDirect {
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * @typedef {object} ResponseItemJson
+		 * @property {string} question
+		 * @property {string} answer
+		 */
+		/**
+		 * @typedef {ResponseItemJson[]} ResponseJson
+		 */
+
 		const responseZodSchema = Zod.array(Zod.object({
 			question: Zod.string(),
-			trueAnswer: Zod.string(),
+			answer: Zod.string(),
 		}))
 		const outputParser = StructuredOutputParser.fromZodSchema(responseZodSchema);
 		// const outputFixingModel = new LlamaCpp({ 
@@ -169,13 +195,24 @@ Please generate {nQuestions} question/answer tuples about this context
 		}
 
 		if (options.verbose) {
-			console.log(`OUTPUT by ${CliColor.red(modelName)}`)
+			console.log(`OUTPUT by ${CliColor.red(options.modelName)}`)
 			console.log(outputText)
 			console.log()
 		}
 
-		const responseJson = Json5.parse(outputText)
-		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */(responseJson)
+		const responseJson = /** @type {ResponseJson} */(Json5.parse(outputText))
+
+		// build datasetJson
+		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */([])
+		for (const responseItem of responseJson) {
+			const datasetItemJson = /** @type {import("../../src/type.d.js").DatasetItemJson} */({
+				userInput: responseItem.question,
+				expectedResponse: responseItem.answer,
+				context: contextText,
+			})
+			datasetJson.push(datasetItemJson)
+		}
+
 
 		// return datasetJson
 		return datasetJson
@@ -191,7 +228,8 @@ Please generate {nQuestions} question/answer tuples about this context
 async function mainAsync() {
 	const evaluationName = 'myeval'
 	const modelName = 'gpt-3.5-turbo'
-	await DatasetGenerateDirect.generate(evaluationName, modelName, {
+	await DatasetGenerateDirect.generate(evaluationName, {
+		modelName: modelName,
 		verbose: true
 	})
 }

@@ -21,3 +21,38 @@
 - [x] add documentation on the steps
 - [x] support predictionName in .hptuning.json5
 - [x] rename prompt into userPrompt
+
+
+---
+# REFACTOR
+- some abstractions are missing...
+- hptuning got list of tuples: models, template for userPrompt and systemPrompt
+  - each of them is an prediction
+  - this should remains out of the context
+
+- dataset question generation is very specific the bot personality - so command line action ```generate-question``` ?
+  - it is that who will determine the context specific to the questions
+  - should i add the context in ```.dataset.json``` ?
+
+- an prediction needs systemPrompt, userPrompt, modelName
+- rename that ```.prediction-plan.json``` ?
+
+
+## Roadmap
+- [ ] make ```DatasetPredictDirect``` and ```DatasetPredictLangChain``` to receive a parse ```DatasetJson```
+  - this ```DatasetJson``` contains the **FINAL** ```systemPromt``` and ```userPrompt``` (no variables)
+
+---
+
+
+- dataset contains a list of systemPrompt and userPrompt
+- both are generated from a 'prompt template'
+  - 'prompt template' === f-string template and a list of values
+  - without predefined keys ? several questions for a predictions ? and the context depends on the questions
+  - unclear...
+  - ```userInput``` from the suer
+  - ```context```
+  - ```responseFormatInstructions```
+- hptuning is a list of models and a list of prompt template
+  - then a grid search is performed
+
