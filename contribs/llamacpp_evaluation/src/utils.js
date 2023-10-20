@@ -24,18 +24,25 @@ export default class Utils {
 			hpTuningName: gridSearchJson.hpTuningName,
 			predictions: [],
 		})
-		for (const systemPrompt of gridSearchJson.systemPrompts) {
-			for (const modelName of gridSearchJson.modelNames) {
-				for (const userPrompt of gridSearchJson.userPrompts) {
-					const hpTuningItemJson = /** @type {import("../src/type.d.js").HpTuningPredictionJson} */({
-						modelName: modelName,
-						systemPrompt: systemPrompt,
-						userPrompt: userPrompt,
-					})
+		
+		// Trick to add 'undefined' to the array if the array is empty
+		// - this allow to have a simple algo in the loop below
+		const modelNames = gridSearchJson.modelNames.length === 0 ? [undefined] : gridSearchJson.modelNames
+		const systemPrompts = gridSearchJson.systemPrompts.length === 0 ? [undefined] : gridSearchJson.systemPrompts
+		const userPrompts = gridSearchJson.userPrompts.length === 0 ? [undefined] : gridSearchJson.userPrompts
+		for (const modelName of modelNames) {
+			for (const systemPrompt of systemPrompts) {
+				for (const userPrompt of userPrompts) {
+					const hpTuningItemJson = /** @type {import("../src/type.d.js").HpTuningPredictionJson} */({})
+					if (modelName !== undefined) hpTuningItemJson.modelName = modelName
+					if (systemPrompt !== undefined) hpTuningItemJson.systemPrompt = systemPrompt
+					if (userPrompt !== undefined) hpTuningItemJson.userPrompt = userPrompt
 					hpTuningJson.predictions.push(hpTuningItemJson)
 				}
 			}
 		}
+
+		// return the generated hpTuningJson
 		return hpTuningJson
 	}
 

@@ -10,7 +10,7 @@
     "validate:evaluation": "ajv validate -s ../data/json_schemas/evaluation.schema.json -d '../data/evaluations/evaluation_*/predictions/prediction_*/*.evaluation.json'",
     "validate:hptuning": "ajv validate -s ../data/json_schemas/hptuning.schema.json -d '../data/evaluations/hptunings/*.hptuning.json'",
     "validate:gridsearch": "ajv validate -s ../data/json_schemas/gridsearch.schema.json -d '../data/evaluations/hptunings/*.gridsearch.json'",
-    "test": "npm run validate:dataset && npm run validate:prediction-metadata && npm run validate:prediction && npm run validate:evaluation && npm run validate:hptuning && npm run validate:gridsearch"
+    "test": "npm run validate:dataset && npm run validate:prediction-metadata && npm run validate:prediction && npm run validate:evaluation && npm run validate:hptuning && npm run validate:gridsearch && echo All json schema are VALIDATED!"
   },
   "keywords": [],
   "author": "",

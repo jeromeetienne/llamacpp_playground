@@ -7,7 +7,6 @@ import Fs from "fs"
 // npm imports
 import * as Commander from "commander"
 import CliColor from "cli-color"
-import Json5 from "json5"
 
 // local imports
 import ModelPathContants from "../../../src/model_path_constants.js"
@@ -80,16 +79,15 @@ async function mainAsync() {
 			await generateDatasetStateUnionQa()
 		});
 	cmdline.command('gridsearch_multiLanguage')
-		.description('generate the hptuning.json5+.gridsearch.json for multiLanguage')
+		.description('generate the hptuning.json+.gridsearch.json for multiLanguage')
 		.action(async (personalityName, options) => {
 			await generateGridSearchMultiLanguage()
 		});
 	cmdline.command('gridsearch_onlyBlah')
-		.description('generate the hptuning.json5+.gridsearch.json for onlyBlah')
+		.description('generate the hptuning.json+.gridsearch.json for onlyBlah')
 		.action(async (personalityName, options) => {
 			await generateGridSearchOnlyBlah()
 		});
-
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -154,7 +152,7 @@ async function generateGridSearchMultiLanguage() {
 	
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	//	generate grid-search and save .hptuning.json5 file
+	//	generate grid-search and save .hptuning.json file
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
@@ -174,7 +172,7 @@ async function generateGridSearchOnlyBlah() {
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
 		hpTuningName: `gridsearch_onlyBlah`,
 		modelNames: [
-			...ConstantModelNamesOpenAI,
+			// ...ConstantModelNamesOpenAI,
 			...ConstantModelNames7B,
 			// ...modelNames13B,
 		],
@@ -191,10 +189,10 @@ async function generateGridSearchOnlyBlah() {
 	
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	//	generate grid-search and save .hptuning.json5 file
+	//	generate grid-search and save .hptuning.json file
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-
+	// debugger
 	const hpTuningJson = await Utils.generateHpTuningFromGridSearch(gridSearchJson)
 	await Utils.saveHpTuningJson(gridSearchJson.hpTuningName, hpTuningJson)
 
