@@ -24,7 +24,7 @@ export default class Utils {
 			hpTuningName: gridSearchJson.hpTuningName,
 			predictions: [],
 		})
-		
+
 		// Trick to add 'undefined' to the array if the array is empty
 		// - this allow to have a simple algo in the loop below
 		const modelNames = gridSearchJson.modelNames.length === 0 ? [undefined] : gridSearchJson.modelNames
@@ -113,9 +113,8 @@ export default class Utils {
 	///////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * 
+	 *  get the list of evaluation names in ./data/evaluations/
 	 * @param {string} evaluationName 
-	 * @returns 
 	 */
 	static async getPredictionNames(evaluationName) {
 		const predictionsFolder = Path.join(Utils.getEvaluationFolder(evaluationName), `./predictions/`)
@@ -220,6 +219,17 @@ export default class Utils {
 	 * 
 	 * @param {string} datasetName 
 	 */
+	static async hasDatasetJsonNew(datasetName) {
+		const datasetsFolder = Utils.getDatasetsFolder()
+		const filePath = Path.join(datasetsFolder, `${datasetName}.dataset.json`)
+		const fileExists = await FsExtra.pathExists(filePath)
+		return fileExists
+	}
+
+	/**
+	 * 
+	 * @param {string} datasetName 
+	 */
 	static async loadDatasetJsonNew(datasetName) {
 		const datasetsFolder = Utils.getDatasetsFolder()
 		const filePath = Path.join(datasetsFolder, `${datasetName}.dataset.json`)
@@ -246,6 +256,18 @@ export default class Utils {
 	//	.prediction.json
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @param {string} predictionName
+	 */
+	static async hasPredictionJson(evaluationName, predictionName) {
+		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
+		const filePath = Path.join(predictionFolder, 'data.prediction.json')
+		const fileExists = await FsExtra.pathExists(filePath)
+		return fileExists
+	}
 
 	/**
 	 * 
@@ -285,6 +307,18 @@ export default class Utils {
 	 * @param {string} evaluationName 
 	 * @param {string} predictionName
 	 */
+	static async hasEvaluationJson(evaluationName, predictionName) {
+		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
+		const filePath = Path.join(predictionFolder, 'data.evaluation.json')
+		const fileExists = await FsExtra.pathExists(filePath)
+		return fileExists
+	}
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @param {string} predictionName
+	 */
 	static async loadEvaluationJson(evaluationName, predictionName) {
 		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
 		const filePath = Path.join(predictionFolder, 'data.evaluation.json')
@@ -318,6 +352,19 @@ export default class Utils {
 	 * 
 	 * @param {string} evaluationName 
 	 * @param {string} predictionName
+	 */
+	static async hasPredictionMetadataJson(evaluationName, predictionName) {
+		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
+		const filePath = Path.join(predictionFolder, 'data.prediction-metadata.json')
+		const fileExists = await FsExtra.pathExists(filePath)
+		return fileExists
+	}
+
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @param {string} predictionName
 	 * @param {import("./type.d.js").PredictionMetadataJson} predictionMetadataJson
 	 */
 	static async savePredictionMetadataJson(evaluationName, predictionName, predictionMetadataJson) {
@@ -330,9 +377,20 @@ export default class Utils {
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	//	.hptuning.json5
+	//	.hptuning.json
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * 
+	 * @param {string} hpTuningName 
+	 */
+	static async hasHpTuningJson(hpTuningName) {
+		const hpTuningsFolder = Utils.getHpTuningsFolder()
+		const filePath = Path.join(hpTuningsFolder, `./${hpTuningName}.hptuning.json`)
+		const fileExists = await FsExtra.pathExists(filePath)
+		return fileExists
+	}
 
 	/**
 	 * 
@@ -385,6 +443,23 @@ export default class Utils {
 		const fileContent = JSON.stringify(hpTuningJson, null, '\t')
 		console.log(`saved hpTuningJson to "${CliColor.greenBright(filePath)}"`)
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	.gridsearch.json
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * 
+	 * @param {string} gridSearchName 
+	 */
+	static async hasGridSearJson(gridSearchName) {
+		const hpTuningsFolder = Utils.getHpTuningsFolder()
+		const filePath = Path.join(hpTuningsFolder, `./${gridSearchName}.gridsearch.json`)
+		const fileExists = await FsExtra.pathExists(filePath)
+		return fileExists
 	}
 
 	/**

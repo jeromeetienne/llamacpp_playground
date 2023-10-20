@@ -136,8 +136,9 @@ async function generateGridSearchMultiLanguage() {
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
 		hpTuningName: `gridsearch_multiLanguage`,
 		modelNames: [
-			...ConstantModelNamesOpenAI,
-			...ConstantModelNames7B,
+			'gpt-3.5-turbo'
+			// ...ConstantModelNamesOpenAI,
+			// ...ConstantModelNames7B,
 			// ...modelNames13B,
 		],
 		systemPrompts: [
@@ -172,7 +173,7 @@ async function generateGridSearchOnlyBlah() {
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
 		hpTuningName: `gridsearch_onlyBlah`,
 		modelNames: [
-			// ...ConstantModelNamesOpenAI,
+			...ConstantModelNamesOpenAI,
 			...ConstantModelNames7B,
 			// ...modelNames13B,
 		],
