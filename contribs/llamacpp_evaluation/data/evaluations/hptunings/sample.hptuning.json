@@ -1,0 +1,12 @@
+{
+        "hpTuningName": "sampleHpTuning",
+        "predictions": [
+                {},
+                {
+                        "predictionName": "samplePrediction",
+                        "modelName": "mistral-7b-instruct-v0.1.Q6_K.gguf",
+                        "systemPrompt": "you are an helpful assistant.",
+                        "userPrompt": "Here is a context between CONTEXT_BEGIN and CONTEXT_END:\nCONTEXT_BEGIN\n{context}\nCONTEXT_END\n\nBased on this context, answer the following question:\n{userInput}"
+                }
+        ]
+}

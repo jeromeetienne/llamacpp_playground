@@ -6,5 +6,35 @@
                         ],
                         "url": "./contribs/llamacpp_evaluation/data/json_schemas/dataset.schema.json"
                 },
+                {
+                        "fileMatch": [
+                                "/*.prediction.json"
+                        ],
+                        "url": "./contribs/llamacpp_evaluation/data/json_schemas/prediction.schema.json"
+                },
+                {
+                        "fileMatch": [
+                                "/*.evaluation.json"
+                        ],
+                        "url": "./contribs/llamacpp_evaluation/data/json_schemas/evaluation.schema.json"
+                },
+                {
+                        "fileMatch": [
+                                "/*.prediction-metadata.json"
+                        ],
+                        "url": "./contribs/llamacpp_evaluation/data/json_schemas/prediction-metadata.schema.json"
+                },
+                {
+                        "fileMatch": [
+                                "/*.hptuning.json"
+                        ],
+                        "url": "./contribs/llamacpp_evaluation/data/json_schemas/hptuning.schema.json"
+                },
+                {
+                        "fileMatch": [
+                                "/*.gridsearch.json"
+                        ],
+                        "url": "./contribs/llamacpp_evaluation/data/json_schemas/gridsearch.schema.json"
+                },
         ]
 }

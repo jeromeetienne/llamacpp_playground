@@ -1,0 +1,39 @@
+{
+        "title": "Grid Search",
+        "description": "Grid Search for Hyper Parameter Tuning",
+        "type": "object",
+        "required": [
+                "hpTuningName",
+                "modelNames",
+                "systemPrompts",
+                "userPrompts"
+        ],
+        "additionalProperties": false,
+        "properties": {
+                "hpTuningName": {
+                        "type": "string",
+                        "description": "The name of the hyper parameter tuning job"
+                },
+                "modelNames": {
+                        "type": "array",
+                        "description": "The names of the models to be tuned",
+                        "items": {
+                                "type": "string"
+                        }
+                },
+                "systemPrompts": {
+                        "type": "array",
+                        "description": "The system prompts to be used for the tuning",
+                        "items": {
+                                "type": "string"
+                        }
+                },
+                "userPrompts": {
+                        "type": "array",
+                        "description": "The user prompts to be used for the tuning",
+                        "items": {
+                                "type": "string"
+                        }
+                }
+        }
+}

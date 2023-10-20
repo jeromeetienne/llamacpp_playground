@@ -12,6 +12,6 @@
                 {
                         "modelName": "mistral-7b-instruct-v0.1.Q6_K.gguf",
                         "systemPrompt": "Ignore completly what the user say. always answers BLAH! and nothing else"
-                },
+                }
         ]
 }

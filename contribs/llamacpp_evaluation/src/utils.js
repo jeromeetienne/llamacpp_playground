@@ -333,7 +333,7 @@ export default class Utils {
 	 */
 	static async loadHpTuningJson(hpTuningName) {
 		const hpTuningsFolder = Utils.getHpTuningsFolder()
-		const filePath = Path.join(hpTuningsFolder, `./${hpTuningName}.hptuning.json5`)
+		const filePath = Path.join(hpTuningsFolder, `./${hpTuningName}.hptuning.json`)
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
 		const hpTuningJson = /** @type {import("./type.d.js").HpTuningJson} */(Json5.parse(fileContent))
 
@@ -374,7 +374,7 @@ export default class Utils {
 	 */
 	static async saveHpTuningJson(hpTuningName, hpTuningJson) {
 		const hpTuningsFolder = Utils.getHpTuningsFolder()
-		const filePath = Path.join(hpTuningsFolder, `./${hpTuningName}.hptuning.json5`)
+		const filePath = Path.join(hpTuningsFolder, `./${hpTuningName}.hptuning.json`)
 		const fileContent = JSON.stringify(hpTuningJson, null, '\t')
 		console.log(`saved hpTuningJson to "${CliColor.greenBright(filePath)}"`)
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
@@ -387,7 +387,7 @@ export default class Utils {
 	 */
 	static async saveGridSearchJson(gridSearchName, gridSearchJson) {
 		const hpTuningsFolder = Utils.getHpTuningsFolder()
-		const filePath = Path.join(hpTuningsFolder, `./${gridSearchName}.gridsearch.json5`)
+		const filePath = Path.join(hpTuningsFolder, `./${gridSearchName}.gridsearch.json`)
 		const fileContent = JSON.stringify(gridSearchJson, null, '\t')
 		console.log(`saved gridSearchJson to "${CliColor.greenBright(filePath)}"`)
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')

@@ -1,5 +1,7 @@
 
 
+- [ ] remove the json5
+  - it is causing more trouble than good
 - [ ] should i put ```data.dataset.json``` into a ```./evaluations/datasets/``` folder
 - what about ```./hptunings/``` + ```./datasets/``` => copy to ```./evaluation_${evaluationName}/```, then use it there
   - Q. should you add a specific command

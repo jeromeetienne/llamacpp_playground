@@ -1,0 +1,18 @@
+{
+        "title": "Prediction",
+        "description": "Prediction result",
+        "type": "array",
+        "items": {
+                "type": "object",
+                "required": [
+                        "predictedAnswer"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                        "predictedAnswer": {
+                                "type": "string",
+                                "description": "the predicted response"
+                        }
+                }
+        }
+}
