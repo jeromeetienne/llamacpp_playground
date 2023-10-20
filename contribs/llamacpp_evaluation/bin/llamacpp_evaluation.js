@@ -128,7 +128,7 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 			if (shouldUseDirect) {
 				await doDatasetPredictDirect(evaluationName, predictionName, { modelName })
 			} else {
-				await doDatasetPredictLangchain(evaluationName, predictionName, modelName)
+				await doDatasetPredictLangchain(evaluationName, predictionName, {modelName})
 			}
 		});
 

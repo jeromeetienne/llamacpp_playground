@@ -1,4 +1,14 @@
 
+
+# Possible Solutions
+- ```llama_evaluation create evaluationName datasetPath hptuningPath```
+  - copy datasetPath into ```./evaluations/evaluation_${evaluationName}/``` with the original basename
+  - copy hptuningPath into ```./evaluations/evaluation_${evaluationName}/``` with the original basename
+  - reread anyfile which has the proper extensions
+- move ```./hptunings/``` into its parents
+- move ```./datasets/``` into its parents
+
+- TODO rename prediction-metadata.json into ```.hyper-parameters.json``` ?
 - TODO should i put ```data.dataset.json``` into a ```./evaluations/datasets/``` folder
 - what about ```./hptunings/``` + ```./datasets/``` => copy to ```./evaluation_${evaluationName}/```, then use it there
   - Q. should you add a specific command
