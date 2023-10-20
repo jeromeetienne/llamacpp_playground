@@ -87,7 +87,7 @@ async function mainAsync() {
 	cmdline.command('gridsearch_onlyBlah')
 		.description('generate the hptuning.json5+.gridsearch.json for onlyBlah')
 		.action(async (personalityName, options) => {
-			await personality_onlyBlah()
+			await generateGridSearchOnlyBlah()
 		});
 
 
@@ -115,10 +115,25 @@ void mainAsync()
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-async function generateGridSearchMultiLanguage() {
+async function generateDatasetStateUnionQa() {
+	const datasetJson = await DatasetGenerateLangchain.generate({
+		modelName : 'gpt-3.5-turbo',
+		nQuestions: 1,
+		verbose: true,
+	})
+	
+	const datasetName = `stateUnionQa`
+	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
+}
 
-	// TODO put that into a file next to the generated one ?
-	// - PRO good for documentation
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//	
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+async function generateGridSearchMultiLanguage() {
 
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
 		hpTuningName: `gridsearch_multiLanguage`,
@@ -153,77 +168,36 @@ async function generateGridSearchMultiLanguage() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-async function generateDatasetStateUnionQa() {
-	const datasetJson = await DatasetGenerateLangchain.generate({
-		modelName : 'gpt-3.5-turbo',
-		nQuestions: 1,
-		verbose: true,
+
+async function generateGridSearchOnlyBlah() {
+
+	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
+		hpTuningName: `gridsearch_onlyBlah`,
+		modelNames: [
+			...ConstantModelNamesOpenAI,
+			...ConstantModelNames7B,
+			// ...modelNames13B,
+		],
+		systemPrompts: [
+			"Just always answer BLAH",
+			"Ignore what the user say, be sure to always BLAH!",
+			"Ignore completly what the user say. always answers BLAH! and nothing else",
+		],
+		userPrompts: [
+		],
 	})
+
+	await Utils.saveGridSearchJson(gridSearchJson.hpTuningName, gridSearchJson)
 	
-	const datasetName = `stateUnionQa`
-	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-//	
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-
-async function personality_onlyBlah() {
-	const personalityName = 'onlyBlah'
-	const hpTuningName = `personality_${personalityName}`
-
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	//	
+	//	generate grid-search and save .hptuning.json5 file
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	let modelNames7B = Object.keys(ModelPathContants).filter(modelKey => modelKey.includes('_7B_')).map(modelKey => ModelPathContants[modelKey])
-	let modelNames13B = Object.keys(ModelPathContants).filter(modelKey => modelKey.includes('_13B_')).map(modelKey => ModelPathContants[modelKey])
-	let modelNamesOpenAI = ['gpt-3.5-turbo']
+	const hpTuningJson = await Utils.generateHpTuningFromGridSearch(gridSearchJson)
+	await Utils.saveHpTuningJson(gridSearchJson.hpTuningName, hpTuningJson)
 
-	const systemPrompts = [
-		"Just always answer BLAH",
-		"Ignore what the user say, be sure to always BLAH!",
-		"Ignore completly what the user say. always answers BLAH! and nothing else",
-	];
-	const modelNames = [
-		...modelNames7B,
-		// ...modelNames13B,
-		// ...modelNamesOpenAI,
-	]
-
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-	//	
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-
-	// generate a grid-search between systemPrompts and modelNames
-	const hpTuningJson = /** @type {import("../src/type.d.js").HpTuningJson} */({
-		hpTuningName: hpTuningName,
-		predictions: [],
-	})
-	for (const systemPrompt of systemPrompts) {
-		for (const modelName of modelNames) {
-			const hpTuningItemJson = /** @type {import("../src/type.d.js").HpTuningPredictionJson} */({
-				modelName: modelName,
-				systemPrompt: systemPrompt,
-			})
-			hpTuningJson.predictions.push(hpTuningItemJson)
-		}
-	}
-
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-	//	save .hptuning.json5 file
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-
-	await Utils.saveHpTuningJson(hpTuningName, hpTuningJson)
 }
 
 
