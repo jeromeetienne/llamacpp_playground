@@ -1,0 +1,10 @@
+{
+        "json.schemas": [
+                {
+                        "fileMatch": [
+                                "/*.dataset.json"
+                        ],
+                        "url": "./contribs/llamacpp_evaluation/data/json_schemas/dataset.schema.json"
+                },
+        ]
+}

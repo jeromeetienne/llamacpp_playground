@@ -72,7 +72,7 @@ export default class Utils {
 		return hpTuningsFolder
 	}
 
-	static getHpDatasetsFolder() {
+	static getDatasetsFolder() {
 		const evaluationsFolder = Utils.getEvaluationsFolder()
 		const hpTuningsFolder = Path.join(evaluationsFolder, `./datasets/`)
 		return hpTuningsFolder
@@ -180,7 +180,7 @@ export default class Utils {
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	//	
+	//	.dataset.json
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
@@ -211,6 +211,37 @@ export default class Utils {
 
 	/**
 	 * 
+	 * @param {string} datasetName 
+	 */
+	static async loadDatasetJsonNew(datasetName) {
+		const datasetsFolder = Utils.getDatasetsFolder()
+		const filePath = Path.join(datasetsFolder, `${datasetName}.dataset.json`)
+		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
+		const datasetJson = /** @type {import("./type.d.js").DatasetJson} */(Json5.parse(fileContent))
+		return datasetJson
+	}
+
+	/**
+	 * 
+	 * @param {string} datasetName 
+	 * @param {import("./type.d.js").DatasetJson} datasetJson
+	 */
+	static async saveDatasetJsonNew(datasetName, datasetJson) {
+		const datasetsFolder = Utils.getDatasetsFolder()
+		await FsExtra.ensureDir(datasetsFolder)
+		const filePath = Path.join(datasetsFolder, `${datasetName}.dataset.json`)
+		const fileContent = JSON.stringify(datasetJson, null, '\t')
+		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	.prediction.json
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * 
 	 * @param {string} evaluationName 
 	 * @param {string} predictionName
 	 */
@@ -235,6 +266,12 @@ export default class Utils {
 		const fileContent = JSON.stringify(predictionJson, null, '\t')
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	.evaluation.json
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * 
@@ -264,6 +301,12 @@ export default class Utils {
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
 
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	.prediction-metadata.json
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * 
 	 * @param {string} evaluationName 
@@ -280,7 +323,7 @@ export default class Utils {
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	//	
+	//	.hptuning.json5
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
@@ -334,6 +377,19 @@ export default class Utils {
 		const filePath = Path.join(hpTuningsFolder, `./${hpTuningName}.hptuning.json5`)
 		const fileContent = JSON.stringify(hpTuningJson, null, '\t')
 		console.log(`saved hpTuningJson to "${CliColor.greenBright(filePath)}"`)
+		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
+	}
+
+	/**
+	 * 
+	 * @param {string} gridSearchName 
+	 * @param {import("./type.d.js").GridSearchJson} gridSearchJson
+	 */
+	static async saveGridSearchJson(gridSearchName, gridSearchJson) {
+		const hpTuningsFolder = Utils.getHpTuningsFolder()
+		const filePath = Path.join(hpTuningsFolder, `./${gridSearchName}.gridsearch.json5`)
+		const fileContent = JSON.stringify(gridSearchJson, null, '\t')
+		console.log(`saved gridSearchJson to "${CliColor.greenBright(filePath)}"`)
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
 }

@@ -14,7 +14,7 @@
     "evaluate":"node ./bin/llama_cpp_evaluation.js evaluate myEval myPredict",
     "report":"node ./bin/llama_cpp_evaluation.js report myEval",
     "hptuning":"node ./bin/llama_cpp_evaluation.js hptuning myEval ./data/evaluations/hptunings/superHpTuning.hptuning.json5",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cd test && npm test"
   },
   "keywords": [],
   "author": "",

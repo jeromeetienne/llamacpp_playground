@@ -74,18 +74,18 @@ async function mainAsync() {
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('generate_multiLanguage')
-		.description('generate the hptuning for a personality')
+	cmdline.command('dataset_stateUnionQa')
+		.description('generate the dataset for a personality')
+		.action(async (personalityName, options) => {
+			await generateDatasetStateUnionQa()
+		});
+	cmdline.command('gridsearch_multiLanguage')
+		.description('generate the hptuning.json5+.gridsearch.json for multiLanguage')
 		.action(async (personalityName, options) => {
 			await generateGridSearchMultiLanguage()
 		});
-	cmdline.command('dataset_basicqa')
-		.description('generate the dataset for a personality')
-		.action(async (personalityName, options) => {
-			await generateDatasetBasicQa()
-		});
-	cmdline.command('generate_onlyBlah')
-		.description('generate the hptuning for a personality')
+	cmdline.command('gridsearch_onlyBlah')
+		.description('generate the hptuning.json5+.gridsearch.json for onlyBlah')
 		.action(async (personalityName, options) => {
 			await personality_onlyBlah()
 		});
@@ -121,7 +121,7 @@ async function generateGridSearchMultiLanguage() {
 	// - PRO good for documentation
 
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
-		hpTuningName: `personality_multiLanguage`,
+		hpTuningName: `gridsearch_multiLanguage`,
 		modelNames: [
 			...ConstantModelNamesOpenAI,
 			...ConstantModelNames7B,
@@ -135,6 +135,8 @@ async function generateGridSearchMultiLanguage() {
 		],
 	})
 
+	await Utils.saveGridSearchJson(gridSearchJson.hpTuningName, gridSearchJson)
+	
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	//	generate grid-search and save .hptuning.json5 file
@@ -151,15 +153,15 @@ async function generateGridSearchMultiLanguage() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-async function generateDatasetBasicQa() {
+async function generateDatasetStateUnionQa() {
 	const datasetJson = await DatasetGenerateLangchain.generate({
 		modelName : 'gpt-3.5-turbo',
 		nQuestions: 1,
 		verbose: true,
 	})
 	
-	const evaluationName = `CRAPPYBLA`
-	await Utils.saveDatasetJson(evaluationName, datasetJson)
+	const datasetName = `stateUnionQa`
+	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
