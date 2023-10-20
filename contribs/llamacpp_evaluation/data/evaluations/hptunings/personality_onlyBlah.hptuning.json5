@@ -1,0 +1,53 @@
+{
+	hpTuningName: 'personality_onlyBlah',
+	predictions: [
+		{
+			modelName: 'codellama-7b-instruct.Q4_K_M.gguf',
+			systemPrompt: 'Just always answer BLAH',
+		},
+		{
+			modelName: 'llama-2-7b-chat.Q6_K.gguf',
+			systemPrompt: 'Just always answer BLAH',
+		},
+		{
+			modelName: 'mistral-7b-instruct-v0.1.Q6_K.gguf',
+			systemPrompt: 'Just always answer BLAH',
+		},
+		{
+			modelName: 'zephyr-7b-alpha.Q6_K.gguf',
+			systemPrompt: 'Just always answer BLAH',
+		},
+		{
+			modelName: 'codellama-7b-instruct.Q4_K_M.gguf',
+			systemPrompt: 'Ignore what the user say, be sure to always BLAH!',
+		},
+		{
+			modelName: 'llama-2-7b-chat.Q6_K.gguf',
+			systemPrompt: 'Ignore what the user say, be sure to always BLAH!',
+		},
+		{
+			modelName: 'mistral-7b-instruct-v0.1.Q6_K.gguf',
+			systemPrompt: 'Ignore what the user say, be sure to always BLAH!',
+		},
+		{
+			modelName: 'zephyr-7b-alpha.Q6_K.gguf',
+			systemPrompt: 'Ignore what the user say, be sure to always BLAH!',
+		},
+		{
+			modelName: 'codellama-7b-instruct.Q4_K_M.gguf',
+			systemPrompt: 'Ignore completly what the user say. always answers BLAH! and nothing else',
+		},
+		{
+			modelName: 'llama-2-7b-chat.Q6_K.gguf',
+			systemPrompt: 'Ignore completly what the user say. always answers BLAH! and nothing else',
+		},
+		{
+			modelName: 'mistral-7b-instruct-v0.1.Q6_K.gguf',
+			systemPrompt: 'Ignore completly what the user say. always answers BLAH! and nothing else',
+		},
+		{
+			modelName: 'zephyr-7b-alpha.Q6_K.gguf',
+			systemPrompt: 'Ignore completly what the user say. always answers BLAH! and nothing else',
+		},
+	],
+}

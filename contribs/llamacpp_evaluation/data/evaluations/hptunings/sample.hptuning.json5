@@ -1,5 +1,5 @@
 {
-        "hpTuningName": "superHpTuning",
+        "hpTuningName": "sampleHpTuning",
         "predictions": [
 //                 // if you dont specify any options, it will use all the defaults
 //                 {},

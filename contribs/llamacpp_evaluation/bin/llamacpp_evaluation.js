@@ -429,6 +429,7 @@ async function doDatasetHpTuning(evaluationName, hpTuningPath) {
 	const hpTuningName = Path.basename(hpTuningPath, '.hptuning.json5')
 	const hpTuningJson = await Utils.loadHpTuningJson(hpTuningName)
 
+	// do all the predictions
 	for (const hpTuningPrediction of hpTuningJson.predictions) {
 		const itemIndex = hpTuningJson.predictions.indexOf(hpTuningPrediction)
 		const predictionName = hpTuningPrediction.predictionName ?? `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
@@ -448,6 +449,19 @@ async function doDatasetHpTuning(evaluationName, hpTuningPath) {
 			})
 		}
 
+		await doDatasetEvaluateLangchain(evaluationName, predictionName)
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	
+	// do all the evaluate
+	for (const hpTuningPrediction of hpTuningJson.predictions) {
+		const itemIndex = hpTuningJson.predictions.indexOf(hpTuningPrediction)
+		const predictionName = hpTuningPrediction.predictionName ?? `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
 		await doDatasetEvaluateLangchain(evaluationName, predictionName)
 	}
 }

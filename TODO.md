@@ -2,6 +2,7 @@
   - separate script to do it... call that the ```hptuning-generator``` with multiple **personality**.
   - each personality is a specific generator ... ```.hptuning.json5``` and ```.dataset.json``` may be generated
   - it will generate a .hptuning.json5 with a grid search on the prompt+model independantly of the userprompt
+- [ ] add the json-schema everywhere
 - [ ] put the huggingface_playground in its own repo too
 - [ ] put llamacpp_evaluation in its own git, <- YES do it
   - how to import the llamacpp_playground ? can i make a seperate git for that ?
