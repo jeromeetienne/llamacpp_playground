@@ -11,4 +11,4 @@ const embeddings = new HuggingFaceInferenceEmbeddings({
 const res = await embeddings.embedQuery("Hello world");
 
 console.log({res})
-debugger
+// debugger
