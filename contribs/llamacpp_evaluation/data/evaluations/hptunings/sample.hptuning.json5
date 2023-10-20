@@ -6,6 +6,7 @@
 //                 // Here are the default options, you can use the variable "context" and "userInput" in the userPrompt. 
 //                 // - as the "context" is the context of the "userInput", "systemPrompt" can not know about it
 //                 {
+//                         "predictionName": "samplePrediction",
 //                         "modelName": "mistral-7b-instruct-v0.1.Q6_K.gguf",
 //                         "systemPrompt": "you are an helpful assistant.",
 //                         "userPrompt": "Here is a context between CONTEXT_BEGIN and CONTEXT_END:\

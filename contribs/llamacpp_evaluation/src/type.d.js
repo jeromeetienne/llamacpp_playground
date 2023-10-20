@@ -114,6 +114,15 @@ void (0);
  */
 void (0);
 
+
+	/**
+	 * @typedef {Object} GridSearchJson
+	 * @property {string} hpTuningName
+	 * @property {string[]} modelNames
+	 * @property {string[]} systemPrompts
+	 * @property {string[]} userPrompts
+	 */
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 //	

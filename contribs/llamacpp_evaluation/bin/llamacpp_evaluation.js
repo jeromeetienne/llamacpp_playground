@@ -91,12 +91,12 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 
 			if (shouldUseDirect) {
 				await doDatasetGenerateDirect(evaluationName, {
-					modelName: modelName, 
+					modelName: modelName,
 					nQuestions: options.nQuestions
 				})
 			} else {
 				await doDatasetGenerateLangchain(evaluationName, {
-					modelName: modelName, 
+					modelName: modelName,
 					nQuestions: options.nQuestions
 				})
 			}
@@ -207,7 +207,7 @@ async function doDatasetGenerateDirect(evaluationName, options = {}) {
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	// debugger
-	const datasetJson = await DatasetGenerateDirect.generate(evaluationName, {
+	const datasetJson = await DatasetGenerateDirect.generate({
 		modelName: options.modelName,
 		nQuestions: options.nQuestions,
 		verbose: true
@@ -229,8 +229,8 @@ async function doDatasetGenerateDirect(evaluationName, options = {}) {
  * @param {number=} options.nQuestions
  */
 async function doDatasetGenerateLangchain(evaluationName, options = {}) {
-	const datasetJson = await DatasetGenerateLangchain.generate(evaluationName, {
-		modelName : options.modelName,
+	const datasetJson = await DatasetGenerateLangchain.generate({
+		modelName: options.modelName,
 		nQuestions: options.nQuestions,
 		verbose: true,
 	})
@@ -457,7 +457,7 @@ async function doDatasetHpTuning(evaluationName, hpTuningPath) {
 	//	
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	
+
 	// do all the evaluate
 	for (const hpTuningPrediction of hpTuningJson.predictions) {
 		const itemIndex = hpTuningJson.predictions.indexOf(hpTuningPrediction)

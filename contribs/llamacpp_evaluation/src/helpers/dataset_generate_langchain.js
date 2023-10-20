@@ -54,9 +54,9 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
  * 
  * @param {LlamaContext} llamaContext 
  */
-export default class DatasetGenerateDirect {
+export default class DatasetGenerateLangchain {
 
-		///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	//	
 	///////////////////////////////////////////////////////////////////////////////
@@ -73,17 +73,16 @@ export default class DatasetGenerateDirect {
 	//	
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	
+
 	/**
-	 * @param {string} evaluationName
 	 * @param {Partial<DatasetGenerateLangchainOptions>} partialOptions
 	 */
-	static async generate(evaluationName, partialOptions = {}) {
+	static async generate(partialOptions = {}) {
 
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
-		partialOptions = Object.assign({}, DatasetGenerateDirect.defaultGenerateOptions, partialOptions)
+		partialOptions = Object.assign({}, DatasetGenerateLangchain.defaultGenerateOptions, partialOptions)
 		const options = /** @type {DatasetGenerateLangchainOptions} */(partialOptions)
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -226,9 +225,8 @@ Please generate {nQuestions} question/answer tuples about this context
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
-	const evaluationName = 'myeval'
 	const modelName = 'gpt-3.5-turbo'
-	await DatasetGenerateDirect.generate(evaluationName, {
+	await DatasetGenerateLangchain.generate({
 		modelName: modelName,
 		verbose: true
 	})

@@ -56,10 +56,9 @@ export default class DatasetGenerateDirect {
 	})
 	/**
 	 * 
-	 * @param {string} evaluationName
 	 * @param {Partial<DatasetGenerateDirectOptions>} partialOptions
 	 */
-	static async generate(evaluationName, partialOptions = {}) {
+	static async generate(partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
@@ -171,8 +170,7 @@ Please generate ${options.nQuestions} question/answer tuples about this context
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
-	const evaluationName = 'myeval'
-	await DatasetGenerateDirect.generate(evaluationName, {
+	await DatasetGenerateDirect.generate({
 		// modelName: ModelPathContants.LLAMA_2_7B_CHAT_Q6_K,
 		nQuestions: 1,
 		verbose: true,

@@ -40,6 +40,17 @@ const debug = Debug('weboostai:bin:datafolder_checker')
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+//	
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+
+let ConstantModelNames7B = Object.keys(ModelPathContants).filter(modelKey => modelKey.includes('_7B_')).map(modelKey => ModelPathContants[modelKey])
+let ConstantModelNames13B = Object.keys(ModelPathContants).filter(modelKey => modelKey.includes('_13B_')).map(modelKey => ModelPathContants[modelKey])
+let ConstantModelNamesOpenAI = ['gpt-3.5-turbo', 'gpt-4']
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //	main async function
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,48 +64,31 @@ async function mainAsync() {
 
 	// parse command line
 	const cmdline = new Commander.Command()
-	cmdline.name('hptuning_generator.js')
+	cmdline.name('dataset_generator.js')
 		.version('0.0.3')
-		.description(`hptuning_generator.js`);
+		.description(`dataset_generator.js`);
 
-		await personality_onlyBlah()
-	// ///////////////////////////////////////////////////////////////////////////////
-	// ///////////////////////////////////////////////////////////////////////////////
-	// //	
-	// ///////////////////////////////////////////////////////////////////////////////
-	// ///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 
-	// cmdline.command('generate <evaluationName> [modelName]')
-	// 	.description('generate the dataset')
-	// 	.option('-l, --langchain', 'use langchain technology instead of direct')
-	// 	.option('-d, --direct', 'use direct technology instead of langchain')
-	// 	.option('-n, --nQuestions <number>', 'number of questions to generate', parseFloat)
-	// 	.action(async (evaluationName, modelName, options) => {
-	// 		// debugger
-	// 		// compute shouldUseDirect
-	// 		let shouldUseDirect = null
-	// 		if (options.direct) {
-	// 			shouldUseDirect = true
-	// 		} else if (options.langchain) {
-	// 			shouldUseDirect = false
-	// 		} else if (modelName !== undefined) {
-	// 			shouldUseDirect = modelName.endsWith('.gguf')
-	// 		} else {
-	// 			shouldUseDirect = true
-	// 		}
-
-	// 		if (shouldUseDirect) {
-	// 			await doDatasetGenerateDirect(evaluationName, {
-	// 				modelName: modelName, 
-	// 				nQuestions: options.nQuestions
-	// 			})
-	// 		} else {
-	// 			await doDatasetGenerateLangchain(evaluationName, {
-	// 				modelName: modelName, 
-	// 				nQuestions: options.nQuestions
-	// 			})
-	// 		}
-	// 	});
+	cmdline.command('generate_multiLanguage')
+		.description('generate the hptuning for a personality')
+		.action(async (personalityName, options) => {
+			await generateGridSearchMultiLanguage()
+		});
+	cmdline.command('dataset_basicqa')
+		.description('generate the dataset for a personality')
+		.action(async (personalityName, options) => {
+			await generateDatasetBasicQa()
+		});
+	cmdline.command('generate_onlyBlah')
+		.description('generate the hptuning for a personality')
+		.action(async (personalityName, options) => {
+			await personality_onlyBlah()
+		});
 
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -121,8 +115,70 @@ void mainAsync()
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+async function generateGridSearchMultiLanguage() {
 
-async function personality_onlyBlah(){
+	// TODO put that into a file next to the generated one ?
+	// - PRO good for documentation
+
+	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
+		hpTuningName: `personality_multiLanguage`,
+		modelNames: [
+			...ConstantModelNamesOpenAI,
+			...ConstantModelNames7B,
+			// ...modelNames13B,
+		],
+		systemPrompts: [
+			"You are a helpful assistant that translates english to french.",
+		],
+		userPrompts: [
+			`{userInput}`
+		],
+	})
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	generate grid-search and save .hptuning.json5 file
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	const hpTuningJson = await Utils.generateHpTuningFromGridSearch(gridSearchJson)
+	await Utils.saveHpTuningJson(gridSearchJson.hpTuningName, hpTuningJson)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//	
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+async function generateDatasetBasicQa() {
+	const datasetJson = await DatasetGenerateLangchain.generate({
+		modelName : 'gpt-3.5-turbo',
+		nQuestions: 1,
+		verbose: true,
+	})
+	
+	const evaluationName = `CRAPPYBLA`
+	await Utils.saveDatasetJson(evaluationName, datasetJson)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//	
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+
+async function personality_onlyBlah() {
+	const personalityName = 'onlyBlah'
+	const hpTuningName = `personality_${personalityName}`
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
 	let modelNames7B = Object.keys(ModelPathContants).filter(modelKey => modelKey.includes('_7B_')).map(modelKey => ModelPathContants[modelKey])
 	let modelNames13B = Object.keys(ModelPathContants).filter(modelKey => modelKey.includes('_13B_')).map(modelKey => ModelPathContants[modelKey])
 	let modelNamesOpenAI = ['gpt-3.5-turbo']
@@ -143,14 +199,14 @@ async function personality_onlyBlah(){
 	//	
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	
+
 	// generate a grid-search between systemPrompts and modelNames
 	const hpTuningJson = /** @type {import("../src/type.d.js").HpTuningJson} */({
-		hpTuningName: 'personality_onlyBlah',
+		hpTuningName: hpTuningName,
 		predictions: [],
 	})
-	for(const systemPrompt of systemPrompts){
-		for(const modelName of modelNames){
+	for (const systemPrompt of systemPrompts) {
+		for (const modelName of modelNames) {
 			const hpTuningItemJson = /** @type {import("../src/type.d.js").HpTuningPredictionJson} */({
 				modelName: modelName,
 				systemPrompt: systemPrompt,
@@ -161,12 +217,11 @@ async function personality_onlyBlah(){
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	//	
+	//	save .hptuning.json5 file
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	
-	const evaluationsFolder = Utils.getEvaluationsFolder()
-	const fileName = Path.join(evaluationsFolder, 'hptunings', 'personality_onlyBlah.hptuning.json5')
-	const fileContent = Json5.stringify(hpTuningJson, null, '\t')
-	await Fs.promises.writeFile(fileName, fileContent, 'utf-8')
+
+	await Utils.saveHpTuningJson(hpTuningName, hpTuningJson)
 }
+
+

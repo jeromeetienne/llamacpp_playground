@@ -1,4 +1,25 @@
-- [ ] write a generator who try to ignore the userprompt, on all the opensource model available
+
+
+- [ ] should i put ```data.dataset.json``` into a ```./evaluations/datasets/``` folder
+- what about ```./hptunings/``` + ```./datasets/``` => copy to ```./evaluation_${evaluationName}/```, then use it there
+  - Q. should you add a specific command
+  - then you perform a evaluation on it
+  - you dont recompute all what has been computed already
+  - you get hptuning.json5 for specific grid search, or for default options
+
+- [ ] Find a better workflow (finer grained steps) for ```llamacpp_evaluation```
+  - personality generate a .hptuning.json5 (and maybe .dataset.json)
+  - .hptuning.json5 -> .prediction-metadata.json
+  - **predict**: .prediction-metadata.json + .dataset.json -> .prediction.json
+  - **evaluate**: .prediction.json -> .evaluation.json
+- [ ] remove 'generate' from ```llamacpp_evaluation.js```
+  - put it in ```hptuning-generator.js```
+- [x] add dataset.json personality in ```hptuning-generator```
+  - Q. should i rename it ```dataset-generator``` ?
+
+
+
+- [x] write a generator who try to ignore the userprompt, on all the opensource model available
   - separate script to do it... call that the ```hptuning-generator``` with multiple **personality**.
   - each personality is a specific generator ... ```.hptuning.json5``` and ```.dataset.json``` may be generated
   - it will generate a .hptuning.json5 with a grid search on the prompt+model independantly of the userprompt

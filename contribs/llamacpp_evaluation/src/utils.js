@@ -12,6 +12,33 @@ import Url from "url";
 const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
 export default class Utils {
+
+	/**
+	 * 
+	 * @param {import("../src/type.d.js").GridSearchJson} gridSearchJson 
+	 */
+	static async generateHpTuningFromGridSearch(gridSearchJson) {
+
+		// generate a grid-search between systemPrompts and modelNames
+		const hpTuningJson = /** @type {import("../src/type.d.js").HpTuningJson} */({
+			hpTuningName: gridSearchJson.hpTuningName,
+			predictions: [],
+		})
+		for (const systemPrompt of gridSearchJson.systemPrompts) {
+			for (const modelName of gridSearchJson.modelNames) {
+				for (const userPrompt of gridSearchJson.userPrompts) {
+					const hpTuningItemJson = /** @type {import("../src/type.d.js").HpTuningPredictionJson} */({
+						modelName: modelName,
+						systemPrompt: systemPrompt,
+						userPrompt: userPrompt,
+					})
+					hpTuningJson.predictions.push(hpTuningItemJson)
+				}
+			}
+		}
+		return hpTuningJson
+	}
+
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	//	
@@ -38,6 +65,19 @@ export default class Utils {
 		const evaluationFolder = Path.join(__dirname, `../data/evaluations/`)
 		return evaluationFolder
 	}
+
+	static getHpTuningsFolder() {
+		const evaluationsFolder = Utils.getEvaluationsFolder()
+		const hpTuningsFolder = Path.join(evaluationsFolder, `./hptunings/`)
+		return hpTuningsFolder
+	}
+
+	static getHpDatasetsFolder() {
+		const evaluationsFolder = Utils.getEvaluationsFolder()
+		const hpTuningsFolder = Path.join(evaluationsFolder, `./datasets/`)
+		return hpTuningsFolder
+	}
+
 	/**
 	 * 
 	 * @param {string} evaluationName 
@@ -238,13 +278,19 @@ export default class Utils {
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
 
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * 
 	 * @param {string} hpTuningName 
 	 */
 	static async loadHpTuningJson(hpTuningName) {
-		const evaluationsFolder = Utils.getEvaluationsFolder()
-		const filePath = Path.join(evaluationsFolder, `./hptunings/${hpTuningName}.hptuning.json5`)
+		const hpTuningsFolder = Utils.getHpTuningsFolder()
+		const filePath = Path.join(hpTuningsFolder, `./${hpTuningName}.hptuning.json5`)
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
 		const hpTuningJson = /** @type {import("./type.d.js").HpTuningJson} */(Json5.parse(fileContent))
 
@@ -253,22 +299,22 @@ export default class Utils {
 		//	sanity check
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-		
+
 		// - check the models names are valid
 		//   - whitelist of valid models for openai
 		//   - if .gguf basename, check the file exists in ./models/
 		// - else check is "gpt*"
-		for(let tuningPredictionJson of hpTuningJson.predictions){
-			if( tuningPredictionJson.modelName === undefined ) continue
+		for (let tuningPredictionJson of hpTuningJson.predictions) {
+			if (tuningPredictionJson.modelName === undefined) continue
 			// if it is openai models
 			const isOpenaiModel = tuningPredictionJson.modelName.startsWith('gpt')
-			if( isOpenaiModel ) continue
+			if (isOpenaiModel) continue
 
 			const isLlamaCppModel = tuningPredictionJson.modelName.endsWith('.gguf')
-			if( isLlamaCppModel ){
+			if (isLlamaCppModel) {
 				const filePath = Path.join(__dirname, `../../../models/${tuningPredictionJson.modelName}`)
 				const fileExists = await FsExtra.pathExists(filePath)
-				if( fileExists === true ) continue
+				if (fileExists === true) continue
 			}
 
 			throw new Error(`invalid model name "${tuningPredictionJson.modelName}"`)
@@ -276,5 +322,18 @@ export default class Utils {
 
 
 		return hpTuningJson
+	}
+
+	/**
+	 * 
+	 * @param {string} hpTuningName 
+	 * @param {import("./type.d.js").HpTuningJson} hpTuningJson
+	 */
+	static async saveHpTuningJson(hpTuningName, hpTuningJson) {
+		const hpTuningsFolder = Utils.getHpTuningsFolder()
+		const filePath = Path.join(hpTuningsFolder, `./${hpTuningName}.hptuning.json5`)
+		const fileContent = JSON.stringify(hpTuningJson, null, '\t')
+		console.log(`saved hpTuningJson to "${CliColor.greenBright(filePath)}"`)
+		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
 }
