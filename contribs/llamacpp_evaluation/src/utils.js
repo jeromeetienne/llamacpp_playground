@@ -86,7 +86,7 @@ export default class Utils {
 	}
 
 	static getDatasetsFolder() {
-		const hpTuningsFolder = Path.join(__dirname, `./data/datasets/`)
+		const hpTuningsFolder = Path.join(__dirname, `../data/datasets/`)
 		return hpTuningsFolder
 	}
 

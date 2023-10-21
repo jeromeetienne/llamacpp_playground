@@ -8,6 +8,18 @@
 			"modelName": "gpt-4"
 		},
 		{
+			"modelName": "codellama-7b-instruct.Q4_K_M.gguf"
+		},
+		{
+			"modelName": "llama-2-7b-chat.Q6_K.gguf"
+		},
+		{
+			"modelName": "mistral-7b-instruct-v0.1.Q6_K.gguf"
+		},
+		{
+			"modelName": "zephyr-7b-alpha.Q6_K.gguf"
+		},
+		{
 			"modelName": "llama-2-13b-chat.Q3_K_M.gguf"
 		},
 		{

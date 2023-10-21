@@ -3,6 +3,10 @@
 	"modelNames": [
 		"gpt-3.5-turbo",
 		"gpt-4",
+		"codellama-7b-instruct.Q4_K_M.gguf",
+		"llama-2-7b-chat.Q6_K.gguf",
+		"mistral-7b-instruct-v0.1.Q6_K.gguf",
+		"zephyr-7b-alpha.Q6_K.gguf",
 		"llama-2-13b-chat.Q3_K_M.gguf",
 		"codellama-13b-instruct.Q3_K_M.gguf"
 	],

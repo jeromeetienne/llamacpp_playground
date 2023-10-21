@@ -119,9 +119,9 @@ void mainAsync()
 ///////////////////////////////////////////////////////////////////////////////
 
 async function generateDatasetStateUnionQa() {
-	const datasetJson = await DatasetGenerateLangchain.generate({
+	const nQuestions = 2
+	const datasetJson = await DatasetGenerateLangchain.generateStateUnionQa(nQuestions, {
 		modelName: 'gpt-3.5-turbo',
-		nQuestions: 1,
 		verbose: true,
 	})
 
@@ -217,7 +217,7 @@ async function generateGridSearchTestAccuracy() {
 		hpTuningName: `gridsearch_testAccuracy`,
 		modelNames: [
 			...ConstantModelNamesOpenAI,
-			// ...ConstantModelNames7B,
+			...ConstantModelNames7B,
 			...ConstantModelNames13B,
 		],
 		systemPrompts: [

@@ -70,49 +70,6 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	// cmdline.command('generate <evaluationName> [modelName]')
-	// 	.description('generate the dataset')
-	// 	.option('-l, --langchain', 'use langchain technology instead of direct')
-	// 	.option('-d, --direct', 'use direct technology instead of langchain')
-	// 	.option('-n, --nQuestions <number>', 'number of questions to generate', parseFloat)
-	// 	.action(async (evaluationName, modelName, options) => {
-
-	// 		// TODO this logic should be moved to dataset_generator.js
-
-	// 		console.error('WARNING: this command is deprecated')
-
-	// 		// debugger
-	// 		// compute shouldUseDirect
-	// 		let shouldUseDirect = null
-	// 		if (options.direct) {
-	// 			shouldUseDirect = true
-	// 		} else if (options.langchain) {
-	// 			shouldUseDirect = false
-	// 		} else if (modelName !== undefined) {
-	// 			shouldUseDirect = modelName.endsWith('.gguf')
-	// 		} else {
-	// 			shouldUseDirect = true
-	// 		}
-
-	// 		if (shouldUseDirect) {
-	// 			await doDatasetGenerateDirect(evaluationName, {
-	// 				modelName: modelName,
-	// 				nQuestions: options.nQuestions
-	// 			})
-	// 		} else {
-	// 			await doDatasetGenerateLangchain(evaluationName, {
-	// 				modelName: modelName,
-	// 				nQuestions: options.nQuestions
-	// 			})
-	// 		}
-	// 	});
-
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-	//	
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-
 	cmdline.command('create <evaluationName> <datasetPath> <hpTuningPath>')
 		.description('generate an evaluation from a dataset and a hpTuning file.')
 		.action(async (evaluationName, datasetPath, hpTuningPath, options) => {
@@ -137,7 +94,7 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('predict <evaluationName> <predictionName> [modelName]')
+	cmdline.command('predictOne <evaluationName> <predictionName> [modelName]')
 		.description('predict on the dataset')
 		.option('-l, --langchain', 'use langchain technology instead of direct')
 		.option('-d, --direct', 'use direct technology instead of langchain')
@@ -155,9 +112,9 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 			}
 
 			if (shouldUseDirect) {
-				await doDatasetPredictDirect(evaluationName, predictionName, { modelName })
+				await doDatasetPredictOneDirect(evaluationName, predictionName, { modelName })
 			} else {
-				await doDatasetPredictLangchain(evaluationName, predictionName, { modelName })
+				await doDatasetPredictOneLangchain(evaluationName, predictionName, { modelName })
 			}
 		});
 
@@ -167,10 +124,10 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('evaluate <evaluationName> <predictionName>')
+	cmdline.command('evaluateOne <evaluationName> <predictionName>')
 		.description('evaluate the prediction based on the dataset')
 		.action(async (evaluationName, predictionName, options) => {
-			await doDatasetEvaluateLangchain(evaluationName, predictionName)
+			await doDatasetEvaluateOneLangchain(evaluationName, predictionName)
 		});
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -221,58 +178,6 @@ void mainAsync()
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// /**
-//  * 
-//  * @param {string} evaluationName 
-//  * @param {object} options
-//  * @param {string=} options.modelName
-//  * @param {number=} options.nQuestions
-//  */
-// async function doDatasetGenerateDirect(evaluationName, options = {}) {
-
-// 	///////////////////////////////////////////////////////////////////////////////
-// 	///////////////////////////////////////////////////////////////////////////////
-// 	//	do the generate itself
-// 	///////////////////////////////////////////////////////////////////////////////
-// 	///////////////////////////////////////////////////////////////////////////////
-// 	// debugger
-// 	const datasetJson = await DatasetGenerateDirect.generate({
-// 		modelName: options.modelName,
-// 		nQuestions: options.nQuestions,
-// 		verbose: true
-// 	})
-
-// 	// save a prediction.json file
-// 	await Utils.saveEvaluationDatasetJson(evaluationName, datasetJson);
-
-// 	const modelName = options.modelName ?? DatasetGenerateDirect.defaultGenerateOptions.modelName
-// 	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
-// 	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
-// }
-
-// /**
-//  * 
-//  * @param {string} evaluationName 
-//  * @param {object}	options
-//  * @param {string=} options.modelName
-//  * @param {number=} options.nQuestions
-//  */
-// async function doDatasetGenerateLangchain(evaluationName, options = {}) {
-// 	const datasetJson = await DatasetGenerateLangchain.generate({
-// 		modelName: options.modelName,
-// 		nQuestions: options.nQuestions,
-// 		verbose: true,
-// 	})
-
-// 	// save a prediction.json file
-// 	await Utils.saveEvaluationDatasetJson(evaluationName, datasetJson);
-
-// 	const modelName = options.modelName ?? DatasetGenerateLangchain.defaultGenerateOptions.modelName
-// 	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
-// 	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
-// }
-
-
 /**
  * 
  * @param {string} evaluationName 
@@ -322,7 +227,7 @@ async function doEvaluationDelete(evaluationName) {
  * @param {string=} options.systemPrompt
  * @param {string=} options.userPrompt
  */
-async function doDatasetPredictDirect(evaluationName, predictionName, options = {}) {
+async function doDatasetPredictOneDirect(evaluationName, predictionName, options = {}) {
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -412,7 +317,7 @@ async function doDatasetPredictDirect(evaluationName, predictionName, options = 
  * @param {string=} options.systemPrompt
  * @param {string=} options.userPrompt
  */
-async function doDatasetPredictLangchain(evaluationName, predictionName, options = {}) {	// build a metadata.json file
+async function doDatasetPredictOneLangchain(evaluationName, predictionName, options = {}) {	// build a metadata.json file
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -488,7 +393,7 @@ async function doDatasetPredictLangchain(evaluationName, predictionName, options
  * @param {string} evaluationName 
  * @param {string} predictionName
  */
-async function doDatasetEvaluateLangchain(evaluationName, predictionName) {
+async function doDatasetEvaluateOneLangchain(evaluationName, predictionName) {
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -549,14 +454,14 @@ async function doComputeEvaluation(evaluationName) {
 		const predictionName = hpTuningPrediction.predictionName ?? `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
 		const shouldUseDirect = hpTuningPrediction.modelName?.endsWith('.gguf') || hpTuningPrediction.modelName === undefined
 		if (shouldUseDirect) {
-			await doDatasetPredictDirect(evaluationName, predictionName, {
+			await doDatasetPredictOneDirect(evaluationName, predictionName, {
 				modelName: hpTuningPrediction.modelName,
 				systemPrompt: hpTuningPrediction.systemPrompt,
 				userPrompt: hpTuningPrediction.userPrompt,
 			})
 		} else {
 			// debugger
-			await doDatasetPredictLangchain(evaluationName, predictionName, {
+			await doDatasetPredictOneLangchain(evaluationName, predictionName, {
 				modelName: hpTuningPrediction.modelName,
 				systemPrompt: hpTuningPrediction.systemPrompt,
 				userPrompt: hpTuningPrediction.userPrompt,
@@ -574,7 +479,7 @@ async function doComputeEvaluation(evaluationName) {
 	for (const hpTuningPrediction of hpTuningJson.predictions) {
 		const itemIndex = hpTuningJson.predictions.indexOf(hpTuningPrediction)
 		const predictionName = hpTuningPrediction.predictionName ?? `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
-		await doDatasetEvaluateLangchain(evaluationName, predictionName)
+		await doDatasetEvaluateOneLangchain(evaluationName, predictionName)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////

@@ -40,7 +40,6 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 /**
  * @typedef {Object} DatasetGenerateLangchainOptions
  * @property {string} modelName
- * @property {number} nQuestions
  * @property {Boolean} verbose
  */
 
@@ -64,7 +63,6 @@ export default class DatasetGenerateLangchain {
 
 	static defaultGenerateOptions =  /** @type {DatasetGenerateLangchainOptions} */({
 		modelName: 'gpt-3.5-turbo',
-		nQuestions: 1,
 		verbose: false,
 	})
 
@@ -75,10 +73,10 @@ export default class DatasetGenerateLangchain {
 	///////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * @param {number} nQuestions
 	 * @param {Partial<DatasetGenerateLangchainOptions>} partialOptions
 	 */
-	static async generate(partialOptions = {}) {
-
+	static async generateStateUnionQa(nQuestions, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
@@ -96,7 +94,7 @@ export default class DatasetGenerateLangchain {
 			modelName: options.modelName,
 			// modelName: 'gpt-4',
 			temperature: 0,
-			// verbose: true,
+			verbose: true,
 		});
 		// const modelName = lgModel.modelName
 
@@ -176,7 +174,7 @@ Please generate {nQuestions} question/answer tuples about this context
 			contextText: contextText,
 			outputFormatInstructions: outputParser.getFormatInstructions(),
 			// outputFormatInstructions: '',
-			nQuestions: options.nQuestions,
+			nQuestions: nQuestions,
 		});
 
 		// @ts-ignore
@@ -193,12 +191,6 @@ Please generate {nQuestions} question/answer tuples about this context
 			outputText = outputText
 		}
 
-		if (options.verbose) {
-			console.log(`OUTPUT by ${CliColor.red(options.modelName)}`)
-			console.log(outputText)
-			console.log()
-		}
-
 		const responseJson = /** @type {ResponseJson} */(Json5.parse(outputText))
 
 		// build datasetJson
@@ -210,6 +202,13 @@ Please generate {nQuestions} question/answer tuples about this context
 				context: contextText,
 			})
 			datasetJson.push(datasetItemJson)
+		}
+
+
+		if (options.verbose) {
+			console.log(`OUTPUT by ${CliColor.red(options.modelName)}: ${datasetJson.length} items`)
+			console.log(datasetJson)
+			console.log()
 		}
 
 
@@ -226,7 +225,7 @@ Please generate {nQuestions} question/answer tuples about this context
 
 async function mainAsync() {
 	const modelName = 'gpt-3.5-turbo'
-	await DatasetGenerateLangchain.generate({
+	await DatasetGenerateLangchain.generateStateUnionQa(3, {
 		modelName: modelName,
 		verbose: true
 	})
