@@ -98,7 +98,7 @@ export default class EvaluationReport {
 					console.log(CliColor.red(`\titem ${itemIndex} INVALID`))
 					console.log(`\t- User input: ${CliColor.cyan(reportItem.userInput)}`)
 					console.log(`\t- Expected response: ${CliColor.cyan(reportItem.expectedResponse)}`)
-					console.log(`\t- Predicted response: ${CliColor.cyan(reportItem.predictedAnswer)}`)
+					console.log(`\t- Predicted response: ${CliColor.cyan(reportItem.predictedResponse)}`)
 					// console.log(JSON.stringify(reportItem, null, '\t'))
 				}
 			}

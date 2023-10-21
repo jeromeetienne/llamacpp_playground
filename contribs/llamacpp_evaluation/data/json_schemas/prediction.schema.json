@@ -5,11 +5,11 @@
         "items": {
                 "type": "object",
                 "required": [
-                        "predictedAnswer"
+                        "predictedResponse"
                 ],
                 "additionalProperties": false,
                 "properties": {
-                        "predictedAnswer": {
+                        "predictedResponse": {
                                 "type": "string",
                                 "description": "the predicted response"
                         }

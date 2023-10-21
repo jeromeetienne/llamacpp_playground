@@ -131,7 +131,7 @@ Based on this context, answer the following question:
 			const outputText = await LlamaUtils.promptOne(llamaContext, options.systemPrompt, userPromptGenerated, streamEnabled);
 			console.log(`Answer : ${CliColor.cyan(outputText)}`)
 			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({ 
-				predictedAnswer: outputText
+				predictedResponse: outputText
 			})
 			predictionJson.push(predictionItemJson)
 		}

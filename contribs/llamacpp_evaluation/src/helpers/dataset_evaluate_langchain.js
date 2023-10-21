@@ -88,7 +88,7 @@ ${datasetItem.userInput}`
 			// debugger
 			const evaluatorArgs = /** @type {import("langchain/dist/evaluation/base.js").StringEvaluatorArgs} */({
 				input: input,
-				prediction: predictionItem.predictedAnswer,
+				prediction: predictionItem.predictedResponse,
 				reference: datasetItem.expectedResponse
 			})
 			console.log({ evaluatorArgs })

@@ -20,6 +20,14 @@ Install the dependencies
 npm install
 ```
 
+## How to test
+
+It test all .json files are conforming to their json-schema.
+
+```
+npm test
+```
+
 **TODO** explain how to download the models for node-llama-cpp
 
 Generate the dataset

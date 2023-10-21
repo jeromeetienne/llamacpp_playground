@@ -143,7 +143,7 @@ Based on this context, answer the following question:
 
 			console.log(`Answer : ${CliColor.cyan(outputText)}`)
 			const predictionItemJson = /** @type {import("../type.d.js").PredictionItemJson} */({
-				predictedAnswer: outputText
+				predictedResponse: outputText
 			})
 			predictionJson.push(predictionItemJson)
 		}

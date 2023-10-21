@@ -180,7 +180,7 @@ export default class Utils {
 			const reportItemJson = /** @type {import("./type.d.js").ReportItemJson} */({
 				userInput: datasetItem.userInput,
 				expectedResponse: datasetItem.expectedResponse,
-				predictedAnswer: predictionItem.predictedAnswer,
+				predictedResponse: predictionItem.predictedResponse,
 				predictionValid: evaluationItem.predictionValid,
 			})
 			reportJson.push(reportItemJson)

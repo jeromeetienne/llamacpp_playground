@@ -8,8 +8,8 @@
     "validate:prediction-metadata": "ajv validate -s ../data/json_schemas/prediction-metadata.schema.json -d '../data/evaluations/evaluation_*/predictions/prediction_*/*.prediction-metadata.json'",
     "validate:prediction": "ajv validate -s ../data/json_schemas/prediction.schema.json -d '../data/evaluations/evaluation_*/predictions/prediction_*/*.prediction.json'",
     "validate:evaluation": "ajv validate -s ../data/json_schemas/evaluation.schema.json -d '../data/evaluations/evaluation_*/predictions/prediction_*/*.evaluation.json'",
-    "validate:hptuning": "ajv validate -s ../data/json_schemas/hptuning.schema.json -d '../data/evaluations/hptunings/*.hptuning.json'",
-    "validate:gridsearch": "ajv validate -s ../data/json_schemas/gridsearch.schema.json -d '../data/evaluations/hptunings/*.gridsearch.json'",
+    "validate:hptuning": "ajv validate -s ../data/json_schemas/hptuning.schema.json -d '../data/hptunings/*.hptuning.json'",
+    "validate:gridsearch": "ajv validate -s ../data/json_schemas/gridsearch.schema.json -d '../data/hptunings/*.gridsearch.json'",
     "test": "npm run validate:dataset && npm run validate:prediction-metadata && npm run validate:prediction && npm run validate:evaluation && npm run validate:hptuning && npm run validate:gridsearch && echo All json schema are VALIDATED!"
   },
   "keywords": [],

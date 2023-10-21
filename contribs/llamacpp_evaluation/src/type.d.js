@@ -25,7 +25,7 @@ void (0);
 
 /**
  * @typedef {object} PredictionItemJson
- * @property {string} predictedAnswer
+ * @property {string} predictedResponse
  */
 void (0);
 
@@ -82,7 +82,7 @@ void (0);
  * @typedef {object} ReportItemJson
  * @property {string} userInput
  * @property {string} expectedResponse
- * @property {string} predictedAnswer
+ * @property {string} predictedResponse
  * @property {boolean} predictionValid
  */
 void (0);
