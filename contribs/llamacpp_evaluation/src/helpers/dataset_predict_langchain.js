@@ -110,15 +110,6 @@ Based on this context, answer the following question:
 		const context = await Utils.loadContextText()
 		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
 
-
-
-		// const chain = promptTemplate.pipe(lgModel);
-		const chain = new LLMChain({
-			llm: lgModel,
-			prompt: promptTemplate
-		});
-
-
 		const predictionJson = /** @type {import("../type.d.js").PredictionJson} */([])
 		for (const datasetItem of datasetJson) {
 

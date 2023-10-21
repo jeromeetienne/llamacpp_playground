@@ -1,21 +1,4 @@
-
-
-# Possible Solutions
-- ```llama_evaluation create evaluationName datasetPath hptuningPath```
-  - copy datasetPath into ```./evaluations/evaluation_${evaluationName}/``` with the original basename
-  - copy hptuningPath into ```./evaluations/evaluation_${evaluationName}/``` with the original basename
-  - reread anyfile which has the proper extensions
-- move ```./hptunings/``` into its parents
-- move ```./datasets/``` into its parents
-
 - TODO rename prediction-metadata.json into ```.hyper-parameters.json``` ?
-- TODO should i put ```data.dataset.json``` into a ```./evaluations/datasets/``` folder
-- what about ```./hptunings/``` + ```./datasets/``` => copy to ```./evaluation_${evaluationName}/```, then use it there
-  - Q. should you add a specific command
-  - then you perform a evaluation on it
-  - you dont recompute all what has been computed already
-  - you get hptuning.json5 for specific grid search, or for default options
-
 - TODO remove 'generate' from ```llamacpp_evaluation.js```
   - put it in ```hptuning-generator.js```
 - TODO remove DatasetGenerateLangchain abd DatasetGenerateDirect and put it in ```dataset-generator```
@@ -28,6 +11,20 @@
     - doc here https://gist.github.com/gitaarik/8735255
 
 ## Done
+- ```llama_evaluation create evaluationName datasetPath hptuningPath```
+  - copy datasetPath into ```./evaluations/evaluation_${evaluationName}/``` with the original basename
+  - copy hptuningPath into ```./evaluations/evaluation_${evaluationName}/``` with the original basename
+  - reread anyfile which has the proper extensions
+- DONE move ```./hptunings/``` into its parents
+- DONE move ```./datasets/``` into its parents
+
+- DONE should i put ```data.dataset.json``` into a ```./evaluations/datasets/``` folder
+- DONE what about ```./hptunings/``` + ```./datasets/``` => copy to ```./evaluation_${evaluationName}/```, then use it there
+  - Q. should you add a specific command
+  - then you perform a evaluation on it
+  - you dont recompute all what has been computed already
+  - you get hptuning.json5 for specific grid search, or for default options
+
 - DONE Find a better workflow (finer grained steps) for ```llamacpp_evaluation```
   - personality generate a .gridsearch.json && .hptuning.json5 (and maybe .dataset.json)
   - .hptuning.json5 -> .prediction-metadata.json

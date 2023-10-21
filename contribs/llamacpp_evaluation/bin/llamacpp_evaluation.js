@@ -114,9 +114,21 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 
 	cmdline.command('create <evaluationName> <datasetPath> <hpTuningPath>')
-		.description('generate the dataset')
+		.description('generate an evaluation from a dataset and a hpTuning file.')
 		.action(async (evaluationName, datasetPath, hpTuningPath, options) => {
 			await doEvaluationCreate(evaluationName, datasetPath, hpTuningPath)
+		});
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	cmdline.command('delete <evaluationName>')
+		.description('delete an evaluation. WARNING: this is irreversible.')
+		.action(async (evaluationName, options) => {
+			await doEvaluationDelete(evaluationName)
 		});
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -274,19 +286,32 @@ async function doEvaluationCreate(evaluationName, datasetSrcPath, hpTuningSrcPat
 	await FsExtra.ensureDir(evaluationFolder)
 
 	// copy .dataset.json file
-	// const datasetBaseName = Path.basename(datasetSrcPath)
-	const datasetBaseName = 'data.dataset.json'
-	const datasetDstPath = Path.join(evaluationFolder, datasetBaseName)
+	const datasetBaseName = Path.basename(datasetSrcPath)
+	const datasetDstPath = Path.join(evaluationFolder, 'data.dataset.json')
 	await FsExtra.copy(datasetSrcPath, datasetDstPath)
 
 	// copy .hptuning.json file
-	// const hpTuningBaseName = Path.basename(hpTuningSrcPath)
-	const hpTuningBaseName = 'data.hptuning.json'
-	const hpTuningDstPath = Path.join(evaluationFolder, hpTuningBaseName)
+	const hpTuningBaseName = Path.basename(hpTuningSrcPath)
+	const hpTuningDstPath = Path.join(evaluationFolder, 'data.hptuning.json')
 	await FsExtra.copy(hpTuningSrcPath, hpTuningDstPath)
 
-	console.log(`Created evaluation ${CliColor.red(evaluationName)} with dataset ${CliColor.red(datasetBaseName)} and hpTuning ${CliColor.red(hpTuningBaseName)}`)
+	console.log(`Created evaluation ${CliColor.blue(evaluationName)} with dataset ${CliColor.blue(datasetBaseName)} and hpTuning ${CliColor.blue(hpTuningBaseName)}`)
 }
+
+/**
+ * 
+ * @param {string} evaluationName 
+ */
+async function doEvaluationDelete(evaluationName) {
+	// create the folder if needed
+	const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
+	// delete the folder
+	await FsExtra.remove(evaluationFolder)
+
+	// log for the user
+	console.log(`Deleted evaluation ${CliColor.blue(evaluationName)}`)
+}
+
 
 /**
  * 
@@ -499,7 +524,7 @@ async function doDatasetEvaluateLangchain(evaluationName, predictionName) {
  */
 async function doDatasetReport(evaluationName) {
 	await EvaluationReport.display(evaluationName, {
-		// verbose: true
+		verbose: true
 	})
 }
 

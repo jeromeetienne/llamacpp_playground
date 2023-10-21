@@ -2,8 +2,12 @@
 import Path from 'path'
 import Fs from 'fs'
 
+// npm imports
+import CliColor from 'cli-color'
+
 // local imports
 import Utils from "../utils.js";
+
 
 
 
@@ -40,20 +44,10 @@ export default class EvaluationReport {
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-		//	get prediction names
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-
-		// TODO put that into Utils
-		const predictionNames = await Utils.getPredictionNames(evaluationName)
-		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
 		//      build report array
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-
+		const predictionNames = await Utils.getPredictionNames(evaluationName)
 		for (const predictionName of predictionNames) {
 			const reportJson = await Utils.buildReportJson(evaluationName, predictionName)
 			const predictionMetadataJson = await Utils.loadPredictionMetadataJson(evaluationName, predictionName)
@@ -70,13 +64,14 @@ export default class EvaluationReport {
 			//	
 			///////////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////////
-			
-			console.log(`OUTPUT REPORT FOR ${predictionName}`)
-			if (options.verbose) {
-				console.log(`${JSON.stringify(reportJson, null, '\t')}`)
-			}
+
+			const cliColorName = evaluationScore === 1 ? 'green' : evaluationScore >= 0.8 ? 'yellow' : 'red'
+			console.log(`${CliColor.blue(`OUTPUT REPORT FOR ${predictionName}`)}: score ${CliColor[cliColorName]((evaluationScore * 100).toFixed(2) + '%')}`)
+			// if (options.verbose) {
+			// 	console.log(`${JSON.stringify(reportJson, null, '\t')}`)
+			// }
 			// debugger
-			for(const optionName of Object.keys(predictionMetadataJson.explicitOptions)){
+			for (const optionName of Object.keys(predictionMetadataJson.explicitOptions)) {
 				console.log(`\t- Explicit ${optionName}: ${predictionMetadataJson.explicitOptions[optionName]}`)
 			}
 
@@ -86,8 +81,8 @@ export default class EvaluationReport {
 			///////////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////////
 
-			console.log(`\tDataset count: ${reportJson.length} items (${validCount} valid/${reportJson.length-validCount} invalid)`)
-			console.log(`\tEvaluation score: ${(evaluationScore * 100).toFixed(2)}%`)
+			// console.log(`\tDataset count: ${reportJson.length} items (${validCount} valid/${reportJson.length-validCount} invalid)`)
+			// console.log(`\tEvaluation score: ${(evaluationScore * 100).toFixed(2)}%`)
 
 			///////////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////////
@@ -95,20 +90,17 @@ export default class EvaluationReport {
 			///////////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////////
 
-			if( options.verbose === true ){
-				const hasInvalidItems = reportJson.some(reportItem => reportItem.predictionValid === false)
-				if (hasInvalidItems === false) {
-					console.log('No invalid items')
-				} else {
-					for (const reportItem of reportJson) {
-						const itemIndex = reportJson.indexOf(reportItem)
-						if (reportItem.predictionValid) {
-							continue
-						}
-						console.log(`items ${itemIndex} INVALID`)
-						console.log(JSON.stringify(reportItem, null, '\t'))
-					}
-				}	
+			if (evaluationScore < 1 && options.verbose === true) {
+				// display invalid items
+				for (const reportItem of reportJson) {
+					const itemIndex = reportJson.indexOf(reportItem)
+					if (reportItem.predictionValid) continue
+					console.log(CliColor.red(`\titem ${itemIndex} INVALID`))
+					console.log(`\t- User input: ${CliColor.cyan(reportItem.userInput)}`)
+					console.log(`\t- Expected response: ${CliColor.cyan(reportItem.expectedResponse)}`)
+					console.log(`\t- Predicted response: ${CliColor.cyan(reportItem.predictedAnswer)}`)
+					// console.log(JSON.stringify(reportItem, null, '\t'))
+				}
 			}
 		}
 	}
