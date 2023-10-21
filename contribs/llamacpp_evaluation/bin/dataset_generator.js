@@ -136,10 +136,9 @@ async function generateGridSearchMultiLanguage() {
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
 		hpTuningName: `gridsearch_multiLanguage`,
 		modelNames: [
-			'gpt-3.5-turbo'
-			// ...ConstantModelNamesOpenAI,
+			...ConstantModelNamesOpenAI,
 			// ...ConstantModelNames7B,
-			// ...modelNames13B,
+			...ConstantModelNames13B,
 		],
 		systemPrompts: [
 			"You are a helpful assistant that translates english to french.",

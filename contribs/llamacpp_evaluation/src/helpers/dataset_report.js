@@ -46,7 +46,7 @@ export default class DatasetReport {
 
 		// TODO put that into Utils
 		const predictionNames = await Utils.getPredictionNames(evaluationName)
-		const datasetJson = await Utils.loadDatasetJson(evaluationName)
+		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////

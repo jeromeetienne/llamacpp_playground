@@ -16,11 +16,6 @@
   - you dont recompute all what has been computed already
   - you get hptuning.json5 for specific grid search, or for default options
 
-- TODO Find a better workflow (finer grained steps) for ```llamacpp_evaluation```
-  - personality generate a .gridsearch.json && .hptuning.json5 (and maybe .dataset.json)
-  - .hptuning.json5 -> .prediction-metadata.json
-  - **predict**: .prediction-metadata.json + .dataset.json -> .prediction.json
-  - **evaluate**: .prediction.json -> .evaluation.json
 - TODO remove 'generate' from ```llamacpp_evaluation.js```
   - put it in ```hptuning-generator.js```
 - TODO remove DatasetGenerateLangchain abd DatasetGenerateDirect and put it in ```dataset-generator```
@@ -33,6 +28,11 @@
     - doc here https://gist.github.com/gitaarik/8735255
 
 ## Done
+- DONE Find a better workflow (finer grained steps) for ```llamacpp_evaluation```
+  - personality generate a .gridsearch.json && .hptuning.json5 (and maybe .dataset.json)
+  - .hptuning.json5 -> .prediction-metadata.json
+  - **predict**: .prediction-metadata.json + .dataset.json -> .prediction.json
+  - **evaluate**: .prediction.json -> .evaluation.json
 - DONE add dataset.json personality in ```hptuning-generator```
   - Q. should i rename it ```dataset-generator``` ?
 - DONE remove the json5

@@ -116,7 +116,7 @@ Based on this context, answer the following question:
 		///////////////////////////////////////////////////////////////////////////////
 
 		// debugger
-		const datasetJson = await Utils.loadDatasetJson(evaluationName)
+		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
 		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
 
 		for (const datasetItem of datasetJson) {

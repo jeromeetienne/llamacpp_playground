@@ -30,7 +30,7 @@ export default class Utils {
 		//	
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-		
+
 
 		// Trick to add 'undefined' to the array if the array is empty
 		// - this allow to have a simple algo in the loop below
@@ -81,14 +81,12 @@ export default class Utils {
 	}
 
 	static getHpTuningsFolder() {
-		const evaluationsFolder = Utils.getEvaluationsFolder()
-		const hpTuningsFolder = Path.join(evaluationsFolder, `./hptunings/`)
+		const hpTuningsFolder = Path.join(__dirname, `../data/hptunings/`)
 		return hpTuningsFolder
 	}
 
 	static getDatasetsFolder() {
-		const evaluationsFolder = Utils.getEvaluationsFolder()
-		const hpTuningsFolder = Path.join(evaluationsFolder, `./datasets/`)
+		const hpTuningsFolder = Path.join(__dirname, `./data/datasets/`)
 		return hpTuningsFolder
 	}
 
@@ -160,7 +158,7 @@ export default class Utils {
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		const datasetJson = await Utils.loadDatasetJson(evaluationName)
+		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
 		const predictionJson = await Utils.loadPredictionJson(evaluationName, predictionName)
 		const evaluationJson = await Utils.loadEvaluationJson(evaluationName, predictionName)
 		// sanity check
@@ -201,7 +199,7 @@ export default class Utils {
 	 * 
 	 * @param {string} evaluationName 
 	 */
-	static async loadDatasetJson(evaluationName) {
+	static async loadEvaluationDatasetJson(evaluationName) {
 		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
 		const filePath = Path.join(evaluationFolder, 'data.dataset.json')
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
@@ -214,7 +212,7 @@ export default class Utils {
 	 * @param {string} evaluationName 
 	 * @param {import("./type.d.js").DatasetJson} datasetJson
 	 */
-	static async saveDatasetJson(evaluationName, datasetJson) {
+	static async saveEvaluationDatasetJson(evaluationName, datasetJson) {
 		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
 		await FsExtra.ensureDir(evaluationFolder)
 		const filePath = Path.join(evaluationFolder, 'data.dataset.json')
@@ -409,12 +407,22 @@ export default class Utils {
 		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
 		const hpTuningJson = /** @type {import("./type.d.js").HpTuningJson} */(Json5.parse(fileContent))
 
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		//	sanity check
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
+		// sanity check
+		const isValid = await Utils._checkHpTuningJson(hpTuningJson)
+		if (isValid === false) {
+			throw new Error(`invalid hpTuningJson`)
+		}
 
+
+		return hpTuningJson
+	}
+
+	/**
+	 * 
+	 * @param {import("./type.d.js").HpTuningJson} hpTuningJson
+	 * @returns 
+	 */
+	static async _checkHpTuningJson(hpTuningJson) {
 		// - check the models names are valid
 		//   - whitelist of valid models for openai
 		//   - if .gguf basename, check the file exists in ./models/
@@ -432,11 +440,10 @@ export default class Utils {
 				if (fileExists === true) continue
 			}
 
-			throw new Error(`invalid model name "${tuningPredictionJson.modelName}"`)
+			return false
 		}
 
-
-		return hpTuningJson
+		return true
 	}
 
 	/**
@@ -451,6 +458,26 @@ export default class Utils {
 		console.log(`saved hpTuningJson to "${CliColor.greenBright(filePath)}"`)
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
 	}
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 */
+	static async loadEvaluationHpTuningJson(evaluationName) {
+		const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
+		const filePath = Path.join(evaluationFolder, 'data.hptuning.json')
+		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
+		const hpTuningJson = /** @type {import("./type.d.js").HpTuningJson} */(Json5.parse(fileContent))
+
+		// sanity check
+		const isValid = await Utils._checkHpTuningJson(hpTuningJson)
+		if (isValid === false) {
+			throw new Error(`invalid hpTuningJson`)
+		}
+
+		return hpTuningJson
+	}
+
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////

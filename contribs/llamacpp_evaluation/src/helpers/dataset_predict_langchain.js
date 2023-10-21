@@ -108,7 +108,7 @@ Based on this context, answer the following question:
 
 
 		const context = await Utils.loadContextText()
-		const datasetJson = await Utils.loadDatasetJson(evaluationName)
+		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
 
 
 

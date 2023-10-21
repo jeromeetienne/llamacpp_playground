@@ -7,12 +7,12 @@ import Fs from "fs"
 // npm imports
 import * as Commander from "commander"
 import CliColor from "cli-color"
-import Json5 from "json5"
+import FsExtra from "fs-extra"
 
 // local imports
-import ModelPathContants from "../../../src/model_path_constants.js"
-import DatasetGenerateDirect from "../src/helpers/dataset_generate_direct.js"
-import DatasetGenerateLangchain from "../src/helpers/dataset_generate_langchain.js"
+// import ModelPathContants from "../../../src/model_path_constants.js"
+// import DatasetGenerateDirect from "../src/helpers/dataset_generate_direct.js"
+// import DatasetGenerateLangchain from "../src/helpers/dataset_generate_langchain.js"
 import DatasetPredictDirect from "../src/helpers/dataset_predict_direct.js"
 import DatasetPredictLangchain from "../src/helpers/dataset_predict_langchain.js"
 import DatasetEvaluateLangchain from "../src/helpers/dataset_evaluate_langchain.js"
@@ -70,36 +70,53 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('generate <evaluationName> [modelName]')
-		.description('generate the dataset')
-		.option('-l, --langchain', 'use langchain technology instead of direct')
-		.option('-d, --direct', 'use direct technology instead of langchain')
-		.option('-n, --nQuestions <number>', 'number of questions to generate', parseFloat)
-		.action(async (evaluationName, modelName, options) => {
-			// debugger
-			// compute shouldUseDirect
-			let shouldUseDirect = null
-			if (options.direct) {
-				shouldUseDirect = true
-			} else if (options.langchain) {
-				shouldUseDirect = false
-			} else if (modelName !== undefined) {
-				shouldUseDirect = modelName.endsWith('.gguf')
-			} else {
-				shouldUseDirect = true
-			}
+	// cmdline.command('generate <evaluationName> [modelName]')
+	// 	.description('generate the dataset')
+	// 	.option('-l, --langchain', 'use langchain technology instead of direct')
+	// 	.option('-d, --direct', 'use direct technology instead of langchain')
+	// 	.option('-n, --nQuestions <number>', 'number of questions to generate', parseFloat)
+	// 	.action(async (evaluationName, modelName, options) => {
 
-			if (shouldUseDirect) {
-				await doDatasetGenerateDirect(evaluationName, {
-					modelName: modelName,
-					nQuestions: options.nQuestions
-				})
-			} else {
-				await doDatasetGenerateLangchain(evaluationName, {
-					modelName: modelName,
-					nQuestions: options.nQuestions
-				})
-			}
+	// 		// TODO this logic should be moved to dataset_generator.js
+
+	// 		console.error('WARNING: this command is deprecated')
+
+	// 		// debugger
+	// 		// compute shouldUseDirect
+	// 		let shouldUseDirect = null
+	// 		if (options.direct) {
+	// 			shouldUseDirect = true
+	// 		} else if (options.langchain) {
+	// 			shouldUseDirect = false
+	// 		} else if (modelName !== undefined) {
+	// 			shouldUseDirect = modelName.endsWith('.gguf')
+	// 		} else {
+	// 			shouldUseDirect = true
+	// 		}
+
+	// 		if (shouldUseDirect) {
+	// 			await doDatasetGenerateDirect(evaluationName, {
+	// 				modelName: modelName,
+	// 				nQuestions: options.nQuestions
+	// 			})
+	// 		} else {
+	// 			await doDatasetGenerateLangchain(evaluationName, {
+	// 				modelName: modelName,
+	// 				nQuestions: options.nQuestions
+	// 			})
+	// 		}
+	// 	});
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	cmdline.command('create <evaluationName> <datasetPath> <hpTuningPath>')
+		.description('generate the dataset')
+		.action(async (evaluationName, datasetPath, hpTuningPath, options) => {
+			await doEvaluationCreate(evaluationName, datasetPath, hpTuningPath)
 		});
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -128,7 +145,7 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 			if (shouldUseDirect) {
 				await doDatasetPredictDirect(evaluationName, predictionName, { modelName })
 			} else {
-				await doDatasetPredictLangchain(evaluationName, predictionName, {modelName})
+				await doDatasetPredictLangchain(evaluationName, predictionName, { modelName })
 			}
 		});
 
@@ -162,10 +179,10 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('hptuning <evaluationName> <hpTuningPath>')
+	cmdline.command('hptuning <evaluationName>')
 		.description('Do hyperparameters tuning for a given .hptuning.json file')
-		.action(async (evaluationName, hpTuningPath, options) => {
-			await doDatasetHpTuning(evaluationName, hpTuningPath)
+		.action(async (evaluationName, options) => {
+			await doDatasetHpTuning(evaluationName)
 		});
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -192,55 +209,83 @@ void mainAsync()
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+// /**
+//  * 
+//  * @param {string} evaluationName 
+//  * @param {object} options
+//  * @param {string=} options.modelName
+//  * @param {number=} options.nQuestions
+//  */
+// async function doDatasetGenerateDirect(evaluationName, options = {}) {
+
+// 	///////////////////////////////////////////////////////////////////////////////
+// 	///////////////////////////////////////////////////////////////////////////////
+// 	//	do the generate itself
+// 	///////////////////////////////////////////////////////////////////////////////
+// 	///////////////////////////////////////////////////////////////////////////////
+// 	// debugger
+// 	const datasetJson = await DatasetGenerateDirect.generate({
+// 		modelName: options.modelName,
+// 		nQuestions: options.nQuestions,
+// 		verbose: true
+// 	})
+
+// 	// save a prediction.json file
+// 	await Utils.saveEvaluationDatasetJson(evaluationName, datasetJson);
+
+// 	const modelName = options.modelName ?? DatasetGenerateDirect.defaultGenerateOptions.modelName
+// 	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
+// 	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
+// }
+
+// /**
+//  * 
+//  * @param {string} evaluationName 
+//  * @param {object}	options
+//  * @param {string=} options.modelName
+//  * @param {number=} options.nQuestions
+//  */
+// async function doDatasetGenerateLangchain(evaluationName, options = {}) {
+// 	const datasetJson = await DatasetGenerateLangchain.generate({
+// 		modelName: options.modelName,
+// 		nQuestions: options.nQuestions,
+// 		verbose: true,
+// 	})
+
+// 	// save a prediction.json file
+// 	await Utils.saveEvaluationDatasetJson(evaluationName, datasetJson);
+
+// 	const modelName = options.modelName ?? DatasetGenerateLangchain.defaultGenerateOptions.modelName
+// 	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
+// 	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
+// }
+
+
 /**
  * 
  * @param {string} evaluationName 
- * @param {object} options
- * @param {string=} options.modelName
- * @param {number=} options.nQuestions
+ * @param {string} datasetSrcPath 
+ * @param {string} hpTuningSrcPath 
+ * @returns 
  */
-async function doDatasetGenerateDirect(evaluationName, options = {}) {
+async function doEvaluationCreate(evaluationName, datasetSrcPath, hpTuningSrcPath) {
+	// create the folder if needed
+	const evaluationFolder = Utils.getEvaluationFolder(evaluationName)
+	await FsExtra.ensureDir(evaluationFolder)
 
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-	//	do the generate itself
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-	// debugger
-	const datasetJson = await DatasetGenerateDirect.generate({
-		modelName: options.modelName,
-		nQuestions: options.nQuestions,
-		verbose: true
-	})
+	// copy .dataset.json file
+	// const datasetBaseName = Path.basename(datasetSrcPath)
+	const datasetBaseName = 'data.dataset.json'
+	const datasetDstPath = Path.join(evaluationFolder, datasetBaseName)
+	await FsExtra.copy(datasetSrcPath, datasetDstPath)
 
-	// save a prediction.json file
-	await Utils.saveDatasetJson(evaluationName, datasetJson);
+	// copy .hptuning.json file
+	// const hpTuningBaseName = Path.basename(hpTuningSrcPath)
+	const hpTuningBaseName = 'data.hptuning.json'
+	const hpTuningDstPath = Path.join(evaluationFolder, hpTuningBaseName)
+	await FsExtra.copy(hpTuningSrcPath, hpTuningDstPath)
 
-	const modelName = options.modelName ?? DatasetGenerateDirect.defaultGenerateOptions.modelName
-	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
-	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
-}
-
-/**
- * 
- * @param {string} evaluationName 
- * @param {object}	options
- * @param {string=} options.modelName
- * @param {number=} options.nQuestions
- */
-async function doDatasetGenerateLangchain(evaluationName, options = {}) {
-	const datasetJson = await DatasetGenerateLangchain.generate({
-		modelName: options.modelName,
-		nQuestions: options.nQuestions,
-		verbose: true,
-	})
-
-	// save a prediction.json file
-	await Utils.saveDatasetJson(evaluationName, datasetJson);
-
-	const modelName = options.modelName ?? DatasetGenerateLangchain.defaultGenerateOptions.modelName
-	console.log(`Generate OUTPUT by ${CliColor.red(modelName)}`)
-	console.log(`${JSON.stringify(datasetJson, null, '\t')}`)
+	console.log(`Created evaluation ${CliColor.red(evaluationName)} with dataset ${CliColor.red(datasetBaseName)} and hpTuning ${CliColor.red(hpTuningBaseName)}`)
 }
 
 /**
@@ -436,7 +481,7 @@ async function doDatasetEvaluateLangchain(evaluationName, predictionName) {
 	//	
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	
+
 	const modelName = 'gpt-3.5-turbo'
 	const evaluationJson = await DatasetEvaluateLangchain.evaluate(evaluationName, predictionName, modelName, {
 		// verbose: true
@@ -462,12 +507,10 @@ async function doDatasetReport(evaluationName) {
 /**
  * 
  * @param {string} evaluationName 
- * @param {string} hpTuningPath 
  */
-async function doDatasetHpTuning(evaluationName, hpTuningPath) {
+async function doDatasetHpTuning(evaluationName) {
 
-	const hpTuningName = Path.basename(hpTuningPath, '.hptuning.json')
-	const hpTuningJson = await Utils.loadHpTuningJson(hpTuningName)
+	const hpTuningJson = await Utils.loadEvaluationHpTuningJson(evaluationName)
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -508,4 +551,12 @@ async function doDatasetHpTuning(evaluationName, hpTuningPath) {
 		const predictionName = hpTuningPrediction.predictionName ?? `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
 		await doDatasetEvaluateLangchain(evaluationName, predictionName)
 	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	Display report
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	await doDatasetReport(evaluationName)
 }

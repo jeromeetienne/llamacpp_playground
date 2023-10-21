@@ -1,0 +1,17 @@
+[
+	{
+		"userInput": "What is your name ?",
+		"expectedResponse": "Quel est ton nom ?",
+		"context": ""
+	},
+	{
+		"userInput": "My favorite color is blue",
+		"expectedResponse": "Ma couleur préférée est le bleu",
+		"context": ""
+	},
+	{
+		"userInput": "I like to walk on the beach.",
+		"expectedResponse": "J'aime marcher sur la plage.",
+		"context": ""
+	}
+]

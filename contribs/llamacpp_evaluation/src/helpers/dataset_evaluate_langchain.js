@@ -56,7 +56,7 @@ export default class DatasetEvaluateLangchain {
 		// const evaluationName = 'myeval'
 
 		const contextText = await Utils.loadContextText()
-		const datasetJson = await Utils.loadDatasetJson(evaluationName)
+		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
 		const predictionJson = await Utils.loadPredictionJson(evaluationName, predictionName)
 		// sanity check
 		console.assert(datasetJson.length === predictionJson.length, `datasetJson.length (${datasetJson.length}) !== predictionJson.length (${predictionJson.length})`)
