@@ -78,10 +78,10 @@ async function mainAsync() {
 		.action(async (personalityName, options) => {
 			await generateDatasetStateUnionQa()
 		});
-	cmdline.command('gridsearch_multiLanguage')
-		.description('generate the hptuning.json+.gridsearch.json for multiLanguage')
+	cmdline.command('gridsearch_translateFrench')
+		.description('generate the hptuning.json+.gridsearch.json for translateFrench')
 		.action(async (personalityName, options) => {
-			await generateGridSearchMultiLanguage()
+			await generateGridSearchTranslateFrench()
 		});
 	cmdline.command('gridsearch_onlyBlah')
 		.description('generate the hptuning.json+.gridsearch.json for onlyBlah')
@@ -136,13 +136,13 @@ async function generateDatasetStateUnionQa() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-async function generateGridSearchMultiLanguage() {
+async function generateGridSearchTranslateFrench() {
 
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
-		hpTuningName: `gridsearch_multiLanguage`,
+		hpTuningName: `gridsearch_translateFrench`,
 		modelNames: [
 			...ConstantModelNamesOpenAI,
-			// ...ConstantModelNames7B,
+			...ConstantModelNames7B,
 			...ConstantModelNames13B,
 		],
 		systemPrompts: [
