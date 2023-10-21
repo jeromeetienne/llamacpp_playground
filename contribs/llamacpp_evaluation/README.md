@@ -16,7 +16,7 @@
 ## How to get started
 
 Install the dependencies
-```
+```sh
 npm install
 ```
 
@@ -24,26 +24,59 @@ npm install
 
 It test all .json files are conforming to their json-schema.
 
-```
+```sh
 npm test
 ```
 
 **TODO** explain how to download the models for node-llama-cpp
 
 
+## How to Generate a dataset ?
 
-Generate the dataset
-```
-npm run generate
+This is done by ```dataset_generator.js``` tool
+```sh
+./bin/dataset_generator.js 
 ```
 
-Perform a hyperparameters tuning on this dataset
+Here is the inline help for this tool
 ```
-npm run hptuning
+Usage: dataset_generator.js [options] [command]
+
+dataset_generator.js
+
+Options:
+  -V, --version             output the version number
+  -h, --help                display help for command
+
+Commands:
+  dataset_stateUnionQa      generate the dataset for a personality
+  gridsearch_multiLanguage  generate the hptuning.json+.gridsearch.json for multiLanguage
+  gridsearch_onlyBlah       generate the hptuning.json+.gridsearch.json for onlyBlah
+  gridsearch_testAccuracy   generate the hptuning.json+.gridsearch.json for testAccuracy
+  help [command]            display help for command
 ```
+
+## How to do an Evaluation ?
+
+Create an evaluation
+```sh
+./bin/llamacpp_evaluation.js create yourEval ./data/datasets/translatefrench.dataset.json ./data/hptunings/gridsearch_multiLanguage.hptuning.json
+```
+
+Compute the evaluation
+```
+./bin/llamacpp_evaluation.js compute yourEval 
+```
+
+Once you don't need it anymore, you can delete the evaluation
+
+```
+./bin/llamacpp_evaluation.js delete yourEval 
+```
+
 
 ## How to download model
-see [llamacpp_playground README.md](../llamacpp_playground/README.md)
+see [llamacpp_playground README.md](../../README.md)
 
 ## Evaluation Steps
 

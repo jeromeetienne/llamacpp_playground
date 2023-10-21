@@ -191,10 +191,10 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('hptuning <evaluationName>')
+	cmdline.command('compute <evaluationName>')
 		.description('Do hyperparameters tuning for a given .hptuning.json file')
 		.action(async (evaluationName, options) => {
-			await doDatasetHpTuning(evaluationName)
+			await doComputeEvaluation(evaluationName)
 		});
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -533,7 +533,7 @@ async function doDatasetReport(evaluationName) {
  * 
  * @param {string} evaluationName 
  */
-async function doDatasetHpTuning(evaluationName) {
+async function doComputeEvaluation(evaluationName) {
 
 	const hpTuningJson = await Utils.loadEvaluationHpTuningJson(evaluationName)
 
