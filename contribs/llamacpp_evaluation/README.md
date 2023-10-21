@@ -30,6 +30,8 @@ npm test
 
 **TODO** explain how to download the models for node-llama-cpp
 
+
+
 Generate the dataset
 ```
 npm run generate
@@ -39,6 +41,9 @@ Perform a hyperparameters tuning on this dataset
 ```
 npm run hptuning
 ```
+
+## How to download model
+see [llamacpp_playground README.md](../llamacpp_playground/README.md)
 
 ## Evaluation Steps
 

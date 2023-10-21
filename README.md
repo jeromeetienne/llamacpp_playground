@@ -21,6 +21,28 @@ npm run download:mistral-7b-instruct
 
 it will be downloaded in [./models/ folder](./models/).
 
+### Benchmark
+It will benchmark the downloaded models.
+
+```sh
+npm run benchmark
+```
+
+Output:
+```
+Benching model... codellama-7b-instruct.Q4_K_M.gguf
+Time elapsed: 21.71-seconds
+Speed: 108.75 chars/second - 25.01 tokens/second
+Benching model... llama-2-7b-chat.Q6_K.gguf
+Time elapsed: 22.05-seconds
+Speed: 83.73 chars/second - 18.82 tokens/second
+Benching model... mistral-7b-instruct-v0.1.Q6_K.gguf
+Time elapsed: 20.07-seconds
+Speed: 71.05 chars/second - 17.19 tokens/second
+Benching model... zephyr-7b-alpha.Q6_K.gguf
+Time elapsed: 14.41-seconds
+Speed: 75.00 chars/second - 16.65 tokens/second
+```
 
 ### Some Predefined Models For Convenience
 Check the [./packages.json](./package.json) scripts and look at ```downdload:*``` or ```validate:*```.
