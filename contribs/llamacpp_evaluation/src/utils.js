@@ -178,7 +178,7 @@ export default class Utils {
 			const evaluationItem = evaluationJson[itemIndex]
 
 			const reportItemJson = /** @type {import("./type.d.js").ReportItemJson} */({
-				question: datasetItem.userInput,
+				userInput: datasetItem.userInput,
 				expectedResponse: datasetItem.expectedResponse,
 				predictedAnswer: predictionItem.predictedAnswer,
 				predictionValid: evaluationItem.predictionValid,
@@ -363,6 +363,20 @@ export default class Utils {
 		const filePath = Path.join(predictionFolder, 'data.prediction-metadata.json')
 		const fileExists = await FsExtra.pathExists(filePath)
 		return fileExists
+	}
+
+	/**
+	 * 
+	 * @param {string} evaluationName 
+	 * @param {string} predictionName
+	 */
+	static async loadPredictionMetadataJson(evaluationName, predictionName) {
+		const predictionFolder = Utils.getPredictionFolder(evaluationName, predictionName)
+		const filePath = Path.join(predictionFolder, 'data.prediction-metadata.json')
+
+		const fileContent = await Fs.promises.readFile(filePath, 'utf8')
+		const predictionMetadataJson = /** @type {import("./type.d.js").PredictionMetadataJson} */(Json5.parse(fileContent))
+		return predictionMetadataJson
 	}
 
 

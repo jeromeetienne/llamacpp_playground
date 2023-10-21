@@ -3,7 +3,7 @@ import Path from 'path'
 import Fs from 'fs'
 
 // local imports
-import Utils from "../../src/utils.js";
+import Utils from "../utils.js";
 
 
 
@@ -14,7 +14,7 @@ import Utils from "../../src/utils.js";
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * @typedef {Object} DatasetReportOptions
+ * @typedef {Object} EvaluationReportOptions
  * @property {Boolean} verbose
  */
 
@@ -24,19 +24,19 @@ import Utils from "../../src/utils.js";
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-export default class DatasetReport {
+export default class EvaluationReport {
 
 	/**
 	 * @param {string} evaluationName
-	 * @param {Partial<DatasetReportOptions>} partialOptions
+	 * @param {Partial<EvaluationReportOptions>} partialOptions
 	 */
 	static async display(evaluationName, partialOptions = {}) {
 
 		// handle default options
-		partialOptions = Object.assign({}, /** @type {DatasetReportOptions} */({
+		partialOptions = Object.assign({}, /** @type {EvaluationReportOptions} */({
 			verbose: false,
 		}), partialOptions)
-		const options = /** @type {DatasetReportOptions} */(partialOptions)
+		const options = /** @type {EvaluationReportOptions} */(partialOptions)
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -56,9 +56,28 @@ export default class DatasetReport {
 
 		for (const predictionName of predictionNames) {
 			const reportJson = await Utils.buildReportJson(evaluationName, predictionName)
+			const predictionMetadataJson = await Utils.loadPredictionMetadataJson(evaluationName, predictionName)
+
+			// Compute statistics
+			let validCount = 0
+			for (const reportItem of reportJson) {
+				if (reportItem.predictionValid) validCount += 1
+			}
+			const evaluationScore = validCount / reportJson.length
+
+			///////////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////////
+			//	
+			///////////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////////
+			
 			console.log(`OUTPUT REPORT FOR ${predictionName}`)
 			if (options.verbose) {
 				console.log(`${JSON.stringify(reportJson, null, '\t')}`)
+			}
+			// debugger
+			for(const optionName of Object.keys(predictionMetadataJson.explicitOptions)){
+				console.log(`\t- Explicit ${optionName}: ${predictionMetadataJson.explicitOptions[optionName]}`)
 			}
 
 			///////////////////////////////////////////////////////////////////////////////
@@ -67,11 +86,6 @@ export default class DatasetReport {
 			///////////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////////
 
-			let validCount = 0
-			for (const reportItem of reportJson) {
-				if (reportItem.predictionValid) validCount += 1
-			}
-			const evaluationScore = validCount / reportJson.length
 			console.log(`\tDataset count: ${reportJson.length} items (${validCount} valid/${reportJson.length-validCount} invalid)`)
 			console.log(`\tEvaluation score: ${(evaluationScore * 100).toFixed(2)}%`)
 

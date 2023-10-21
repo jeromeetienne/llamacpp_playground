@@ -1,0 +1,11 @@
+{
+	"hpTuningName": "gridsearch_testAccuracy",
+	"modelNames": [
+		"gpt-3.5-turbo",
+		"gpt-4",
+		"llama-2-13b-chat.Q3_K_M.gguf",
+		"codellama-13b-instruct.Q3_K_M.gguf"
+	],
+	"systemPrompts": [],
+	"userPrompts": []
+}

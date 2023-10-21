@@ -15,7 +15,7 @@ import DatasetGenerateLangchain from "../src/helpers/dataset_generate_langchain.
 import DatasetPredictDirect from "../src/helpers/dataset_predict_direct.js"
 import DatasetPredictLangchain from "../src/helpers/dataset_predict_langchain.js"
 import DatasetEvaluateLangchain from "../src/helpers/dataset_evaluate_langchain.js"
-import DatasetReport from "../src/helpers/dataset_report.js"
+import EvaluationReport from "../src/helpers/evaluation_report.js"
 import Utils from "../src/utils.js"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,6 +88,11 @@ async function mainAsync() {
 		.action(async (personalityName, options) => {
 			await generateGridSearchOnlyBlah()
 		});
+	cmdline.command('gridsearch_testAccuracy')
+		.description('generate the hptuning.json+.gridsearch.json for testAccuracy')
+		.action(async (personalityName, options) => {
+			await generateGridSearchTestAccuracy()
+		});
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -115,11 +120,11 @@ void mainAsync()
 
 async function generateDatasetStateUnionQa() {
 	const datasetJson = await DatasetGenerateLangchain.generate({
-		modelName : 'gpt-3.5-turbo',
+		modelName: 'gpt-3.5-turbo',
 		nQuestions: 1,
 		verbose: true,
 	})
-	
+
 	const datasetName = `stateUnionQa`
 	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
 }
@@ -149,7 +154,7 @@ async function generateGridSearchMultiLanguage() {
 	})
 
 	await Utils.saveGridSearchJson(gridSearchJson.hpTuningName, gridSearchJson)
-	
+
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	//	generate grid-search and save .hptuning.json file
@@ -186,7 +191,43 @@ async function generateGridSearchOnlyBlah() {
 	})
 
 	await Utils.saveGridSearchJson(gridSearchJson.hpTuningName, gridSearchJson)
-	
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	generate grid-search and save .hptuning.json file
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	// debugger
+	const hpTuningJson = await Utils.generateHpTuningFromGridSearch(gridSearchJson)
+	await Utils.saveHpTuningJson(gridSearchJson.hpTuningName, hpTuningJson)
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//	
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+
+async function generateGridSearchTestAccuracy() {
+
+	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
+		hpTuningName: `gridsearch_testAccuracy`,
+		modelNames: [
+			...ConstantModelNamesOpenAI,
+			// ...ConstantModelNames7B,
+			...ConstantModelNames13B,
+		],
+		systemPrompts: [
+		],
+		userPrompts: [
+		],
+	})
+
+	await Utils.saveGridSearchJson(gridSearchJson.hpTuningName, gridSearchJson)
+
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	//	generate grid-search and save .hptuning.json file

@@ -16,7 +16,7 @@ import FsExtra from "fs-extra"
 import DatasetPredictDirect from "../src/helpers/dataset_predict_direct.js"
 import DatasetPredictLangchain from "../src/helpers/dataset_predict_langchain.js"
 import DatasetEvaluateLangchain from "../src/helpers/dataset_evaluate_langchain.js"
-import DatasetReport from "../src/helpers/dataset_report.js"
+import EvaluationReport from "../src/helpers/evaluation_report.js"
 import Utils from "../src/utils.js"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -498,7 +498,7 @@ async function doDatasetEvaluateLangchain(evaluationName, predictionName) {
  * @param {string} evaluationName 
  */
 async function doDatasetReport(evaluationName) {
-	await DatasetReport.display(evaluationName, {
+	await EvaluationReport.display(evaluationName, {
 		// verbose: true
 	})
 }

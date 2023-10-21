@@ -80,7 +80,7 @@ void (0);
 
 /**
  * @typedef {object} ReportItemJson
- * @property {string} question
+ * @property {string} userInput
  * @property {string} expectedResponse
  * @property {string} predictedAnswer
  * @property {boolean} predictionValid

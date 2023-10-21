@@ -1,0 +1,17 @@
+{
+	"hpTuningName": "gridsearch_testAccuracy",
+	"predictions": [
+		{
+			"modelName": "gpt-3.5-turbo"
+		},
+		{
+			"modelName": "gpt-4"
+		},
+		{
+			"modelName": "llama-2-13b-chat.Q3_K_M.gguf"
+		},
+		{
+			"modelName": "codellama-13b-instruct.Q3_K_M.gguf"
+		}
+	]
+}
