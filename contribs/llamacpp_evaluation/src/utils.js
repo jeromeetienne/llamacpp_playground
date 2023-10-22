@@ -59,7 +59,7 @@ export default class Utils {
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	static async loadContextText(contextLineLimit = 10) {
+	static async loadContextStateUnion(contextLineLimit = 10) {
 		const contextFileName = Path.join(__dirname, '../data/state_of_the_union.txt')
 		const contextTextFull = await Fs.promises.readFile(contextFileName, 'utf8')
 		const contextTextLines = contextTextFull.split('\n').map(line => line.trim()).filter(line => line.length > 0)
@@ -69,6 +69,15 @@ export default class Utils {
 		return contextText
 	}
 
+	static async loadContextSynthetic(){
+		const context = `Meet John Doe, a 35-year-old office worker who leads a rather ordinary life. His days are spent diligently working away 
+at his desk, ensuring that all tasks are completed efficiently and on time. During his leisure hours, John finds comfort in watching movies, 
+engaging in various sports activities, and indulging in a good book. With a friendly disposition, he effortlessly adapts to any social 
+situation and can strike up a conversation with anyone. Overall, John is your quintessential, run-of-the-mill individual who finds contentment 
+in life's simple pleasures.`
+
+		return context
+	}
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	//	

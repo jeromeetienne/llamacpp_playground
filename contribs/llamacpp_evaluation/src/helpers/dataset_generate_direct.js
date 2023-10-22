@@ -50,10 +50,18 @@ export default class DatasetGenerateDirect {
 	///////////////////////////////////////////////////////////////////////////////
 
 	static defaultGenerateOptions =  /** @type {DatasetGenerateDirectOptions} */({
-		modelName: ModelPathContants.CODELLAMA_13B_INSTRUCT_Q3_K_M,
+		// modelName: ModelPathContants.CODELLAMA_13B_INSTRUCT_Q3_K_M,
+		modelName: ModelPathContants.LLAMA_2_13B_CHAT_Q3_K_M,
 		nQuestions: 1,
 		verbose: false,
 	})
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * 
 	 * @param {Partial<DatasetGenerateDirectOptions>} partialOptions
@@ -67,6 +75,130 @@ export default class DatasetGenerateDirect {
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
+		//	init parameters
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		
+		// create record zod schema
+		const recordZodSchema = Zod.object({
+			question: Zod.string().describe('a short clear question based on the context'),
+			answer: Zod.string().describe('the response to the question'),
+		})
+		// load the context we want to use
+		const context = await Utils.loadContextSynthetic()
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	generate recordsJson
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		
+		// generate recordsJson
+		const recordsJson = await DatasetGenerateDirect._generateRecordsFromZod(options.nQuestions, recordZodSchema, {
+			context: context,
+			modelName: options.modelName,
+		})
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	Convert recordsJson to datasetJson
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		// build datasetJson
+		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */([])
+		for (const record of recordsJson) {
+			const datasetItemJson = /** @type {import("../../src/type.d.js").DatasetItemJson} */({
+				userInput: record.question,
+				expectedResponse: record.answer,
+				context: context,
+			})
+			datasetJson.push(datasetItemJson)
+		}
+
+		if (options.verbose) {
+			console.log(`Response : ${CliColor.cyan(JSON.stringify(recordsJson, null, '\t'))}`)
+		}
+
+		// return datasetJson
+		return datasetJson
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	s
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * @param {number} recordCount
+	 * @param {Zod.Schema} recordZodSchema 
+	 * @param {object} partialOptions
+	 * @param {string=} partialOptions.modelName
+	 * @param {string=} partialOptions.context
+	 */
+	static async _generateRecordsFromZod(recordCount, recordZodSchema, partialOptions = {}) {
+
+		// handle default options
+		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
+		const options = Object.assign({}, {
+			modelName: ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
+			context: '',
+		}, partialOptions)
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	build systemPrompt and userPrompt
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		// convert zodSchema to jsonSchema
+		let recordJsonSchemaTyped = zodToJsonSchema(recordZodSchema)
+		let recordJsonSchema = /** @type {object} */(JSON.parse(JSON.stringify(recordJsonSchemaTyped)))
+		// 
+		const fixtureProperties = /** @type {Object<string, string>} */({})
+		Object.keys(recordJsonSchema.properties).forEach(property => {
+			fixtureProperties[property] = recordJsonSchema.properties[property].description
+		})
+
+		// format the instructions
+		let formatInstruction = ''
+		Object.keys(fixtureProperties).forEach(property => {
+			formatInstruction += `- ${property}: <${fixtureProperties[property].toUpperCase()}>\n`
+		})
+		formatInstruction = formatInstruction.trim()
+
+		const systemPrompt = `Generate JSON Objects. each of them has:
+${formatInstruction}
+
+Format your response as a JSON array.`
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		let userPrompt = ''
+		if (options.context) {
+			userPrompt = `${options.context}
+		
+Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 ? 's' : ''}.`
+		}
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+		//	build llama grammar
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
+
+		const responseZodSchema = Zod.array(recordZodSchema)
+		const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
+		const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
+		const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
+
+		///////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////
 		//	
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -76,90 +208,14 @@ export default class DatasetGenerateDirect {
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-		//	build llama grammar
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-
-		/**
-		 * @typedef {object} ResponseItemJson
-		 * @property {string} question
-		 * @property {string} answer
-		 */
-		/**
-		 * @typedef {ResponseItemJson[]} ResponseJson
-		 */
-
-		const responseZodSchema = Zod.array(Zod.object({
-			question: Zod.string(),
-			answer: Zod.string(),
-		}))
-		const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
-		const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
-		const responseSample = [{ "question": "What is your name?", "answer": "My name is John." }, { "question": "What do you like?", "answer": "I like blue." }]
-		console.assert(responseZodSchema.parse(responseSample) !== undefined, `responseSample should be valid`);
-		const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
-		// const llamaGrammar = await LlamaGrammar.getFor("json");
-		// console.log(`reponse json-schema ${JSON.stringify(responseJsonSchema, null, 2)}`)
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		//	load context
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-
-		const contextText = await Utils.loadContextText()
-
-		// const contextText = `My name is john, i like blue and eat sausages. i speak french and i listen to rock.`
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		//	build systemPrompt and userPrompt
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-
-		const systemPrompt = `Be sure to format your response in JSON with the following format:
-${JSON.stringify(responseSample)}`;
-
-		const userPrompt = `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
-CONTEXT_BEGIN
-${contextText}
-CONTEXT_END
-
-Please generate ${options.nQuestions} question/answer tuples about this context
-- make your questions are short and clear
-- make your answers short and factual
-- make sure the question can be fully answered only by reading the context`;
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
 		//	
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		if (options.verbose) {
-			console.log(`System Prompt : ${CliColor.green(systemPrompt)}`);
-			console.log(`User Prompt : ${CliColor.green(userPrompt)}`);
-		}
+		const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, userPrompt, true)
 
-		const responseJson = /** @type {ResponseJson} */(await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, userPrompt, true))
-
-		// build datasetJson
-		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */([])
-		for (const responseItem of responseJson) {
-			const datasetItemJson = /** @type {import("../../src/type.d.js").DatasetItemJson} */({
-				userInput: responseItem.question,
-				expectedResponse: responseItem.answer,
-				context: contextText,
-			})
-			datasetJson.push(datasetItemJson)
-		}
-
-		if (options.verbose) {
-			console.log(`Response : ${CliColor.cyan(JSON.stringify(responseJson, null, '\t'))}`)
-		}
-
-		// return datasetJson
-		return datasetJson
+		// debugger
+		return responseJson
 	}
 }
 
@@ -171,7 +227,7 @@ Please generate ${options.nQuestions} question/answer tuples about this context
 
 async function mainAsync() {
 	await DatasetGenerateDirect.generate({
-		// modelName: ModelPathContants.LLAMA_2_7B_CHAT_Q6_K,
+		// modelName: ModelPathContants.ZEPHYR_7B_ALPHA_Q6_K,
 		nQuestions: 1,
 		verbose: true,
 	})
@@ -179,8 +235,4 @@ async function mainAsync() {
 
 // run mainAsync() if this file is run directly from node.js
 import { fileURLToPath } from 'url';
-const runAsMainModule = process.argv[1] === fileURLToPath(import.meta.url)
-if (runAsMainModule) {
-	// call mainAsync()
-	await mainAsync()
-}
+if (process.argv[1] === fileURLToPath(import.meta.url)) await mainAsync()
