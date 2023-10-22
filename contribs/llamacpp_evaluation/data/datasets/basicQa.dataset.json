@@ -10,8 +10,8 @@
 		"context": ""
 	},
 	{
-		"userInput": "Today is a beautiful day",
-		"expectedResponse": "Aujourd'hui est une belle journée",
+		"userInput": "The sun is shining",
+		"expectedResponse": "Le soleil brille",
 		"context": ""
 	},
 	{
@@ -20,8 +20,8 @@
 		"context": ""
 	},
 	{
-		"userInput": "Can you help me?",
-		"expectedResponse": "Pouvez-vous m'aider ?",
+		"userInput": "Today is a beautiful day",
+		"expectedResponse": "Aujourd'hui est une belle journée",
 		"context": ""
 	}
 ]

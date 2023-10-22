@@ -73,6 +73,16 @@ async function mainAsync() {
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
+	cmdline.command('dataset_basicQa')
+		.description('generate the dataset for a personality')
+		.action(async (personalityName, options) => {
+			await generateDatasetBasicQa()
+		});
+	cmdline.command('dataset_translateFrench')
+		.description('generate the dataset for a personality')
+		.action(async (personalityName, options) => {
+			await generateDatasetTranslateFrench()
+		});
 	cmdline.command('dataset_stateUnionQa')
 		.description('generate the dataset for a personality')
 		.action(async (personalityName, options) => {
@@ -118,9 +128,41 @@ void mainAsync()
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+async function generateDatasetBasicQa() {
+	const nItems = 5
+	const datasetJson = await DatasetGenerateLangchain.generateBasicQa(nItems)
+
+	console.log(`datasetJson : ${JSON.stringify(datasetJson, null, '\t')}`)
+
+	const datasetName = `basicQa`
+	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//	
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+async function generateDatasetTranslateFrench() {
+	const nItems = 5
+	const datasetJson = await DatasetGenerateLangchain.generateTranslateFrench(nItems)
+
+	console.log(`datasetJson : ${JSON.stringify(datasetJson, null, '\t')}`)
+
+	const datasetName = `translateFrench`
+	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//	
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 async function generateDatasetStateUnionQa() {
-	const nQuestions = 2
-	const datasetJson = await DatasetGenerateLangchain.generateStateUnionQa(nQuestions, {
+	const nItems = 2
+	const datasetJson = await DatasetGenerateLangchain.generateStateUnionQa(nItems, {
 		modelName: 'gpt-3.5-turbo',
 		verbose: true,
 	})
@@ -128,7 +170,6 @@ async function generateDatasetStateUnionQa() {
 	const datasetName = `stateUnionQa`
 	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

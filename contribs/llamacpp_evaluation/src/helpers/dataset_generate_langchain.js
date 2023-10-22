@@ -16,6 +16,7 @@ import Json5 from "json5";
 // langchain imports
 import { PromptTemplate } from "langchain/prompts";
 import { ChatOpenAI } from "langchain/chat_models/openai";
+import { HumanMessage, SystemMessage } from "langchain/schema";
 import { OpenAI } from "langchain/llms/openai";
 import { LlamaCpp } from "langchain/llms/llama_cpp";
 import { LLMChain } from "langchain/chains";
@@ -71,12 +72,73 @@ export default class DatasetGenerateLangchain {
 	//	
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
+	/**
+	 * @param {number} nItems
+	 */
+	static async generateBasicQa(nItems) {
+		// generate fixtures
+		const fixtureZodSchema = Zod.object({
+			question: Zod.string().describe('a short simple question'),
+			answer: Zod.string().describe('the response to the question'),
+		})
+		const fixturesJson = await DatasetGenerateLangchain._generateFixturesFromZod(nItems, fixtureZodSchema)
+
+		// convert fixturesJson to datasetJson
+		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */([])
+		for (const fixtureJson of fixturesJson) {
+			const datasetItemJson = /** @type {import("../../src/type.d.js").DatasetItemJson} */({
+				userInput: fixtureJson.question,
+				expectedResponse: fixtureJson.answer,
+				context: '',
+			})
+			datasetJson.push(datasetItemJson)
+		}
+
+		// return datasetJson
+		return datasetJson
+	}
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	/**
+	 * @param {number} nItems
+	 */
+	static async generateTranslateFrench(nItems) {
+		// generate fixtures
+		const fixtureZodSchema = Zod.object({
+			sentence: Zod.string().describe('a short simple sentence'),
+			frenchSentence: Zod.string().describe('the french translation of the sentence'),
+		})
+		const fixturesJson = await DatasetGenerateLangchain._generateFixturesFromZod(nItems, fixtureZodSchema)
+
+		// convert fixturesJson to datasetJson
+		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */([])
+		for (const fixtureJson of fixturesJson) {
+			const datasetItemJson = /** @type {import("../../src/type.d.js").DatasetItemJson} */({
+				userInput: fixtureJson.sentence,
+				expectedResponse: fixtureJson.frenchSentence,
+				context: '',
+			})
+			datasetJson.push(datasetItemJson)
+		}
+
+		// return datasetJson
+		return datasetJson
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @param {number} nQuestions
+	 * @param {number} nItems
 	 * @param {Partial<DatasetGenerateLangchainOptions>} partialOptions
 	 */
-	static async generateStateUnionQa(nQuestions, partialOptions = {}) {
+	static async generateStateUnionQa(nItems, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
@@ -174,7 +236,7 @@ Please generate {nQuestions} question/answer tuples about this context
 			contextText: contextText,
 			outputFormatInstructions: outputParser.getFormatInstructions(),
 			// outputFormatInstructions: '',
-			nQuestions: nQuestions,
+			nQuestions: nItems,
 		});
 
 		// @ts-ignore
@@ -215,6 +277,60 @@ Please generate {nQuestions} question/answer tuples about this context
 		// return datasetJson
 		return datasetJson
 	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+
+
+	/**
+	 * @param {number} fixtureCount
+	 * @param {Zod.Schema} fixtureZodSchema 
+	 */
+	static async _generateFixturesFromZod(fixtureCount, fixtureZodSchema) {
+		// convert zodSchema to jsonSchema
+		let fixtureJsonSchemaTyped = zodToJsonSchema(fixtureZodSchema)
+		let fixtureJsonSchema = /** @type {object} */(JSON.parse(JSON.stringify(fixtureJsonSchemaTyped)))
+		// 
+		const fixtureProperties = /** @type {Object<string, string>} */({})
+		Object.keys(fixtureJsonSchema.properties).forEach(property => {
+			fixtureProperties[property] = fixtureJsonSchema.properties[property].description
+		})
+
+		// format the instructions
+		let formatInstruction = ''
+		Object.keys(fixtureProperties).forEach(property => {
+			formatInstruction += `- ${property}: <${fixtureProperties[property].toUpperCase()}>\n`
+		})
+
+		const systemPrompt = `Generate ${fixtureCount} JSON objects. each of them has:
+${formatInstruction}
+
+Format your response as a JSON array.`
+
+
+		// Create the model
+		const lgModel = new ChatOpenAI({
+			modelName: 'gpt-3.5-turbo',
+			temperature: 0,
+			// verbose: true,
+		});
+
+		// call the model
+		const result = await lgModel.call([
+			new SystemMessage(systemPrompt),
+		])
+
+		const outputText = result.text.trim()
+		const responseUntypedJson = Json5.parse(outputText)
+		const responseZodSchema = Zod.array(fixtureZodSchema)
+		const responseJson = responseZodSchema.parse(responseUntypedJson)
+
+		return responseJson
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -224,8 +340,10 @@ Please generate {nQuestions} question/answer tuples about this context
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
+	const datasetBasicQa = await DatasetGenerateLangchain.generateBasicQa(3)
+
 	const modelName = 'gpt-3.5-turbo'
-	await DatasetGenerateLangchain.generateStateUnionQa(3, {
+	const datasetStateUnionQa = await DatasetGenerateLangchain.generateStateUnionQa(3, {
 		modelName: modelName,
 		verbose: true
 	})

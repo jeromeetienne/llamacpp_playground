@@ -104,7 +104,7 @@ Based on this context, answer the following question:
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		const promptTemplate = PromptTemplate.fromTemplate(options.userPrompt);
+		// const promptTemplate = PromptTemplate.fromTemplate(options.userPrompt);
 
 
 		const context = await Utils.loadContextText()
