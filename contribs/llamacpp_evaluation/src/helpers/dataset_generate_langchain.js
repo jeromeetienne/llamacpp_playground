@@ -389,6 +389,7 @@ export default class DatasetGenerateLangchain {
 		Object.keys(fixtureProperties).forEach(property => {
 			formatInstruction += `- ${property}: <${fixtureProperties[property].toUpperCase()}>\n`
 		})
+		formatInstruction = formatInstruction.trim()
 
 		const systemPrompt = `Generate ${recordCount} JSON objects. each of them has:
 ${formatInstruction}
@@ -411,7 +412,7 @@ Format your response as a JSON array.`
 		if (options.context) {
 			const userPrompt = `${options.context}
 		
-Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 ? 's' : ''}.`
+Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 ? 's' : ''} in a array.`
 			messages.push(new HumanMessage(userPrompt))
 		}
 

@@ -107,7 +107,7 @@ Based on this context, answer the following question:
 		// const promptTemplate = PromptTemplate.fromTemplate(options.userPrompt);
 
 
-		const context = await Utils.loadContextText()
+		const context = await Utils.loadContextStateUnion()
 		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
 
 		const predictionJson = /** @type {import("../type.d.js").PredictionJson} */([])

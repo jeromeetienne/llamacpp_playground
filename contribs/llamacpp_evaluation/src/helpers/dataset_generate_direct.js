@@ -66,7 +66,7 @@ export default class DatasetGenerateDirect {
 	 * 
 	 * @param {Partial<DatasetGenerateDirectOptions>} partialOptions
 	 */
-	static async generate(partialOptions = {}) {
+	static async generateStateUnionQa(partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
@@ -183,7 +183,7 @@ Format your response as a JSON array.`
 		if (options.context) {
 			userPrompt = `${options.context}
 		
-Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 ? 's' : ''}.`
+Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 ? 's' : ''} in a array.`
 		}
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -196,6 +196,7 @@ Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 
 		const responseJsonSchemaFull = zodToJsonSchema(responseZodSchema, "responseJsonSchema");
 		const responseJsonSchema = /** @type {Object} */(responseJsonSchemaFull.definitions?.['responseJsonSchema'])
 		const llamaGrammar = new LlamaJsonSchemaGrammar(responseJsonSchema)
+		// const llamaGrammar = await LlamaGrammar.getFor('json')
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -226,8 +227,8 @@ Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
-	await DatasetGenerateDirect.generate({
-		// modelName: ModelPathContants.ZEPHYR_7B_ALPHA_Q6_K,
+	await DatasetGenerateDirect.generateStateUnionQa({
+		modelName: ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
 		nQuestions: 1,
 		verbose: true,
 	})

@@ -55,7 +55,7 @@ export default class DatasetEvaluateLangchain {
 		// async function doDatasetEvaluateLangchain() {
 		// const evaluationName = 'myeval'
 
-		const contextText = await Utils.loadContextText()
+		const contextText = await Utils.loadContextStateUnion()
 		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
 		const predictionJson = await Utils.loadPredictionJson(evaluationName, predictionName)
 		// sanity check
