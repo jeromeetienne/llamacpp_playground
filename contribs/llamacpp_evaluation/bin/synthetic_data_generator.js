@@ -11,8 +11,8 @@ import Zod from "zod"
 
 // local imports
 import ModelPathContants from "../../../src/model_path_constants.js"
-import RecordGenerateLlamaCpp from "../src/helpers_generation/record_generate_llamacpp.js"
-import RecordGenerateLangchain from "../src/helpers_generation/record_generate_langchain.js"
+import RecordGenerateLlamaCpp from "../src/records_generator/record_generate_llamacpp.js"
+import RecordGenerateLangchain from "../src/records_generator/record_generate_langchain.js"
 import Utils from "../src/utils.js"
 
 ///////////////////////////////////////////////////////////////////////////////

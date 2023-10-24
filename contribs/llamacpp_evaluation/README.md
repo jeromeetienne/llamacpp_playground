@@ -33,9 +33,9 @@ npm test
 
 ## How to Generate a dataset ?
 
-This is done by ```dataset_generator.js``` tool
+This is done by ```synthetic_data_generator.js``` tool
 ```sh
-./bin/dataset_generator.js 
+./bin/synthetic_data_generator.js 
 ```
 
 Here is the inline help for this tool
@@ -45,35 +45,43 @@ Usage: dataset_generator.js [options] [command]
 dataset_generator.js
 
 Options:
-  -V, --version             output the version number
-  -h, --help                display help for command
+  -V, --version               output the version number
+  -h, --help                  display help for command
 
 Commands:
-  dataset_stateUnionQa      generate the dataset for a personality
-  gridsearch_multiLanguage  generate the hptuning.json+.gridsearch.json for multiLanguage
-  gridsearch_onlyBlah       generate the hptuning.json+.gridsearch.json for onlyBlah
-  gridsearch_testAccuracy   generate the hptuning.json+.gridsearch.json for testAccuracy
-  help [command]            display help for command
+  dataset_basicQa             generate the dataset for a personality
+  dataset_translateFrench     generate the dataset for a personality
+  dataset_stateUnionQa        generate the dataset for a personality
+  gridsearch_translateFrench  generate the hptuning.json+.gridsearch.json for translateFrench
+  gridsearch_onlyBlah         generate the hptuning.json+.gridsearch.json for onlyBlah
+  gridsearch_testAccuracy     generate the hptuning.json+.gridsearch.json for testAccuracy
+  help [command]              display help for command
 ```
 
 ## How to do an Evaluation ?
 
 Create an evaluation
 ```sh
-./bin/llamacpp_evaluation.js create yourEval ./data/datasets/translatefrench.dataset.json ./data/hptunings/gridsearch_multiLanguage.hptuning.json
+./bin/llamacpp_evaluation.js create translareFrenchEval ./data/datasets/translateFrench.dataset.json ./data/hptunings/gridsearch_translateFrench.hptuning.json
 ```
 
 Compute the evaluation
+
+```sh
+./bin/llamacpp_evaluation.js compute translareFrenchEval 
 ```
-./bin/llamacpp_evaluation.js compute yourEval 
+
+Display the evaluation report
+
+```sh
+./bin/llamacpp_evaluation.js report translareFrenchEval 
 ```
 
 Once you don't need it anymore, you can delete the evaluation
 
+```sh
+./bin/llamacpp_evaluation.js delete translareFrenchEval 
 ```
-./bin/llamacpp_evaluation.js delete yourEval 
-```
-
 
 ## How to download model
 see [llamacpp_playground README.md](../../README.md)
@@ -83,18 +91,7 @@ see [llamacpp_playground README.md](../../README.md)
 When doing a evaluation, multiples steps are needed
 
 ### 1. generate dataset
-Sometime it may be interesting to generate synthetic dataset to evaluate the model on. It is faster to build than manual dataset.
-If your dataset is manual, you can skip this step.
-
-```
-node ./bin/dataset-evaluation.js generate myEval
-```
-
-**Available Options**
-- ```-l``` or ```--langchain``` to use langchain.js
-- ```-d``` or ```--direct``` to use node-llama-cpp
-- ```-n``` or ```--nQuestions``` to specify the number of questions to generate
-
+See "How to Generate a dataset ?" section
 ### 2. do a prediction on this dataset
 
 ```
