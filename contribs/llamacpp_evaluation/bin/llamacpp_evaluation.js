@@ -10,7 +10,7 @@ import CliColor from "cli-color"
 import FsExtra from "fs-extra"
 
 // local imports
-import DatasetPredictDirect from "../src/helpers_evaluation/dataset_predict_direct.js"
+import DatasetPredictLlamaCpp from "../src/helpers_evaluation/dataset_predict_llamacpp.js"
 import DatasetPredictLangchain from "../src/helpers_evaluation/dataset_predict_langchain.js"
 import DatasetEvaluateLangchain from "../src/helpers_evaluation/dataset_evaluate_langchain.js"
 import EvaluationReport from "../src/helpers_evaluation/evaluation_report.js"
@@ -33,7 +33,7 @@ import Assert from 'assert'
 console.assert = function (condition, message) { Assert.ok(condition, message) }
 
 import Debug from 'debug'
-const debug = Debug('weboostai:bin:datafolder_checker')
+const debug = Debug('llamacpp_evaluation')
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,20 +96,20 @@ When using direct node-llama-cpp, the model name is something like "codellama-13
 		.option('-l, --langchain', 'use langchain technology instead of direct')
 		.option('-d, --direct', 'use direct technology instead of langchain')
 		.action(async (evaluationName, predictionName, modelName, options) => {
-			// compute shouldUseDirect
-			let shouldUseDirect = true
+			// compute shouldUseLlamaCpp
+			let shouldUseLlamaCpp = true
 			if (options.direct) {
-				shouldUseDirect = true
+				shouldUseLlamaCpp = true
 			} else if (options.langchain) {
-				shouldUseDirect = false
+				shouldUseLlamaCpp = false
 			} else if (modelName !== undefined) {
-				shouldUseDirect = modelName.endsWith('.gguf')
+				shouldUseLlamaCpp = modelName.endsWith('.gguf')
 			} else {
-				shouldUseDirect = true
+				shouldUseLlamaCpp = true
 			}
 
-			if (shouldUseDirect) {
-				await doDatasetPredictOneDirect(evaluationName, predictionName, { modelName })
+			if (shouldUseLlamaCpp) {
+				await doDatasetPredictOneLlamaCpp(evaluationName, predictionName, { modelName })
 			} else {
 				await doDatasetPredictOneLangchain(evaluationName, predictionName, { modelName })
 			}
@@ -224,7 +224,7 @@ async function doEvaluationDelete(evaluationName) {
  * @param {string=} options.systemPrompt
  * @param {string=} options.userPrompt
  */
-async function doDatasetPredictOneDirect(evaluationName, predictionName, options = {}) {
+async function doDatasetPredictOneLlamaCpp(evaluationName, predictionName, options = {}) {
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -246,9 +246,9 @@ async function doDatasetPredictOneDirect(evaluationName, predictionName, options
 	// build a metadata.json file
 	const predictionMetadataJson = /** @type {import("../src/type.d.js").PredictionMetadataJson} */({
 		defaultOptions: {
-			modelName: DatasetPredictDirect.defaultPredictOptions.modelName,
-			systemPrompt: DatasetPredictDirect.defaultPredictOptions.systemPrompt,
-			userPrompt: DatasetPredictDirect.defaultPredictOptions.userPrompt,
+			modelName: DatasetPredictLlamaCpp.defaultPredictOptions.modelName,
+			systemPrompt: DatasetPredictLlamaCpp.defaultPredictOptions.systemPrompt,
+			userPrompt: DatasetPredictLlamaCpp.defaultPredictOptions.userPrompt,
 		},
 		explicitOptions: {
 		}
@@ -274,7 +274,7 @@ async function doDatasetPredictOneDirect(evaluationName, predictionName, options
 	}
 	// assigned modelName if not defined
 	if (modelName === undefined) {
-		modelName = DatasetPredictDirect.defaultPredictOptions.modelName
+		modelName = DatasetPredictLlamaCpp.defaultPredictOptions.modelName
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ async function doDatasetPredictOneDirect(evaluationName, predictionName, options
 	///////////////////////////////////////////////////////////////////////////////
 
 	// do the actual prediction
-	const predictionJson = await DatasetPredictDirect.predict(evaluationName, predictionName, {
+	const predictionJson = await DatasetPredictLlamaCpp.predict(evaluationName, predictionName, {
 		modelName: modelName,
 		systemPrompt: options.systemPrompt,
 		userPrompt: options.userPrompt,
@@ -449,9 +449,9 @@ async function doComputeEvaluation(evaluationName) {
 	for (const hpTuningPrediction of hpTuningJson.predictions) {
 		const itemIndex = hpTuningJson.predictions.indexOf(hpTuningPrediction)
 		const predictionName = hpTuningPrediction.predictionName ?? `hp_${hpTuningJson.hpTuningName}_${itemIndex}`
-		const shouldUseDirect = hpTuningPrediction.modelName?.endsWith('.gguf') || hpTuningPrediction.modelName === undefined
-		if (shouldUseDirect) {
-			await doDatasetPredictOneDirect(evaluationName, predictionName, {
+		const shouldUseLlamaCpp = hpTuningPrediction.modelName?.endsWith('.gguf') || hpTuningPrediction.modelName === undefined
+		if (shouldUseLlamaCpp) {
+			await doDatasetPredictOneLlamaCpp(evaluationName, predictionName, {
 				modelName: hpTuningPrediction.modelName,
 				systemPrompt: hpTuningPrediction.systemPrompt,
 				userPrompt: hpTuningPrediction.userPrompt,

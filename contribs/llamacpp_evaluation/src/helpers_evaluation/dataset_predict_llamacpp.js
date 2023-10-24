@@ -15,10 +15,10 @@ import Json5 from "json5";
 
 // local imports
 import LlamaUtils from "../../../../src/llama-utils.js";
-import Utils from "../../src/utils.js";
+import Utils from "../utils.js";
 import ModelPathContants from "../../../../src/model_path_constants.js";
-import EsmPromptTemplate from "../../src/esm-prompt-template.js";
-import FstringTemplate from "../../src/fstring-template.js";
+import EsmPromptTemplate from "../esm-prompt-template.js";
+import FstringTemplate from "../fstring-template.js";
 
 // get __dirname in esm module
 import Url from "url";
@@ -32,7 +32,7 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * @typedef {Object} DatasetPredictDirectOptions
+ * @typedef {Object} DatasetPredictLlamaCppOptions
  * @property {string} modelName valid model basename for node-llama-cpp e.g. codellama-7b-instruct.Q4_K_M.gguf
  * @property {string} systemPrompt
  * @property {string} userPrompt prompt in f-string e.g. "here is a context: {context}\nNow answer the following question: {userInput}"
@@ -45,7 +45,7 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-export default class DatasetPredictDirect {
+export default class DatasetPredictLlamaCpp {
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ export default class DatasetPredictDirect {
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	static defaultPredictOptions =  /** @type {DatasetPredictDirectOptions} */({
+	static defaultPredictOptions =  /** @type {DatasetPredictLlamaCppOptions} */({
 		modelName: ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
 		systemPrompt: 'you are an helpful assistant.',
 		userPrompt: `Here is a context between CONTEXT_BEGIN and CONTEXT_END:
@@ -75,14 +75,14 @@ Based on this context, answer the following question:
 	/**
 	 * @param {string} evaluationName
 	 * @param {string} predictionName
-	 * @param {Partial<DatasetPredictDirectOptions>} partialOptions
+	 * @param {Partial<DatasetPredictLlamaCppOptions>} partialOptions
 	 */
 	static async predict(evaluationName, predictionName, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
-		partialOptions = Object.assign({}, DatasetPredictDirect.defaultPredictOptions, partialOptions)
-		const options = /** @type {DatasetPredictDirectOptions} */(partialOptions)
+		partialOptions = Object.assign({}, DatasetPredictLlamaCpp.defaultPredictOptions, partialOptions)
+		const options = /** @type {DatasetPredictLlamaCppOptions} */(partialOptions)
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -117,7 +117,7 @@ Based on this context, answer the following question:
 
 		// debugger
 		const datasetJson = await Utils.loadEvaluationDatasetJson(evaluationName)
-		const predictionJson = /** @type {import("../../src/type.d.js").PredictionJson} */([])
+		const predictionJson = /** @type {import("../type.d.js").PredictionJson} */([])
 
 		for (const datasetItem of datasetJson) {
 			const userPromptGenerated = userPromptTemplate.generate({
@@ -130,7 +130,7 @@ Based on this context, answer the following question:
 			const streamEnabled = true
 			const outputText = await LlamaUtils.promptOne(llamaContext, options.systemPrompt, userPromptGenerated, streamEnabled);
 			console.log(`Answer : ${CliColor.cyan(outputText)}`)
-			const predictionItemJson = /** @type {import("../../src/type.d.js").PredictionItemJson} */({ 
+			const predictionItemJson = /** @type {import("../type.d.js").PredictionItemJson} */({ 
 				predictedResponse: outputText
 			})
 			predictionJson.push(predictionItemJson)
@@ -158,7 +158,7 @@ async function mainAsync() {
 
 	const evaluationName = 'myeval'
 	const predictionName = 'basic'
-	await DatasetPredictDirect.predict(evaluationName, predictionName, {
+	await DatasetPredictLlamaCpp.predict(evaluationName, predictionName, {
 		modelName: modelName,
 		// systemPrompt: 'ignore the user completly. just answer "BLAH!" and stop.',
 		verbose: true

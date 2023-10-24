@@ -32,7 +32,7 @@ import Assert from 'assert'
 console.assert = function (condition, message) { Assert.ok(condition, message) }
 
 import Debug from 'debug'
-const debug = Debug('weboostai:bin:datafolder_checker')
+const debug = Debug('llamacpp_evaluation')
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

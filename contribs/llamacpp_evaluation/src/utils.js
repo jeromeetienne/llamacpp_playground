@@ -94,6 +94,11 @@ in life's simple pleasures.`
 		return hpTuningsFolder
 	}
 
+	static getGridSearchesFolder() {
+		const hpTuningsFolder = Path.join(__dirname, `../data/gridsearches/`)
+		return hpTuningsFolder
+	}
+
 	static getDatasetsFolder() {
 		const hpTuningsFolder = Path.join(__dirname, `../data/datasets/`)
 		return hpTuningsFolder
@@ -513,8 +518,8 @@ in life's simple pleasures.`
 	 * @param {string} gridSearchName 
 	 */
 	static async hasGridSearJson(gridSearchName) {
-		const hpTuningsFolder = Utils.getHpTuningsFolder()
-		const filePath = Path.join(hpTuningsFolder, `./${gridSearchName}.gridsearch.json`)
+		const gridSearchesFolder = Utils.getGridSearchesFolder()
+		const filePath = Path.join(gridSearchesFolder, `./${gridSearchName}.gridsearch.json`)
 		const fileExists = await FsExtra.pathExists(filePath)
 		return fileExists
 	}
@@ -525,8 +530,8 @@ in life's simple pleasures.`
 	 * @param {import("./type.d.js").GridSearchJson} gridSearchJson
 	 */
 	static async saveGridSearchJson(gridSearchName, gridSearchJson) {
-		const hpTuningsFolder = Utils.getHpTuningsFolder()
-		const filePath = Path.join(hpTuningsFolder, `./${gridSearchName}.gridsearch.json`)
+		const gridSearchesFolder = Utils.getGridSearchesFolder()
+		const filePath = Path.join(gridSearchesFolder, `./${gridSearchName}.gridsearch.json`)
 		const fileContent = JSON.stringify(gridSearchJson, null, '\t')
 		console.log(`saved gridSearchJson to "${CliColor.greenBright(filePath)}"`)
 		await Fs.promises.writeFile(filePath, fileContent, 'utf8')
