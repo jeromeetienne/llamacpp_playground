@@ -7,15 +7,12 @@ import Fs from "fs"
 // npm imports
 import * as Commander from "commander"
 import CliColor from "cli-color"
+import Zod from "zod"
 
 // local imports
 import ModelPathContants from "../../../src/model_path_constants.js"
-import DatasetGenerateDirect from "../src/helpers/dataset_generate_direct.js"
-import DatasetGenerateLangchain from "../src/helpers/dataset_generate_langchain.js"
-import DatasetPredictDirect from "../src/helpers/dataset_predict_direct.js"
-import DatasetPredictLangchain from "../src/helpers/dataset_predict_langchain.js"
-import DatasetEvaluateLangchain from "../src/helpers/dataset_evaluate_langchain.js"
-import EvaluationReport from "../src/helpers/evaluation_report.js"
+import RecordGenerateDirect from "../src/helpers_generation/record_generate_direct.js"
+import RecordGenerateLangchain from "../src/helpers_generation/record_generate_langchain.js"
 import Utils from "../src/utils.js"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,11 +126,41 @@ void mainAsync()
 ///////////////////////////////////////////////////////////////////////////////
 
 async function generateDatasetBasicQa() {
-	const nItems = 5
-	const datasetJson = await DatasetGenerateLangchain.generateBasicQa(nItems)
+	// build the record schema
+	const recordZodSchema = Zod.object({
+		question: Zod.string().describe('a short simple question'),
+		answer: Zod.string().describe('the response to the question'),
+	})
+	const recordCount = 5
 
+	// generate the records
+	let recordsJson = /** @type {array} */([])
+	const useDirect = true
+	if( useDirect ){
+		recordsJson = await RecordGenerateDirect.generateRecordsFromZod(recordZodSchema, {
+			recordCount
+		})
+	}else{
+		recordsJson = await RecordGenerateLangchain.generateRecordsFromZod(recordZodSchema, {
+			recordCount
+		})
+	} 
+
+	// convert recordsJson to datasetJson
+	const datasetJson = /** @type {import("../src/type.d.js").DatasetJson} */([])
+	for (const fixtureJson of recordsJson) {
+		const datasetItemJson = /** @type {import("../src/type.d.js").DatasetItemJson} */({
+			userInput: fixtureJson.question,
+			expectedResponse: fixtureJson.answer,
+			context: '',
+		})
+		datasetJson.push(datasetItemJson)
+	}
+
+	// display to debug
 	console.log(`datasetJson : ${JSON.stringify(datasetJson, null, '\t')}`)
 
+	// save the dataset
 	const datasetName = `basicQa`
 	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
 }
@@ -145,11 +172,42 @@ async function generateDatasetBasicQa() {
 ///////////////////////////////////////////////////////////////////////////////
 
 async function generateDatasetTranslateFrench() {
-	const nItems = 5
-	const datasetJson = await DatasetGenerateLangchain.generateTranslateFrench(nItems)
+	// build the record schema
+	const recordZodSchema = Zod.object({
+		sentence: Zod.string().describe('a short simple sentence'),
+		frenchSentence: Zod.string().describe('the french translation of the sentence'),
+	})
+	const recordCount = 5
 
+	// generate the records
+	let recordsJson = /** @type {array} */([])
+	const useDirect = true
+	if( useDirect ){
+		recordsJson = await RecordGenerateDirect.generateRecordsFromZod(recordZodSchema, {
+			// modelName: ModelPathContants.LLAMA_2_7B_CHAT_Q6_K,
+			recordCount
+		})
+	}else{
+		recordsJson = await RecordGenerateLangchain.generateRecordsFromZod(recordZodSchema, {
+			recordCount
+		})
+	} 
+
+	// convert recordsJson to datasetJson
+	const datasetJson = /** @type {import("../src/type.d.js").DatasetJson} */([])
+	for (const fixtureJson of recordsJson) {
+		const datasetItemJson = /** @type {import("../src/type.d.js").DatasetItemJson} */({
+			userInput: fixtureJson.sentence,
+			expectedResponse: fixtureJson.frenchSentence,
+			context: '',
+		})
+		datasetJson.push(datasetItemJson)
+	}
+
+	// display to debug
 	console.log(`datasetJson : ${JSON.stringify(datasetJson, null, '\t')}`)
 
+	// save the dataset
 	const datasetName = `translateFrench`
 	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
 }
@@ -161,12 +219,45 @@ async function generateDatasetTranslateFrench() {
 ///////////////////////////////////////////////////////////////////////////////
 
 async function generateDatasetStateUnionQa() {
-	const nItems = 2
-	const datasetJson = await DatasetGenerateLangchain.generateStateUnionQa(nItems, {
-		modelName: 'gpt-3.5-turbo',
-		verbose: true,
+	// create record zod schema
+	const recordZodSchema = Zod.object({
+		question: Zod.string().describe('a short clear question based on the context'),
+		answer: Zod.string().describe('the response to the question'),
 	})
+	// load the context we want to use
+	const context = await Utils.loadContextStateUnion()
+	const recordCount = 2
 
+	// generate the records
+	let recordsJson = /** @type {array} */([])
+	const useDirect = true
+	if( useDirect ){
+		recordsJson = await RecordGenerateDirect.generateRecordsFromZod(recordZodSchema, {
+			recordCount,
+			context,
+		})
+	}else{
+		recordsJson = await RecordGenerateLangchain.generateRecordsFromZod(recordZodSchema, {
+			recordCount,
+			context,
+		})
+	} 
+
+	// convert recordsJson to datasetJson
+	const datasetJson = /** @type {import("../src/type.d.js").DatasetJson} */([])
+	for (const recordJson of recordsJson) {
+		const datasetItemJson = /** @type {import("../src/type.d.js").DatasetItemJson} */({
+			userInput: recordJson.question,
+			expectedResponse: recordJson.answer,
+			context: context,
+		})
+		datasetJson.push(datasetItemJson)
+	}
+
+	// display to debug
+	console.log(`datasetJson : ${JSON.stringify(datasetJson, null, '\t')}`)
+
+	// save the dataset
 	const datasetName = `stateUnionQa`
 	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
 }

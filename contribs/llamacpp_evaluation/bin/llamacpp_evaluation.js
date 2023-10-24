@@ -10,13 +10,10 @@ import CliColor from "cli-color"
 import FsExtra from "fs-extra"
 
 // local imports
-// import ModelPathContants from "../../../src/model_path_constants.js"
-// import DatasetGenerateDirect from "../src/helpers/dataset_generate_direct.js"
-// import DatasetGenerateLangchain from "../src/helpers/dataset_generate_langchain.js"
-import DatasetPredictDirect from "../src/helpers/dataset_predict_direct.js"
-import DatasetPredictLangchain from "../src/helpers/dataset_predict_langchain.js"
-import DatasetEvaluateLangchain from "../src/helpers/dataset_evaluate_langchain.js"
-import EvaluationReport from "../src/helpers/evaluation_report.js"
+import DatasetPredictDirect from "../src/helpers_evaluation/dataset_predict_direct.js"
+import DatasetPredictLangchain from "../src/helpers_evaluation/dataset_predict_langchain.js"
+import DatasetEvaluateLangchain from "../src/helpers_evaluation/dataset_evaluate_langchain.js"
+import EvaluationReport from "../src/helpers_evaluation/evaluation_report.js"
 import Utils from "../src/utils.js"
 
 ///////////////////////////////////////////////////////////////////////////////

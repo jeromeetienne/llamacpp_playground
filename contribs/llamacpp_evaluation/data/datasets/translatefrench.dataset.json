@@ -1,27 +1,17 @@
 [
 	{
-		"userInput": "Hello",
-		"expectedResponse": "Bonjour",
+		"userInput": "The sky is blue",
+		"expectedResponse": "Le ciel est bleu",
 		"context": ""
 	},
 	{
-		"userInput": "I love cats",
-		"expectedResponse": "J'adore les chats",
+		"userInput": "I am happy today",
+		"expectedResponse": "Je suis heureux aujourd'hui",
 		"context": ""
 	},
 	{
-		"userInput": "Today is a beautiful day",
-		"expectedResponse": "Aujourd'hui est une belle journée",
-		"context": ""
-	},
-	{
-		"userInput": "I am hungry",
-		"expectedResponse": "J'ai faim",
-		"context": ""
-	},
-	{
-		"userInput": "Can you help me?",
-		"expectedResponse": "Pouvez-vous m'aider ?",
+		"userInput": "She sings well",
+		"expectedResponse": "Elle chante bien",
 		"context": ""
 	}
 ]

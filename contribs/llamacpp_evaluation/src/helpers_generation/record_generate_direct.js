@@ -15,25 +15,13 @@ import Json5 from "json5";
 
 // local imports
 import LlamaUtils from "../../../../src/llama-utils.js";
-import Utils from "../../src/utils.js";
+import Utils from "../utils.js";
 import ModelPathContants from "../../../../src/model_path_constants.js";
 
 // get __dirname in esm module
 import Url from "url";
 const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-//	
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * @typedef {Object} DatasetGenerateDirectOptions
- * @property {string} modelName
- * @property {number} nQuestions
- * @property {Boolean} verbose
- */
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,110 +29,31 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-export default class DatasetGenerateDirect {
+export default class RecordGenerateDirect {
 
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-	//	
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
+	/**
+	 * @typedef {Object} RecordGenerateDirectOptions
+	 * @property {number} recordCount use 0 if you dont want to specify
+	 * @property {string} modelName
+	 * @property {string} context
+	 */
 
-	static defaultGenerateOptions =  /** @type {DatasetGenerateDirectOptions} */({
-		// modelName: ModelPathContants.CODELLAMA_13B_INSTRUCT_Q3_K_M,
-		modelName: ModelPathContants.LLAMA_2_13B_CHAT_Q3_K_M,
-		nQuestions: 1,
-		verbose: false,
+	static defaultOptions =  /** @type {RecordGenerateDirectOptions} */({
+		recordCount: 0,
+		modelName: ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
+		context: '',
 	})
 
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-	//	
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-
 	/**
-	 * 
-	 * @param {Partial<DatasetGenerateDirectOptions>} partialOptions
-	 */
-	static async generateStateUnionQa(partialOptions = {}) {
-
-		// handle default options
-		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
-		partialOptions = Object.assign({}, DatasetGenerateDirect.defaultGenerateOptions, partialOptions)
-		const options = /** @type {DatasetGenerateDirectOptions} */(partialOptions)
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		//	init parameters
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		
-		// create record zod schema
-		const recordZodSchema = Zod.object({
-			question: Zod.string().describe('a short clear question based on the context'),
-			answer: Zod.string().describe('the response to the question'),
-		})
-		// load the context we want to use
-		const context = await Utils.loadContextSynthetic()
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		//	generate recordsJson
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		
-		// generate recordsJson
-		const recordsJson = await DatasetGenerateDirect._generateRecordsFromZod(options.nQuestions, recordZodSchema, {
-			context: context,
-			modelName: options.modelName,
-		})
-
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-		//	Convert recordsJson to datasetJson
-		///////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////
-
-		// build datasetJson
-		const datasetJson = /** @type {import("../../src/type.d.js").DatasetJson} */([])
-		for (const record of recordsJson) {
-			const datasetItemJson = /** @type {import("../../src/type.d.js").DatasetItemJson} */({
-				userInput: record.question,
-				expectedResponse: record.answer,
-				context: context,
-			})
-			datasetJson.push(datasetItemJson)
-		}
-
-		if (options.verbose) {
-			console.log(`Response : ${CliColor.cyan(JSON.stringify(recordsJson, null, '\t'))}`)
-		}
-
-		// return datasetJson
-		return datasetJson
-	}
-
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-	//	s
-	///////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * @param {number} recordCount
 	 * @param {Zod.Schema} recordZodSchema 
-	 * @param {object} partialOptions
-	 * @param {string=} partialOptions.modelName
-	 * @param {string=} partialOptions.context
+	 * @param {Partial<RecordGenerateDirectOptions>} partialOptions
 	 */
-	static async _generateRecordsFromZod(recordCount, recordZodSchema, partialOptions = {}) {
+	static async generateRecordsFromZod(recordZodSchema, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
-		const options = Object.assign({}, {
-			modelName: ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
-			context: '',
-		}, partialOptions)
+		partialOptions = Object.assign({}, RecordGenerateDirect.defaultOptions, partialOptions)
+		const options = /** @type {RecordGenerateDirectOptions} */(partialOptions)
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -183,9 +92,10 @@ Format your response as a JSON array.`
 		if (options.context) {
 			userPrompt = `${options.context}
 		
-Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 ? 's' : ''} in a array.`
+Now based on this context, generate ${options.recordCount !== 0 ? options.recordCount + ' ' : ''}JSON Object${options.recordCount > 1 || options.recordCount === 0 ? 's' : ''} in a array.`
 		}
 
+		// debugger
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 		//	build llama grammar
@@ -215,6 +125,8 @@ Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 
 
 		const responseJson = await LlamaUtils.promptGrammarJsonOne(llamaContext, llamaGrammar, systemPrompt, userPrompt, true)
 
+		// TODO reparse with zod to validate the responseJson
+
 		// debugger
 		return responseJson
 	}
@@ -227,11 +139,26 @@ Now based on this context, generate ${recordCount} JSON Object${recordCount > 1 
 ///////////////////////////////////////////////////////////////////////////////
 
 async function mainAsync() {
-	await DatasetGenerateDirect.generateStateUnionQa({
-		modelName: ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
-		nQuestions: 1,
-		verbose: true,
+	// create record zod schema
+	const recordZodSchema = Zod.object({
+		fullName: Zod.string().describe('the full name of a person mentioned in the context'),
+		age: Zod.number().nullable().describe('the age of this person. null if not specified'),
+		happyNess: Zod.number().nullable().describe('the sadness/happiness of this person. integer from 0 to 10 inclusive. null if not specified'),
 	})
+	// const recordZodSchema = Zod.object({
+	// 	summary: Zod.string().describe('the summary of the context'),
+	// })
+	// load the context we want to use
+	const context = `hello my name is John, my last name is Doe. I am 30 years old.
+my friend is called Jane, her last name is Smith. she is 25 years old and not happy.
+the other day, i met Bill Gates, he was laughing.`
+
+	const recordJson = await RecordGenerateDirect.generateRecordsFromZod(recordZodSchema, {
+		recordCount: 1,
+		context: context,
+		modelName: ModelPathContants.LLAMA_2_13B_CHAT_Q3_K_M,
+	})
+	console.log({ recordJson })
 }
 
 // run mainAsync() if this file is run directly from node.js

@@ -1,27 +1,22 @@
 [
 	{
-		"userInput": "Hello",
-		"expectedResponse": "Bonjour",
+		"userInput": "What is the capital of France?",
+		"expectedResponse": "Paris",
 		"context": ""
 	},
 	{
-		"userInput": "I love cats",
-		"expectedResponse": "J'adore les chats",
+		"userInput": "What is the largest planet in our solar system?",
+		"expectedResponse": "Jupiter",
 		"context": ""
 	},
 	{
-		"userInput": "The sun is shining",
-		"expectedResponse": "Le soleil brille",
+		"userInput": "Who wrote 'To Kill a Mockingbird'?",
+		"expectedResponse": "Harper Lee",
 		"context": ""
 	},
 	{
-		"userInput": "I am hungry",
-		"expectedResponse": "J'ai faim",
-		"context": ""
-	},
-	{
-		"userInput": "Today is a beautiful day",
-		"expectedResponse": "Aujourd'hui est une belle journée",
+		"userInput": "What is the smallest country in the world?",
+		"expectedResponse": "Vatican City",
 		"context": ""
 	}
 ]
