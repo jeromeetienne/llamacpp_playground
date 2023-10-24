@@ -44,7 +44,7 @@ export default class RecordGenerateLangchain {
 	 * @param {Zod.Schema} recordZodSchema 
 	 * @param {Partial<RecordGenerateLangchainOptions>} partialOptions
 	 */
-	static async generateRecordsFromZod(recordZodSchema, partialOptions = {}) {
+	static async generateFromZod(recordZodSchema, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
@@ -136,7 +136,7 @@ async function mainAsync() {
 		answer: Zod.string().describe('the response to the question'),
 	})
 	// load the context we want to use
-	const recordJson = await RecordGenerateLangchain.generateRecordsFromZod(recordZodSchema, {
+	const recordJson = await RecordGenerateLangchain.generateFromZod(recordZodSchema, {
 		recordCount: 3,
 		context: await Utils.loadContextStateUnion(),
 	})

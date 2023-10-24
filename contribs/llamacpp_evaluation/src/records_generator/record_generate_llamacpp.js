@@ -48,7 +48,7 @@ export default class RecordGenerateLlamaCpp {
 	 * @param {Zod.Schema} recordZodSchema 
 	 * @param {Partial<RecordGenerateLlamaCppOptions>} partialOptions
 	 */
-	static async generateRecordsFromZod(recordZodSchema, partialOptions = {}) {
+	static async generateFromZod(recordZodSchema, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
@@ -153,7 +153,7 @@ async function mainAsync() {
 my friend is called Jane, her last name is Smith. she is 25 years old and not happy.
 the other day, i met Bill Gates, he was laughing.`
 
-	const recordJson = await RecordGenerateLlamaCpp.generateRecordsFromZod(recordZodSchema, {
+	const recordJson = await RecordGenerateLlamaCpp.generateFromZod(recordZodSchema, {
 		recordCount: 1,
 		context: context,
 		modelName: ModelPathContants.LLAMA_2_13B_CHAT_Q3_K_M,
