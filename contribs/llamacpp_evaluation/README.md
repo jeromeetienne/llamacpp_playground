@@ -28,8 +28,8 @@ It test all .json files are conforming to their json-schema.
 npm test
 ```
 
-**TODO** explain how to download the models for node-llama-cpp
-
+## How to Download Models ?
+see [llamacpp_playground README.md](../../README.md)
 
 ## How to Generate a dataset ?
 
@@ -58,7 +58,8 @@ Commands:
   help [command]              display help for command
 ```
 
-## How to do an Evaluation ?
+
+## How to do an Evaluation ? (with hyper parameter tuning)
 
 Create an evaluation
 ```sh
@@ -83,35 +84,6 @@ Once you don't need it anymore, you can delete the evaluation
 ./bin/llamacpp_evaluation.js delete translareFrenchEval 
 ```
 
-## How to download model
-see [llamacpp_playground README.md](../../README.md)
-
-## Evaluation Steps
-
-When doing a evaluation, multiples steps are needed
-
-### 1. generate dataset
-See "How to Generate a dataset ?" section
-### 2. do a prediction on this dataset
-
-```
-node ./bin/dataset-evaluation.js predict myEval myPredict
-```
-
-- ```-l``` or ```--langchain``` to use langchain.js
-- ```-d``` or ```--direct``` to use node-llama-cpp
-
-### 3. evaluate this prediction
-
-```sh
-node ./bin/dataset-evaluation.js evaluate myEval myPredict
-```
-
-### 4. display a report comparing all predictions
-
-```sh
-node ./bin/dataset-evaluation.js report myEval
-```
 
 ## How to do hyper parameter tuning
 
@@ -124,7 +96,34 @@ One can tune the
 - userPrompt : the question to the model
 
 ```sh
-node ./bin/dataset-evaluation.js hptuning myEval ./data/evaluations/hptunings/superHpTuning.hptuning.json5
+node ./bin/llamacpp-evaluation.js hptuning myEval ./data/evaluations/hptunings/superHpTuning.hptuning.json5
 ```
 
 - [Sample .hptuning.json5 file](./data/evaluations/hptunings/superHpTuning.hptuning.json5)
+## Evaluation Steps (manual without hyper tuning)
+
+When doing a evaluation, multiples steps are needed
+
+### 1. generate dataset
+See "How to Generate a dataset ?" section
+### 2. do a prediction on this dataset
+
+```
+node ./bin/llamacpp-evaluation.js predict myEval myPredict
+```
+
+- ```-l``` or ```--langchain``` to use langchain.js
+- ```-d``` or ```--direct``` to use node-llama-cpp
+
+### 3. evaluate this prediction
+
+```sh
+node ./bin/llamacpp-evaluation.js evaluate myEval myPredict
+```
+
+### 4. display a report comparing all predictions
+
+```sh
+node ./bin/llamacpp-evaluation.js report myEval
+```
+
