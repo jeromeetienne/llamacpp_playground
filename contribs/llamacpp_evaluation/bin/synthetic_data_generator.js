@@ -11,7 +11,7 @@ import Zod from "zod"
 
 // local imports
 import ModelPathContants from "../../../src/model_path_constants.js"
-import RecordGenerateDirect from "../src/helpers_generation/record_generate_direct.js"
+import RecordGenerateLlamaCpp from "../src/helpers_generation/record_generate_llamacpp.js"
 import RecordGenerateLangchain from "../src/helpers_generation/record_generate_langchain.js"
 import Utils from "../src/utils.js"
 
@@ -137,7 +137,7 @@ async function generateDatasetBasicQa() {
 	let recordsJson = /** @type {array} */([])
 	const useDirect = true
 	if( useDirect ){
-		recordsJson = await RecordGenerateDirect.generateRecordsFromZod(recordZodSchema, {
+		recordsJson = await RecordGenerateLlamaCpp.generateRecordsFromZod(recordZodSchema, {
 			recordCount
 		})
 	}else{
@@ -183,7 +183,7 @@ async function generateDatasetTranslateFrench() {
 	let recordsJson = /** @type {array} */([])
 	const useDirect = true
 	if( useDirect ){
-		recordsJson = await RecordGenerateDirect.generateRecordsFromZod(recordZodSchema, {
+		recordsJson = await RecordGenerateLlamaCpp.generateRecordsFromZod(recordZodSchema, {
 			// modelName: ModelPathContants.LLAMA_2_7B_CHAT_Q6_K,
 			recordCount
 		})
@@ -232,7 +232,7 @@ async function generateDatasetStateUnionQa() {
 	let recordsJson = /** @type {array} */([])
 	const useDirect = true
 	if( useDirect ){
-		recordsJson = await RecordGenerateDirect.generateRecordsFromZod(recordZodSchema, {
+		recordsJson = await RecordGenerateLlamaCpp.generateRecordsFromZod(recordZodSchema, {
 			recordCount,
 			context,
 		})

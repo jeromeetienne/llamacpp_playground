@@ -29,16 +29,16 @@ const __dirname = Path.dirname(Url.fileURLToPath(import.meta.url));
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-export default class RecordGenerateDirect {
+export default class RecordGenerateLlamaCpp {
 
 	/**
-	 * @typedef {Object} RecordGenerateDirectOptions
+	 * @typedef {Object} RecordGenerateLlamaCppOptions
 	 * @property {number} recordCount use 0 if you dont want to specify
 	 * @property {string} modelName
 	 * @property {string} context
 	 */
 
-	static defaultOptions =  /** @type {RecordGenerateDirectOptions} */({
+	static defaultOptions =  /** @type {RecordGenerateLlamaCppOptions} */({
 		recordCount: 0,
 		modelName: ModelPathContants.MISTRAL_7B_INSTRUCT_V0_1_Q6_K,
 		context: '',
@@ -46,14 +46,14 @@ export default class RecordGenerateDirect {
 
 	/**
 	 * @param {Zod.Schema} recordZodSchema 
-	 * @param {Partial<RecordGenerateDirectOptions>} partialOptions
+	 * @param {Partial<RecordGenerateLlamaCppOptions>} partialOptions
 	 */
 	static async generateRecordsFromZod(recordZodSchema, partialOptions = {}) {
 
 		// handle default options
 		partialOptions = Object.fromEntries(Object.entries(partialOptions).filter(([k, v]) => v !== undefined));
-		partialOptions = Object.assign({}, RecordGenerateDirect.defaultOptions, partialOptions)
-		const options = /** @type {RecordGenerateDirectOptions} */(partialOptions)
+		partialOptions = Object.assign({}, RecordGenerateLlamaCpp.defaultOptions, partialOptions)
+		const options = /** @type {RecordGenerateLlamaCppOptions} */(partialOptions)
 
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -153,7 +153,7 @@ async function mainAsync() {
 my friend is called Jane, her last name is Smith. she is 25 years old and not happy.
 the other day, i met Bill Gates, he was laughing.`
 
-	const recordJson = await RecordGenerateDirect.generateRecordsFromZod(recordZodSchema, {
+	const recordJson = await RecordGenerateLlamaCpp.generateRecordsFromZod(recordZodSchema, {
 		recordCount: 1,
 		context: context,
 		modelName: ModelPathContants.LLAMA_2_13B_CHAT_Q3_K_M,
