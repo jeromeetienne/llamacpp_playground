@@ -1,7 +1,4 @@
-- TODO rename prediction-metadata.json into ```.hyper-parameters.json``` ?
-- TODO remove 'generate' from ```llamacpp_evaluation.js```
-  - put it in ```hptuning-generator.js```
-- TODO remove DatasetGenerateLangchain abd DatasetGenerateDirect and put it in ```dataset-generator```
+- TODO submit your PR for openai cost
 - TODO put the huggingface_playground in its own repo too
 - TODO put llamacpp_evaluation in its own git, <- YES do it
   - how to import the llamacpp_playground ? can i make a seperate git for that ?
@@ -9,8 +6,17 @@
   - git submodule ? no crazy... well documented ?
     - not crazy because it is done only once on a not that important directory
     - doc here https://gist.github.com/gitaarik/8735255
+- document the various dataset+gridsearch available
+  - explain why they are useful, and how to use them
+- should you move record_generate elsewhere ?
+  - useful for js + ai conference
+
 
 ## Done
+- NO rename prediction-metadata.json into ```.hyper-parameters.json``` ?
+- DONE remove 'generate' from ```llamacpp_evaluation.js```
+  - put it in ```hptuning-generator.js```
+- DONE remove DatasetGenerateLangchain abd DatasetGenerateDirect and put it in ```dataset-generator```
 - ```llama_evaluation create evaluationName datasetPath hptuningPath```
   - copy datasetPath into ```./evaluations/evaluation_${evaluationName}/``` with the original basename
   - copy hptuningPath into ```./evaluations/evaluation_${evaluationName}/``` with the original basename

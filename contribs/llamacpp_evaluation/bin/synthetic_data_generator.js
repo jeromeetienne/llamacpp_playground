@@ -45,6 +45,35 @@ let ConstantModelNames7B = Object.keys(ModelPathContants).filter(modelKey => mod
 let ConstantModelNames13B = Object.keys(ModelPathContants).filter(modelKey => modelKey.includes('_13B_')).map(modelKey => ModelPathContants[modelKey])
 let ConstantModelNamesOpenAI = ['gpt-3.5-turbo', 'gpt-4']
 
+const datasetInfos = [
+	{
+		datasetName: 'basicQa',
+		description: 'generate the dataset for a basicQa. It is a simple question/answer dataset. Question are "common knowledge" learned by the model, not according to a context',
+	},
+	{
+		datasetName: 'translateFrench',
+		description: 'generate the dataset for a translateFrench. It has simple english sentences and their french translation',
+	},
+	{
+		datasetName: 'stateUnionQa',
+		description: 'generate the dataset for a stateUnionQa. It is a question/answer dataset. Question are based on a context (the state union)',
+	}
+]
+const gridSearchInfos = [
+	{
+		gridSearchName: 'translateFrench',
+		description: 'generate the gridSearch for a translateFrench. It is an experiment to see if the model can learn to translate french',
+	},
+	{
+		gridSearchName: 'onlyBlah',
+		description: 'generate the gridSearch for a onlyBlah. It is an experiment to see if the model can learn to always answer BLAH',
+	},
+	{
+		gridSearchName: 'testAccuracy',
+		description: 'generate the gridSearch for a testAccuracy. It is an experiment to see how accurate the model is to answer a question on a given context',
+	}
+]
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 //	main async function
@@ -60,9 +89,9 @@ async function mainAsync() {
 
 	// parse command line
 	const cmdline = new Commander.Command()
-	cmdline.name('dataset_generator.js')
+	cmdline.name('synthetic_data_generator.js')
 		.version('0.0.3')
-		.description(`dataset_generator.js`);
+		.description(`synthetic_data_generator.js`);
 
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
@@ -70,35 +99,50 @@ async function mainAsync() {
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	cmdline.command('dataset_basicQa')
-		.description('generate the dataset for a personality')
-		.action(async (personalityName, options) => {
-			await generateDatasetBasicQa()
+	cmdline.command('dataset <datasetName>')
+		.description('generate the dataset for a datasetName. use "list" to display the list of available dataset.')
+		.action(async (datasetName, options) => {
+			if (datasetName === 'list') {
+				console.log(CliColor.underline('Authorized dataset names:'))
+				for (const datasetInfo of datasetInfos) {
+					console.log(`- ${CliColor.bold(datasetInfo.datasetName)}: ${datasetInfo.description}`)
+				}
+			} else if (datasetName === 'basicQa') {
+				await generateDatasetBasicQa(datasetName)
+			} else if (datasetName === 'translateFrench') {
+				await generateDatasetTranslateFrench(datasetName)
+			} else if (datasetName === 'stateUnionQa') {
+				await generateDatasetStateUnionQa(datasetName)
+			} else {
+				console.error(CliColor.red(`unknown datasetName : ${datasetName}`))
+				process.exit(1)
+			}
 		});
-	cmdline.command('dataset_translateFrench')
-		.description('generate the dataset for a personality')
-		.action(async (personalityName, options) => {
-			await generateDatasetTranslateFrench()
-		});
-	cmdline.command('dataset_stateUnionQa')
-		.description('generate the dataset for a personality')
-		.action(async (personalityName, options) => {
-			await generateDatasetStateUnionQa()
-		});
-	cmdline.command('gridsearch_translateFrench')
-		.description('generate the hptuning.json+.gridsearch.json for translateFrench')
-		.action(async (personalityName, options) => {
-			await generateGridSearchTranslateFrench()
-		});
-	cmdline.command('gridsearch_onlyBlah')
-		.description('generate the hptuning.json+.gridsearch.json for onlyBlah')
-		.action(async (personalityName, options) => {
-			await generateGridSearchOnlyBlah()
-		});
-	cmdline.command('gridsearch_testAccuracy')
-		.description('generate the hptuning.json+.gridsearch.json for testAccuracy')
-		.action(async (personalityName, options) => {
-			await generateGridSearchTestAccuracy()
+
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	//	
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+
+	cmdline.command('gridsearch <grisSearchName>')
+		.description(`generate the grisSearch for a grisSearchName. use "list" to display the list of available gridsearch.`)
+		.action(async (gridSearchName, options) => {
+			if (gridSearchName === 'list') {
+				console.log(CliColor.underline('Authorized gridSearch names:'))
+				for (const gridSearchInfo of gridSearchInfos) {
+					console.log(`- ${CliColor.bold(gridSearchInfo.gridSearchName)}: ${gridSearchInfo.description}`)
+				}
+			} else if (gridSearchName === 'translateFrench') {
+				await generateGridSearchTranslateFrench(`gridsearch_${gridSearchName}}`)
+			} else if (gridSearchName === 'onlyBlah') {
+				await generateGridSearchOnlyBlah(`gridsearch_${gridSearchName}}`)
+			} else if (gridSearchName === 'testAccuracy') {
+				await generateGridSearchTestAccuracy(`gridsearch_${gridSearchName}}`)
+			} else {
+				console.error(CliColor.red(`unknown gridSearchName : ${gridSearchName}`))
+				process.exit(1)
+			}
 		});
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -125,7 +169,11 @@ void mainAsync()
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-async function generateDatasetBasicQa() {
+/**
+ * 
+ * @param {string} datasetName 
+ */
+async function generateDatasetBasicQa(datasetName) {
 	// build the record schema
 	const recordZodSchema = Zod.object({
 		question: Zod.string().describe('a short simple question'),
@@ -136,15 +184,15 @@ async function generateDatasetBasicQa() {
 	// generate the records
 	let recordsJson = /** @type {array} */([])
 	const useDirect = true
-	if( useDirect ){
-		recordsJson = await RecordGenerateLlamaCpp.generateRecordsFromZod(recordZodSchema, {
+	if (useDirect) {
+		recordsJson = await RecordGenerateLlamaCpp.generateFromZod(recordZodSchema, {
 			recordCount
 		})
-	}else{
-		recordsJson = await RecordGenerateLangchain.generateRecordsFromZod(recordZodSchema, {
+	} else {
+		recordsJson = await RecordGenerateLangchain.generateFromZod(recordZodSchema, {
 			recordCount
 		})
-	} 
+	}
 
 	// convert recordsJson to datasetJson
 	const datasetJson = /** @type {import("../src/type.d.js").DatasetJson} */([])
@@ -161,7 +209,6 @@ async function generateDatasetBasicQa() {
 	console.log(`datasetJson : ${JSON.stringify(datasetJson, null, '\t')}`)
 
 	// save the dataset
-	const datasetName = `basicQa`
 	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
 }
 
@@ -171,7 +218,11 @@ async function generateDatasetBasicQa() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-async function generateDatasetTranslateFrench() {
+/**
+ * 
+ * @param {string} datasetName 
+ */
+async function generateDatasetTranslateFrench(datasetName) {
 	// build the record schema
 	const recordZodSchema = Zod.object({
 		sentence: Zod.string().describe('a short simple sentence'),
@@ -182,16 +233,16 @@ async function generateDatasetTranslateFrench() {
 	// generate the records
 	let recordsJson = /** @type {array} */([])
 	const useDirect = true
-	if( useDirect ){
-		recordsJson = await RecordGenerateLlamaCpp.generateRecordsFromZod(recordZodSchema, {
+	if (useDirect) {
+		recordsJson = await RecordGenerateLlamaCpp.generateFromZod(recordZodSchema, {
 			// modelName: ModelPathContants.LLAMA_2_7B_CHAT_Q6_K,
 			recordCount
 		})
-	}else{
-		recordsJson = await RecordGenerateLangchain.generateRecordsFromZod(recordZodSchema, {
+	} else {
+		recordsJson = await RecordGenerateLangchain.generateFromZod(recordZodSchema, {
 			recordCount
 		})
-	} 
+	}
 
 	// convert recordsJson to datasetJson
 	const datasetJson = /** @type {import("../src/type.d.js").DatasetJson} */([])
@@ -208,7 +259,6 @@ async function generateDatasetTranslateFrench() {
 	console.log(`datasetJson : ${JSON.stringify(datasetJson, null, '\t')}`)
 
 	// save the dataset
-	const datasetName = `translateFrench`
 	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
 }
 
@@ -218,7 +268,11 @@ async function generateDatasetTranslateFrench() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-async function generateDatasetStateUnionQa() {
+/**
+ * 
+ * @param {string} datasetName 
+ */
+async function generateDatasetStateUnionQa(datasetName) {
 	// create record zod schema
 	const recordZodSchema = Zod.object({
 		question: Zod.string().describe('a short clear question based on the context'),
@@ -231,17 +285,17 @@ async function generateDatasetStateUnionQa() {
 	// generate the records
 	let recordsJson = /** @type {array} */([])
 	const useDirect = true
-	if( useDirect ){
-		recordsJson = await RecordGenerateLlamaCpp.generateRecordsFromZod(recordZodSchema, {
+	if (useDirect) {
+		recordsJson = await RecordGenerateLlamaCpp.generateFromZod(recordZodSchema, {
 			recordCount,
 			context,
 		})
-	}else{
-		recordsJson = await RecordGenerateLangchain.generateRecordsFromZod(recordZodSchema, {
+	} else {
+		recordsJson = await RecordGenerateLangchain.generateFromZod(recordZodSchema, {
 			recordCount,
 			context,
 		})
-	} 
+	}
 
 	// convert recordsJson to datasetJson
 	const datasetJson = /** @type {import("../src/type.d.js").DatasetJson} */([])
@@ -258,7 +312,6 @@ async function generateDatasetStateUnionQa() {
 	console.log(`datasetJson : ${JSON.stringify(datasetJson, null, '\t')}`)
 
 	// save the dataset
-	const datasetName = `stateUnionQa`
 	await Utils.saveDatasetJsonNew(datasetName, datasetJson)
 }
 
@@ -268,10 +321,14 @@ async function generateDatasetStateUnionQa() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-async function generateGridSearchTranslateFrench() {
+/**
+ * 
+ * @param {string} hpTuningName 
+ */
+async function generateGridSearchTranslateFrench(hpTuningName) {
 
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
-		hpTuningName: `gridsearch_translateFrench`,
+		hpTuningName: hpTuningName,
 		modelNames: [
 			...ConstantModelNamesOpenAI,
 			...ConstantModelNames7B,
@@ -304,10 +361,14 @@ async function generateGridSearchTranslateFrench() {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-async function generateGridSearchOnlyBlah() {
+/**
+ * 
+ * @param {string} hpTuningName 
+ */
+async function generateGridSearchOnlyBlah(hpTuningName) {
 
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
-		hpTuningName: `gridsearch_onlyBlah`,
+		hpTuningName: hpTuningName,
 		modelNames: [
 			...ConstantModelNamesOpenAI,
 			...ConstantModelNames7B,
@@ -342,11 +403,14 @@ async function generateGridSearchOnlyBlah() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-
-async function generateGridSearchTestAccuracy() {
+/**
+ * 
+ * @param {string} hpTuningName 
+ */
+async function generateGridSearchTestAccuracy(hpTuningName) {
 
 	const gridSearchJson = /** @type {import("../src/type.d.js").GridSearchJson} */({
-		hpTuningName: `gridsearch_testAccuracy`,
+		hpTuningName: hpTuningName,
 		modelNames: [
 			...ConstantModelNamesOpenAI,
 			...ConstantModelNames7B,
