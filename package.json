@@ -7,7 +7,7 @@
   "scripts": {
     "run:testbed": "node ./examples/testbed-direct.js",
     "run:langchain": "node ./examples/basic-chat-langchain.js",
-    "run:direct": "node ./examples/basoc-chat-direct.js",
+    "run:direct": "node ./examples/basic-chat-direct.js",
     "benchmark": "node ./examples/benchmark-direct.js  2>/dev/null",
     "generate:modelpaths": "node ./bin/generate_model_paths.js > ./src/model_path_constants.js",
     "download:llama-2-7b-chat": "cd models && npx ipull https://huggingface.co/TheBloke/Llama-2-7b-Chat-GGUF/resolve/main/llama-2-7b-chat.Q6_K.gguf",
@@ -33,7 +33,7 @@
     "json-schema-to-zod": "^1.1.1",
     "json5": "^2.2.3",
     "langchain": "^0.0.166",
-    "node-llama-cpp": "^2.7.2",
+    "node-llama-cpp": "^2.7.4",
     "zod-to-json-schema": "^3.21.4"
   }
 }
