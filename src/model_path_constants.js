@@ -8,6 +8,7 @@ export default class ModelPathContants {
 	static LLAMA_2_7B_CHAT_Q6_K = 'llama-2-7b-chat.Q6_K.gguf'
 	static MISTRAL_7B_INSTRUCT_V0_1_Q6_K = 'mistral-7b-instruct-v0.1.Q6_K.gguf'
 	static ZEPHYR_7B_ALPHA_Q6_K = 'zephyr-7b-alpha.Q6_K.gguf'
+	static ZEPHYR_7B_BETA_Q6_K = 'zephyr-7b-beta.Q6_K.gguf'
 	static LLAMA_2_13B_CHAT_Q3_K_M = 'llama-2-13b-chat.Q3_K_M.gguf'
 	static CODELLAMA_13B_INSTRUCT_Q3_K_M = 'codellama-13b-instruct.Q3_K_M.gguf'
 }
